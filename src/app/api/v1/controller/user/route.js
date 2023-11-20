@@ -18,9 +18,9 @@ DbConnect()
 
 // HTTP REQUEST METHODS
 
-export async function POST(request:NextRequest) {
+export async function POST(request) {
 
-    let responseData:any
+    let responseData
 
     const body=await request.json()
     const {searchParams}=new URL(request.url)
@@ -47,7 +47,7 @@ export async function POST(request:NextRequest) {
     
 }
 
-export async function GET(request:NextRequest) {
+export async function GET(request) {
 
     let responseData={
         message:'',
@@ -69,9 +69,9 @@ export async function GET(request:NextRequest) {
     
 }
 
-export async function PATCH(request:NextRequest) {
+export async function PATCH(request) {
 
-    let responseData:any
+    let responseData
 
     const {searchParams}=new URL(request.url)
     const action=searchParams.get('action')
@@ -88,9 +88,9 @@ export async function PATCH(request:NextRequest) {
     
 }
 
-export async function PUT(request:NextRequest) {
+export async function PUT(request) {
 
-    let responseData:any
+    let responseData
 
     const body=await request.json()
     const {searchParams}=new URL(request.url)
@@ -104,7 +104,7 @@ export async function PUT(request:NextRequest) {
     
 }
 
-export async function DELETE(request:NextRequest) {
+export async function DELETE(request) {
 
     let responseData={
         message:'',
@@ -124,7 +124,7 @@ export async function DELETE(request:NextRequest) {
 }
 
 
-async function generateUniqueUserId(prefix: any) {
+async function generateUniqueUserId(prefix) {
     let id;
     do {
       id = await generateId(prefix);
@@ -143,7 +143,7 @@ async function generateUniqueUserId(prefix: any) {
 
 //NEW MEDICINE
 
-export const newUser=async(value:any)=>{
+export const newUser=async(value)=>{
 
     let responseData={
         message:'',
@@ -170,7 +170,7 @@ export const newUser=async(value:any)=>{
 
         const promise=await Promise.allSettled(promises)
 
-        const data=promise.filter((res)=> res.status==='fulfilled') as PromiseFulfilledResult<any>[]
+        const data=promise.filter((res)=> res.status==='fulfilled')
         
         let userData={
             id:data[0].value,
@@ -230,7 +230,7 @@ export const newUser=async(value:any)=>{
     
 }
 
-export const getMedicineData=async(value:any)=>{
+export const getMedicineData=async(value)=>{
 
     let responseData={
         message:'',
@@ -261,7 +261,7 @@ export const getMedicineData=async(value:any)=>{
     }
 }
 
-export const newSale=async(value:any)=>{
+export const newSale=async(value)=>{
 
     let responseData={
         message:'',
@@ -292,7 +292,7 @@ export const newSale=async(value:any)=>{
             
 
 
-            body.flatMap((result:any)=>{
+            body.flatMap((result)=>{
 
                 
                 let v=isToday.details[isToday.lastIndexDetails].moreDateDetails[isToday.lastIndexDate].moreHourDetails({
@@ -361,7 +361,7 @@ export const newSale=async(value:any)=>{
       
         // const data=promise.filter((res)=> res.status==='fulfilled') as PromiseFulfilledResult<any>[]
       
-        let promises: any[]=[]
+        let promises
 
         // body.flatMap((result:any)=>{
 
@@ -459,7 +459,7 @@ export const newSale=async(value:any)=>{
 
 // USER LOGIN
 
-export const loginUser = async (username: string, password: any, req: any) => {
+export const loginUser = async (username, password, req) => {
   
     try {
       if (!username || !password) {
@@ -616,7 +616,7 @@ export const loginUser = async (username: string, password: any, req: any) => {
   // };
 
 
-  export const verifyEmail=async(token: any)=>{
+  export const verifyEmail=async(token)=>{
 
     let responseData={
       message:'',
@@ -667,7 +667,7 @@ export const loginUser = async (username: string, password: any, req: any) => {
 
 // REQUEST PASSWORD CODE
 
-export const forgotPassword = async (body: { email: any; }) => {
+export const forgotPassword = async (body) => {
 
   let responseData={
     message:'',
@@ -737,7 +737,7 @@ export const forgotPassword = async (body: { email: any; }) => {
 
 // CHECK PASSWORD CODE
 
-export const checkResetPasswordCode = async (body: { code: string; username: any; }) => {
+export const checkResetPasswordCode = async (body) => {
   let responseData={
     message:'',
     success:false
@@ -773,7 +773,7 @@ export const checkResetPasswordCode = async (body: { code: string; username: any
 
 // RESET PASSWORD
 
-export const resetPassword = async (body: { password: any; username: any; }) => {
+export const resetPassword = async (body) => {
 
   let responseData={
     message:'',

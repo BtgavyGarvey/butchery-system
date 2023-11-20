@@ -13,14 +13,14 @@ import { newUser } from "../user/route";
 
 DbConnect()
 
-let butcheryName:String
-export let email:String
+let butcheryName
+export let email
 
 // HTTP REQUEST METHODS
 
-export async function POST(request:NextRequest) {
+export async function POST(request) {
 
-    let responseData:any
+    let responseData
 
     const body=await request.json()
     const {searchParams}=new URL(request.url)
@@ -33,17 +33,17 @@ export async function POST(request:NextRequest) {
     }
     else if (params==='forgotpassword') {
       MiddleWare(request,NextResponse,morgan)
-      responseData=await forgotPassword(body)
+      // responseData=await forgotPassword(body)
     }
     else if (params==='checkcode') {
       MiddleWare(request,NextResponse,morgan)
-      responseData=await checkResetPasswordCode(body)
+      // responseData=await checkResetPasswordCode(body)
     }
     return NextResponse.json(responseData)
     
 }
 
-export async function GET(request:NextRequest) {
+export async function GET(request) {
 
     let responseData={
         message:'',
@@ -61,9 +61,9 @@ export async function GET(request:NextRequest) {
     
 }
 
-export async function PATCH(request:NextRequest) {
+export async function PATCH(request) {
 
-    let responseData:any
+    let responseData
 
     const {searchParams}=new URL(request.url)
     const action=searchParams.get('action')
@@ -74,15 +74,15 @@ export async function PATCH(request:NextRequest) {
       
       MiddleWare(request,NextResponse,morgan)
         
-      responseData=await verifyEmail(token)
+      // responseData=await verifyEmail(token)
     }
     return NextResponse.json(responseData)
     
 }
 
-export async function PUT(request:NextRequest) {
+export async function PUT(request) {
 
-    let responseData:any
+    let responseData
 
     const body=await request.json()
     const {searchParams}=new URL(request.url)
@@ -90,13 +90,13 @@ export async function PUT(request:NextRequest) {
 
     if (params==='resetPassword') {
         
-      responseData=await resetPassword(body)
+      // responseData=await resetPassword(body)
     }
     return NextResponse.json(responseData)
     
 }
 
-export async function DELETE(request:NextRequest) {
+export async function DELETE(request) {
 
     let responseData={
         message:'',
@@ -117,7 +117,7 @@ export async function DELETE(request:NextRequest) {
 
 // CODE GENERATION
 
-async function generateUniqueButcheryCode(prefix: any) {
+async function generateUniqueButcheryCode(prefix) {
   let code;
   do {
     code = await generateCode(prefix);
@@ -126,7 +126,7 @@ async function generateUniqueButcheryCode(prefix: any) {
   return code;
 }
 
-async function generateUniqueButcheryId(prefix: any) {
+async function generateUniqueButcheryId(prefix) {
   let id;
   do {
     id = await generateId(prefix);
@@ -135,7 +135,7 @@ async function generateUniqueButcheryId(prefix: any) {
   return id;
 }
 
-async function generateUniqueBranchCode(prefix: any) {
+async function generateUniqueBranchCode(prefix) {
   let code;
   do {
     code = await generateCode(prefix);
@@ -144,7 +144,7 @@ async function generateUniqueBranchCode(prefix: any) {
   return code;
 }
 
-async function generateUniqueBranchId(prefix: any) {
+async function generateUniqueBranchId(prefix) {
   let id;
   do {
     id = await generateId(prefix);
@@ -153,7 +153,7 @@ async function generateUniqueBranchId(prefix: any) {
   return id;
 }
 
-export const tokenGeneration = async (id: any, emailToken: any) => {
+export const tokenGeneration = async (id, emailToken) => {
   try {
     let token = await Token.findOne({ butchery: id });
 
@@ -174,7 +174,7 @@ export const tokenGeneration = async (id: any, emailToken: any) => {
 
 // EXTENSION FUNCTIONS OF HTTP METHODS
 
-export const newButchery=async(value: any)=>{
+export const newButchery=async(value)=>{
 
   let responseData={
       message:'',
@@ -206,7 +206,7 @@ export const newButchery=async(value: any)=>{
 
     const promise=await Promise.allSettled(promises)
 
-    const data=promise.filter((res)=> res.status==='fulfilled') as PromiseFulfilledResult<any>[]
+    const data=promise.filter((res)=> res.status==='fulfilled')
 
 
     const emailExist=data[0]?.value
@@ -314,7 +314,7 @@ export const newButchery=async(value: any)=>{
 
 // New Branch
 
-export const newBranch=async(value: any)=>{
+export const newBranch=async(value)=>{
 
   let responseData={
     message:'',
@@ -345,7 +345,7 @@ export const newBranch=async(value: any)=>{
 
   const promise=await Promise.allSettled(promises)
 
-  const data=promise.filter((res)=> res.status==='fulfilled') as PromiseFulfilledResult<any>[]
+  const data=promise.filter((res)=> res.status==='fulfilled')
 
   let id=body.id
 

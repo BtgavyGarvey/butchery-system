@@ -17,7 +17,7 @@ const conn={
 
 export default async function DbConnect(){
 
-    let db:any
+    let db
     try {
 
         if(conn.isConnected) return;
@@ -41,7 +41,7 @@ connection.once("error",(err)=>{
 
 // SEND EMAIL
 
-export async function sendEmail(subject: any,message: any,send_to: any,sent_from: any){
+export async function sendEmail(subject,message,send_to,sent_from){
 
     //Create Email transporter
     const transporter=nodeMailer.createTransport({
@@ -66,7 +66,7 @@ export async function sendEmail(subject: any,message: any,send_to: any,sent_from
     }
 
     //Send Email
-    transporter.sendMail(options,function(err: any,info: any){
+    transporter.sendMail(options,function(err,info){
         if (err) {
             console.log(err);
         }
@@ -74,7 +74,7 @@ export async function sendEmail(subject: any,message: any,send_to: any,sent_from
     })
 }
 
-export const sanitizeMessage=async(message: any) =>{
+export const sanitizeMessage=async(message) =>{
   // Define the allowed HTML tags and attributes
   const allowedTags = {
     allowedTags: ['div','h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'br', 'ul', 'ol', 'li'],
@@ -90,7 +90,7 @@ export const sanitizeMessage=async(message: any) =>{
 
 // INPUT VALIDATION
 
-export async function newButcheryValidation (data: any){
+export async function newButcheryValidation (data){
     const schema = Joi.object({
         subscription: Joi.number().required(),
         mobile: Joi.number().required(),
@@ -111,7 +111,7 @@ export async function newButcheryValidation (data: any){
     return schema.validate(data);
 };
 
-export async function newBranchValidation (data: any){
+export async function newBranchValidation (data){
     const schema = Joi.object({
         name: Joi.string().trim().required(),
         id: Joi.string().trim(),
@@ -125,7 +125,7 @@ export async function newBranchValidation (data: any){
     return schema.validate(data);
 };
 
-export async function newUserValidation (data: any){
+export async function newUserValidation (data){
     const schema = Joi.object({
         branch: Joi.string().trim().required(),
         firstName: Joi.string().trim().required(),
@@ -138,7 +138,7 @@ export async function newUserValidation (data: any){
     return schema.validate(data);
 };
 
-export const sanitizeInput =async (input: string) => {
+export const sanitizeInput =async (input) => {
     // Remove unwanted characters and escape special characters
     const sanitizedInput = input
       .replace(/[^\w\s]/gi, '') // Remove characters other than word characters and spaces
@@ -150,10 +150,10 @@ export const sanitizeInput =async (input: string) => {
 
 // MIDDLEWARE
 
-export function MiddleWare(req: any,res: any,fn: (arg0: any, arg1: any, arg2: (result: any) => void) => void){
+export function MiddleWare(req,res,fn){
 
     return new Promise((resolve,reject)=>{
-        fn(req,res,(result: unknown)=>{
+        fn(req,res,(result)=>{
             if(result instanceof Error){
                 return reject(result)
             }
@@ -162,11 +162,11 @@ export function MiddleWare(req: any,res: any,fn: (arg0: any, arg1: any, arg2: (r
     })
 }
 
-export const upperCase=(value: string)=>{
+export const upperCase=(value)=>{
     return value.toUpperCase()
 }
 
-export const generateCode=async(value: any)=>{
+export const generateCode=async(value)=>{
     
     let code=value+crypto.randomBytes(3).toString('hex');
     code=code.trim().toUpperCase();
@@ -174,7 +174,7 @@ export const generateCode=async(value: any)=>{
 
 }
 
-export const generateId=async(value: any)=>{
+export const generateId=async(value)=>{
     
     let code=value+crypto.randomBytes(11).toString('hex')+value;
     code=code.trim().toLowerCase();
@@ -182,7 +182,7 @@ export const generateId=async(value: any)=>{
 
 }
 
-export const getFirstAndLastWord=async(value: string)=>{
+export const getFirstAndLastWord=async(value)=>{
 
     value=value.trim()
     const text=value.split(" ")
@@ -203,7 +203,7 @@ export const DayTime=async()=>{
     return dayTime
 }
 
-export const AddDate=async(value:Number)=>{
+export const AddDate=async(value)=>{
 
     const today = new Date();
     const plusDate = addMonths(today, 2);
