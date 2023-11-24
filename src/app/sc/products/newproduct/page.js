@@ -1,9 +1,14 @@
+import { getServerSession } from "next-auth";
 import NewProductPage from "../../../../../components/sc/products/newproduct";
+import authOptions from "../../../api/auth/[...nextauth]/options";
 
-export default function NewProduct() {
+export default async function NewProduct() {
+
+  const session=await getServerSession(authOptions)
+
   return (
     <>
-    <NewProductPage />
+    <NewProductPage session={session}/>
     </>
   )
 }

@@ -100,7 +100,8 @@ export async function newButcheryValidation (data){
         firstName: Joi.string().trim().required(),
         lastName: Joi.string().trim().required(),
         country: Joi.string().trim().required(),
-        countryCode: Joi.string().trim().required(),
+        isoCode: Joi.string().trim().required(),
+        phoneCode: Joi.string().trim().required(),
         region: Joi.string().trim().required(),
         branch: Joi.string().trim().required(),
         terms: Joi.boolean().required(),
@@ -133,6 +134,20 @@ export async function newUserValidation (data){
         salary: Joi.number().required(),
         password: Joi.string().trim().required(),
         role: Joi.string().required().required(),
+    });
+
+    return schema.validate(data);
+};
+
+export async function newProductValidation (data){
+    const schema = Joi.object({
+        branch: Joi.string().trim().required(),
+        name: Joi.string().trim().required(),
+        price: Joi.number().required(),
+        quantity: Joi.number().required(),
+        link: Joi.boolean(),
+        parent: Joi.any(),
+        radio: Joi.any(),
     });
 
     return schema.validate(data);

@@ -1,3 +1,5 @@
+'use server'
+
 import { NextRequest, NextResponse } from "next/server";
 import DbConnect, { MiddleWare, generateCode, generateId, newUserValidation, sanitizeMessage, sendEmail } from "../../utils";
 import NewMedicine from "../../model/product";
@@ -8,7 +10,7 @@ import crypto from 'crypto'
 import Morgan from 'morgan'
 import User from "../../model/users";
 import Branches from "../../model/branches";
-import { email } from "../butchery/route";
+import { exportEmail } from "../butchery/route";
 import Butchery from "../../model/butchery";
 
 
@@ -170,11 +172,13 @@ export const newUser=async(value)=>{
 
         const promise=await Promise.allSettled(promises)
 
-        const data=promise.filter((res)=> res.status==='fulfilled')
-        
+        let data = promise.flatMap((response) =>
+          response.status==='fulfilled' ? [response.value] : []
+        );
+
         let userData={
-            id:data[0].value,
-            username:data[1].value,
+            id:data[0],
+            username:data[1],
             firstName:body.firstName,
             lastName:body.lastName,
             password:body.password,
@@ -201,13 +205,14 @@ export const newUser=async(value)=>{
         const message=`
         <h3>Registration of ${body.role} ${body.firstName} ${body.lastName},</h3>
         <p>This is to notify you that this new ${body.role} have been registered successfully.</p>
-        <p>Kindly provide the username below to the ne ${body.role} for the purpose of login.</p>
+        <p>Kindly provide the username below to the ${body.role} for the purpose of login.</p>
         <p>Username: <b>${insertUser.username}</b></p>
 
         <p>Kind Regards</P>
         `
+        let email=await exportEmail()
         
-        const subject="Cashier Registration"
+        const subject=`${body.role} Registration`
         const send_to=email
         const sent_from=process.env.EMAIL_USER
 
@@ -459,7 +464,7 @@ export const newSale=async(value)=>{
 
 // USER LOGIN
 
-export const loginUser = async (username, password, req) => {
+export async function loginUser (username, password, req){
   
     try {
       if (!username || !password) {
@@ -488,8 +493,7 @@ export const loginUser = async (username, password, req) => {
       const validPassword = await bcrypt.compare(password, user.password);
   
       let branch=await Branches.findOne({id:user.branch})
-
-        let butchery=await Butchery.findOne({id:branch.butchery})
+      let butchery=await Butchery.findOne({id:branch.butchery})
   
       if (validPassword) {
         if (!butchery.verified) {
@@ -616,7 +620,7 @@ export const loginUser = async (username, password, req) => {
   // };
 
 
-  export const verifyEmail=async(token)=>{
+  export async function verifyEmail(token){
 
     let responseData={
       message:'',
@@ -667,7 +671,7 @@ export const loginUser = async (username, password, req) => {
 
 // REQUEST PASSWORD CODE
 
-export const forgotPassword = async (body) => {
+export async function forgotPassword(body) {
 
   let responseData={
     message:'',
@@ -737,7 +741,7 @@ export const forgotPassword = async (body) => {
 
 // CHECK PASSWORD CODE
 
-export const checkResetPasswordCode = async (body) => {
+export async function checkResetPasswordCode(body) {
   let responseData={
     message:'',
     success:false
@@ -773,7 +777,7 @@ export const checkResetPasswordCode = async (body) => {
 
 // RESET PASSWORD
 
-export const resetPassword = async (body) => {
+export async function resetPassword (body) {
 
   let responseData={
     message:'',

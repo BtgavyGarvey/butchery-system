@@ -29,11 +29,7 @@ const butcherySchema=new Schema({
         required:true,
     },
     country:{
-        type:String,
-        required:true,
-    },
-    countryCode:{
-        type:String,
+        type:Array,
         required:true,
     },
     verified:{

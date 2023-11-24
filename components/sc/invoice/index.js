@@ -94,8 +94,6 @@ export default function ViewProductsPage() {
                     <td>1</td>
                     <td>GD8EG5</td>
                     <td>Beef Liver</td>
-                    <td>50.8798</td>
-                    <td>640</td>
                     <td>Kayole</td>
                     {
                         achivedProducts ? (
@@ -242,33 +240,7 @@ export default function ViewProductsPage() {
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>Product Issues</a>
-                                    {
-                                        achivedProducts ? (
-                                            <>
-                                    <a class="dropdown-item" onClick={(e)=>{
-                                        getProductData(0)
-                                        setproductInfo('Available Products')
-                                        setAchivedProducts(false)
-                                        setDropDownManu(false)
-                                    }}>Available Products</a>
-                                            
-                                            </>
-                                        ):(
-                                            <>
-                                    <a class="dropdown-item" onClick={(e)=>{
-                                        getProductData(1)
-                                        setproductInfo('Archived Products')
-                                        setAchivedProducts(true)
-                                        setDropDownManu(false)
-                                    }}>Archived Products</a>
-                                            
-                                            </>
-                                        )
-                                    }
                                     <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>New Invoice</a>
-                                    <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>View Invoices</a>
-
                                 </div>
                                     
                             </div>
@@ -296,11 +268,9 @@ export default function ViewProductsPage() {
                                 <table class="table table-striped  table-hover table-bordered" id="dataTable">
                                     <thead>
                                         <tr>
-                                            <th>No.</th>
-                                            <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
+                                            <th>Invoice Number</th>
+                                            <th>Added By</th>
+                                            <th>Date</th>
                                             <th>Branch</th>
                                             <th colspan={achivedProducts ? '1':'2'}>Action</th>
                                         </tr>
@@ -340,7 +310,7 @@ export default function ViewProductsPage() {
                         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
                             <div class="modal-content bg-dark">
                                 <div class="modal-header text-capitalize">
-                                    <h2 class="modal-title fw-bolder">Edit Product</h2><button class="btn-close"
+                                    <h2 class="modal-title fw-bolder">New Invoice</h2><button class="btn-close"
                                         type="button" aria-label="Close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
@@ -393,13 +363,13 @@ export default function ViewProductsPage() {
                         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
                             <div class="modal-content bg-dark">
                                 <div class="modal-header text-capitalize">
-                                    <h2 class="modal-title fw-bolder">Product issues</h2><button class="btn-close"
+                                    <h2 class="modal-title fw-bolder">Invoice Details</h2><button class="btn-close"
                                         type="button" aria-label="Close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div
                                         class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                        <p class="fs-5 text-warning">Product 1</p>
+                                        <p class="fs-5 text-warning">Invoice Number</p>
                                         <p className="text-light">290180</p>
                                     </div>
                                     <div class="d-flex">

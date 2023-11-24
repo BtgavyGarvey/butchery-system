@@ -3,11 +3,15 @@ import mongoose, { Schema, model, models } from 'mongoose'
 
 const productSchema=new Schema({
 
+    id:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+    },
     branch:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
-    batchNumber:{
+    code:{
         type:String,
         required:true,
     },
@@ -15,12 +19,24 @@ const productSchema=new Schema({
         type:String,
         required:true,
     },
-    markedPrice:{
+    price:{
         type:Number,
         required:true,
     },
-    availableQuantity:{
+    quantity:{
         type:Number,
+        required:true,
+    },
+    linked:{
+        type:Array,
+        required:true,
+    },
+    addedBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+    },
+    updatedBy:{
+        type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
     __v:{
@@ -31,7 +47,7 @@ const productSchema=new Schema({
     timestamps:true
 })
 
-productSchema.index({batchNumber:1,name:1,markedPrice:1})
+productSchema.index({code:1,name:1})
 
 
 const Product=models.Prodakt || model("Prodakt",productSchema)

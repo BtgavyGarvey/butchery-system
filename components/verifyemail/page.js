@@ -5,6 +5,7 @@ import {signIn} from 'next-auth/react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import {verifyEmail} from '../../src/app/api/v1/controller/user/route'
 
 
 export default function VerifyEmailPage(){
@@ -21,16 +22,17 @@ export default function VerifyEmailPage(){
         try {
 
             toastId=toast.loading('Please wait, Loading...',{id:toastId})
-            const response=await axios.patch(`/api/v1/controller/user?action=verifyemail&token=${token}`)
-            toast.dismiss(toastId)
-            console.log(response);
             
-            if (response.data.success) {
+            const response= await verifyEmail(token)
+            // await axios.patch(`/api/v1/controller/user?action=verifyemail&token=${token}`)
+            toast.dismiss(toastId)
+            
+            if (response.success) {
                 toast.success('Verification Successful',{id:toastId})
-                router.push('/sc/login')
+                router.push('/login')
             }
             else{
-                toast.error('Failed! '+response.data.message,{id:toastId})
+                toast.error('Failed! '+response.message,{id:toastId})
 
             }
             

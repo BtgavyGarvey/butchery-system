@@ -1,29 +1,29 @@
 import crypto from 'crypto'
 import mongoose, { Schema, model, models } from 'mongoose'
 
-const branchesSchema=new Schema({
+const productSchema=new Schema({
 
-    butchery:{
+    product:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
-    id:{
+    branch:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
-    name:{
-        type:String,
-        required:true,
-    },
-    subscription:{
-        type:Array,
-        required:true,
-    },
-    mobile:{
+    loss:{
         type:Number,
         required:true,
     },
-    region:{
+    quantity:{
+        type:Number,
+        required:true,
+    },
+    addedBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+    },
+    date:{
         type:String,
         required:true,
     },
@@ -35,7 +35,8 @@ const branchesSchema=new Schema({
     timestamps:true
 })
 
-branchesSchema.index({id:1,name:1})
+productSchema.index({product:1,branch:1})
 
-const Branches=models.Brunchees || model("Brunchees",branchesSchema)
-export default Branches
+
+const ProductIssue=models.ProdaktIshu || model("ProdaktIshu",productSchema)
+export default ProductIssue

@@ -1,5 +1,7 @@
+'use server'
+
 import { NextRequest, NextResponse } from "next/server";
-import DbConnect, { AddDate, MiddleWare, generateCode, generateId, newBranchValidation, newButcheryValidation, sanitizeMessage, sendEmail } from "../../utils";
+import DbConnect, { AddDate, MiddleWare, generateCode, generateId, newBranchValidation, newButcheryValidation, newProductValidation, sanitizeMessage, sendEmail } from "../../utils";
 import Butchery from "../../model/butchery";
 import Token from "../../model/token";
 import Branch from "../../model/branches";
@@ -8,13 +10,20 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto';
 import Morgan from 'morgan'
 import { newUser } from "../user/route";
+import Product from "../../model/product";
+import LinkedProduct from "../../model/linkedProduct";
+import ProductIssue from "../../model/productIssues";
 
 // DB CONNECTION
 
 DbConnect()
 
 let butcheryName
-export let email
+
+let email
+export async function exportEmail(){
+  return email
+}
 
 // HTTP REQUEST METHODS
 
@@ -153,7 +162,25 @@ async function generateUniqueBranchId(prefix) {
   return id;
 }
 
-export const tokenGeneration = async (id, emailToken) => {
+async function generateUniqueProductId(prefix) {
+  let id;
+  do {
+    id = await generateId(prefix);
+  } while (await Product.findOne({ id }));
+
+  return id;
+}
+
+async function generateUniqueProductCode(prefix,branch) {
+  let code;
+  do {
+    code = await generateCode(prefix);
+  } while (await Product.findOne({ code,branch }));
+
+  return code;
+}
+
+export async function tokenGeneration (id, emailToken) {
   try {
     let token = await Token.findOne({ butchery: id });
 
@@ -174,7 +201,7 @@ export const tokenGeneration = async (id, emailToken) => {
 
 // EXTENSION FUNCTIONS OF HTTP METHODS
 
-export const newButchery=async(value)=>{
+export async function newButchery(value){
 
   let responseData={
       message:'',
@@ -186,10 +213,10 @@ export const newButchery=async(value)=>{
     const validate=await newButcheryValidation(value)
 
     if (validate.error) {
-        console.log(validate.error);
-        responseData.message='Fill in all fields.'      
+      console.log(validate.error);
+      responseData.message='Fill in all fields.'      
 
-        return responseData
+      return responseData
     }
 
     let body=validate.value
@@ -206,15 +233,18 @@ export const newButchery=async(value)=>{
 
     const promise=await Promise.allSettled(promises)
 
-    const data=promise.filter((res)=> res.status==='fulfilled')
+    // const data=promise.filter((res)=> res.status==='fulfilled')
 
+    let data = promise.flatMap((response) =>
+      response.status==='fulfilled' ? [response.value] : []
+    );
 
-    const emailExist=data[0]?.value
-    const mobile=data[1]?.value
-    const ButcheryCode=data[2].value
-    const ButcheryId=data[3].value
-    const BranchId=data[4].value
-    const dbNotNull=data[6].value
+    const emailExist=data[0]
+    const mobile=data[1]
+    const ButcheryCode=data[2]
+    const ButcheryId=data[3]
+    const BranchId=data[4]
+    const dbNotNull=data[6]
 
     if (!dbNotNull) {
       body.role='Administrator'
@@ -230,14 +260,19 @@ export const newButchery=async(value)=>{
       return responseData
     }
 
+    let country={
+      name:body.country,
+      phoneCode:body.phoneCode,
+      isoCode:body.isoCode,
+    }
+
     const insertButchery=await Butchery.create({
       id:ButcheryId,
       code:ButcheryCode,
       name:body.name,
       mobile:body.mobile,
       email:body.email,
-      country:body.country,
-      countryCode:body.countryCode,
+      country,
       verified:false,
       terms:body.terms,
       __v:0,
@@ -257,7 +292,7 @@ export const newButchery=async(value)=>{
       region:body.region,
       butchery:ButcheryId,
       package:body.subscription,
-      expiryDate:data[5].value,
+      expiryDate:data[5],
       mobile:body.mobile,
     }
 
@@ -274,7 +309,7 @@ export const newButchery=async(value)=>{
       
     await tokenGeneration(insertButchery.id, verifyToken);
 
-    const verifyUrl = `${process.env.WEB_URL}/sc/verifyemail?token=${verifyToken}`;
+    const verifyUrl = `${process.env.WEB_URL}/verifyemail?token=${verifyToken}`;
 
     const message=`
     <h3>Registration of ${insertButchery.name} Butchery,</h3>
@@ -314,7 +349,7 @@ export const newButchery=async(value)=>{
 
 // New Branch
 
-export const newBranch=async(value)=>{
+export async function newBranch(value){
 
   let responseData={
     message:'',
@@ -332,8 +367,6 @@ export const newBranch=async(value)=>{
         return responseData
     }
 
-
-
     const body=validate.value
 
     const promises=[
@@ -345,16 +378,18 @@ export const newBranch=async(value)=>{
 
   const promise=await Promise.allSettled(promises)
 
-  const data=promise.filter((res)=> res.status==='fulfilled')
+  let data = promise.flatMap((response) =>
+    response.status==='fulfilled' ? [response.value] : []
+  );
 
   let id=body.id
 
   if (!id) {
-    id=data[0].value
+    id=data[0]
   }
 
-    let nameExist=data[2]?.value
-    let nameRegionExist=data[3]?.value
+    let nameExist=data[2]
+    let nameRegionExist=data[3]
 
     if (nameExist) {
       responseData.message='Your butchery has a branch with the same name'
@@ -366,10 +401,9 @@ export const newBranch=async(value)=>{
       return responseData
     }
 
-
     let branchData={
       id,
-      code:data[1].value,
+      code:data[1],
       name:body.name,
       butchery:body.butchery,
       region:body.region,
@@ -409,4 +443,396 @@ export const newBranch=async(value)=>{
     return responseData
   }
 
+}
+
+export async function getButcheryProfile(session){
+
+  const user=session.user  
+  // console.log(user);
+
+  let branch
+  let butchery
+  let branches
+  let userData
+  
+  let profileData
+
+  try {
+
+    const promises=[
+      Branch.findOne({id:user.branch}),
+      User.findOne({id:user.id})
+    ]
+
+    const promise=await Promise.allSettled(promises)
+
+    let data = promise.flatMap((response) =>
+      response.status==='fulfilled' ? [response.value] : []
+    );
+
+    branch=data[0]
+    userData=data[1]
+
+    if (branch) {
+      butchery=await Butchery.findOne()
+
+      if (butchery) {
+        branches=await Branch.find({butchery:butchery.id})
+      }
+
+      branches=JSON.stringify(branches) 
+      butchery=JSON.stringify(butchery) 
+      userData=JSON.stringify(userData) 
+
+      profileData={
+        branches:JSON.parse(branches),
+        butchery:JSON.parse(butchery),
+        userData:JSON.parse(userData),
+      }
+      
+    } else {
+      
+    }
+    console.log(profileData);
+
+    return profileData
+    
+  } catch (error) {
+    
+  }
+
+  
+
+}
+
+export async function getBranches(session){
+  const user=session.user
+
+  let butcheryData
+  let branches
+
+  try {
+
+    let branch=Branch.findOne({id:user.branch})
+
+    if (branch) {
+      let butchery=await Butchery.findOne()
+
+      if (butchery) {
+        branches=await Branch.find({butchery:butchery.id})
+      }
+
+      branches=JSON.stringify(branches) 
+
+      butcheryData={
+        branches:JSON.parse(branches),
+      }
+      
+    } else {
+      
+    }
+
+    return butcheryData
+    
+  } catch (error) {
+    
+  }
+
+
+}
+
+export async function newProduct(value,session){
+
+  const user=session.user
+
+  let responseData={
+    message:'',
+    success:false
+  }
+
+  try {
+
+  const validate=await newProductValidation(value)
+
+  if (validate.error) {
+      console.log(validate.error);
+      responseData.message='Fill in all fields.'      
+
+      return responseData
+  }
+
+  const body=validate.value
+
+  const promises=[
+    generateUniqueProductId(3),
+    generateUniqueProductCode('P'),
+    Product.findOne({branch:user.branch,name:body.name}),
+  ]
+
+  const promise=await Promise.allSettled(promises)
+
+  let data = promise.flatMap((response) =>
+    response.status==='fulfilled' ? [response.value] : []
+  );
+
+  let id=data[0]
+
+    let nameExist=data[2]
+
+    if (nameExist) {
+      responseData.message='Your branch has a product with the same name'
+      return responseData
+    }
+
+    let parentProduct
+    let quantity=body.quantity
+
+    let dbPromise=[]
+
+    if (body.link) {
+      parentProduct=await Product.findOne({id:body.parent})
+      quantity=parentProduct.quantity
+
+      let parentData={
+        parent:parentProduct.id,
+        quantity,
+        child:id,
+        __v:0
+      }
+
+      dbPromise.push(
+      LinkedProduct.updateMany({parent:parentProduct.id},{$set:{quantity}},{$upsert:false})
+      )
+      dbPromise.push(
+      LinkedProduct.create(parentData)
+      )
+      
+    }
+
+    let productData={
+      id,
+      code:data[1],
+      name:body.name,
+      branch:user.branch,
+      quantity,
+      price:body.price,
+      linked:{
+        status:body.link,
+        parent:body.parent,
+      },
+      addedBy:user.id,
+      updatedBy:user.id,
+      __v:1
+    }
+
+
+    dbPromise.push(
+      Product.create(productData)
+    )
+
+    await Promise.allSettled(dbPromise)
+
+    responseData.success=true
+
+    return responseData
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+
+    return responseData
+  }
+
+}
+
+export async function getProducts(session,val){
+  const user=session.user
+
+  let productData
+  let branches=[]
+  let addedBy=[]
+
+  try {
+
+    let currentPage=0
+    let size=10
+
+    let skip=currentPage*size
+
+    let products=await Product.find({branch:user.branch,__v:val}).skip(skip).limit(size)
+
+    if (products.length>0) {
+
+      for (let i = 0; i < products.length; i++) {
+
+        const promises=[
+          Branch.findOne({id:products[i].branch}),
+          User.findOne({id:products[i].addedBy})
+        ]
+    
+        const promise=await Promise.allSettled(promises)
+    
+        let data = promise.flatMap((response) =>
+          response.status==='fulfilled' ? [response.value] : []
+        );
+        branches.push(data[0])
+        addedBy.push(data[1])
+
+        
+      }
+
+      products=JSON.stringify(products) 
+      branches=JSON.stringify(branches) 
+      addedBy=JSON.stringify(addedBy) 
+
+      productData={
+        products:JSON.parse(products),
+        branches:JSON.parse(branches),
+        addedBy:JSON.parse(addedBy),
+      }
+      
+    } else {
+      productData={
+        products,
+        branches,
+        addedBy,
+      }
+    }
+
+    // console.log(productData);
+
+    return productData
+    
+  } catch (error) {
+    
+  }
+
+
+}
+
+export async function editProducts(body,session){
+
+  const user=session.user
+
+  try {
+    
+    let product=await Product.findOne({id:body.id})
+
+    if (product) {
+
+      product.name=body.name || product.name
+      product.price=body.price || product.price
+      product.updatedBy=user.id || product.updatedBy
+
+      await product.save()
+      
+    }else{
+      return false
+    }
+    return true
+
+  } catch (error) {
+    
+  }
+}
+
+export async function productsIssue(body,session){
+
+  const user=session.user
+  let date=new Date()
+  date=date.toLocaleDateString()
+
+  try {
+
+    let issueDataDB=await ProductIssue.findOne({product:body.id,branch:user.branch,date})
+    // console.log(issueDataDB);
+    if (issueDataDB) {
+      return false
+    }
+
+    let product=await Product.findOne({id:body.id})
+    // console.log(product);
+
+    if (product) {
+
+      if (product.linked[0].status) {
+        return false
+      }
+
+      let newQuantity=product.quantity - body.quantity
+      product.quantity=newQuantity.toFixed(4) || product.quantity
+      product.updatedBy=user.id || product.updatedBy
+
+      let promises=[]
+
+      promises.push(
+        product.save()
+      )
+      promises.push(
+        LinkedProduct.updateMany({parent:product.id},{$set:{quantity:newQuantity.toFixed(4)}},{$upsert:false})
+      )
+
+      let parentProduct=await LinkedProduct.find({parent:product.id})
+      if (parentProduct.length>0) {
+
+        for (let i = 0; i < parentProduct.length; i++) {
+
+          promises.push(
+            Product.updateOne({id:parentProduct[i].child},{$set:{quantity:newQuantity.toFixed(4)}})
+          )
+          
+        }
+
+      }
+
+      let issueData={
+        product:product.id,
+        quantity:body.quantity,
+        loss:parseFloat(body.quantity * product.price).toFixed(4),
+        branch:user.branch,
+        addedBy:user.id,
+        date,
+        __v:0
+      }
+
+      promises.push(
+        ProductIssue.create(issueData)
+      )
+
+      await Promise.allSettled(promises)
+
+    }else{
+      return false
+    }
+    return true
+
+  } catch (error) {
+    
+  }
+
+}
+
+export async function deleteProducts(branch,id,session,val){
+
+  const user=session.user
+
+  try {
+    
+    let product=await Product.findOne({id,branch})
+
+    if (product) {
+
+      product.__v=val || product.__v
+      product.updatedBy=user.id || product.updatedBy
+
+      await product.save()
+      
+    }else{
+      return false
+    }
+    return true
+
+  } catch (error) {
+    
+  }
 }

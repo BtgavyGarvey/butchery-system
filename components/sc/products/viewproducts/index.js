@@ -4,11 +4,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Footer from "../../../layout/footer"
 import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
-import { faArchive, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
+import { faArchive, faArrowAltCircleUp, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
+import { DayTime } from "../../../layout/utils"
+import { deleteProducts, editProducts, getProducts, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
 
-export default function ViewProductsPage() {
+
+export default function ViewProductsPage({session}) {
 
     let toastId
 
@@ -17,18 +20,20 @@ export default function ViewProductsPage() {
     const [dropDownManu, setDropDownManu]=React.useState(false)
     const [achivedProducts, setAchivedProducts]=React.useState(false)
     const [ProductData, setProductDataData]=React.useState([])
+    const [Branches, setBranches]=React.useState([])
+    const [AddedBy, setAddedBy]=React.useState([])
     const [oneProductDataData, setOneProductDataData]=React.useState()
     const [productInfo, setproductInfo]=React.useState('Available Products')
     const [ProductIssue, setProductIssue]=React.useState({
-        productId:'',
-        quantityIssue:''
+        id:'',
+        quantity:''
     })
-
     
     React.useEffect(()=>{
         modalRef1.current.style.display='none'
         modalRef2.current.style.display='none'
-    },[modalRef1,modalRef2])
+        getProductData(1)
+    },[])
 
     const showModal=(val)=>{
 
@@ -52,16 +57,38 @@ export default function ViewProductsPage() {
         }
     }
 
-    const deleteProduct=async(branch, id)=>{
+    const deleteProduct=async(branch,id,code,val)=>{
 
-        let answer=confirm(`Are you sure you want to delete product with ID: ${id}`)
+        let answer
+        let temp
+
+        if (val===-1) {
+            answer=confirm(`Are you sure you want to delete product with ID: ${code}`)
+            temp=2
+        } 
+        else if (val===2) {
+            answer=confirm(`Are you sure you want to archive product with ID: ${code}`)
+            temp=1
+        }
+        else {
+            answer=confirm(`Are you sure you want to restore product with ID: ${code}`)
+            temp=2
+        }
 
         if (answer) {
             toastId=toast.loading('Loading, please wait...',{
                 id:toastId
             })
-    
-            
+
+            let response=await deleteProducts(branch,id,session,val)
+            toast.dismiss(toastId)
+            if (response) {
+                toast.success('Successful')
+                getProductData(temp)
+            }
+            else{
+                toast.error('Failed')
+            }
         }
         
     }
@@ -69,119 +96,106 @@ export default function ViewProductsPage() {
     const getTableData=()=>{
 
         const result1=[]
-        const result2=[]
 
-        // if (val===1) {
-
-            // for (let i = 0; i < ProductData.length; i++) {
-                result1.push(
-                    <>
-                    <tr>
-                    {/* <td>{ProductData[i].batchNumber}</td>
-                    <td>{ProductData[i].medicineName}</td>
-                    <td>{ProductData[i].dosageForm}</td>
-                    <td>{ProductData[i].medicineCategory}</td>
-                    <td>{ProductData[i].availableQuantity}</td>
-                    <td>{ProductData[i].costPerUnit}</td>
-                    <td>{(DayTime(ProductData[i].expiresAt))}</td>
-                    <td><a title='Edit' onClick={(e)=>{oneMedicine(ProductData[i])}}><FontAwesomeIcon icon={faEdit} className="editA text-warning"/></a></td>
-                    <td><a title="Delete" onClick={(e)=>{deleteMed(ProductData[i].pharmacy, ProductData[i].batchNumber)}}><FontAwesomeIcon icon={faTrashAlt} className="editA text-danger"/></a></td> */}
-                    <td>1</td>
-                    <td>GD8EG5</td>
-                    <td>Beef Liver</td>
-                    <td>50.8798</td>
-                    <td>640</td>
-                    <td>Kayole</td>
-                    {
-                        achivedProducts ? (
-                            <>
-                            <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
-                                deleteProduct(1,2)
-                            }}/></td>
-                    
-                            </>
-                        ):(
-                            <>
-                            <td title="Edit"><i onClick={()=>{showModal(1)}} class="far fa-edit faEdit text-start text-warning "
-                            ></i></td>
-                            <td title="Archive"><FontAwesomeIcon icon={faArchive} className="text-danger faEdit"/></td>
-                    
-                            </>
-                        )
-                    }
-                    
-                    </tr>
-        
-                    </>
-                )
-        
-            // }
+        for (let i = 0; i < ProductData.length; i++) {
+            result1.push(
+                <>
+                <tr>
+                <td>{i+1}</td>
+                <td>{ProductData[i].code}</td>
+                <td>{ProductData[i].name}</td>
+                <td>{ProductData[i].price}</td>
+                <td>{ProductData[i].quantity}</td>
+                <td>{Branches[i].name}</td>
+                <td title={AddedBy[i].firstName+' '+AddedBy[i].lastName} onClick={()=>{toast(AddedBy[i].firstName+' '+AddedBy[i].lastName)}}>{AddedBy[i].username}</td>
+                {
+                    achivedProducts ? (
+                        <>
+                        <td title="Restore"><FontAwesomeIcon icon={faArrowAltCircleUp} className="text-success faEdit" onClick={()=>{
+                            deleteProduct(Branches[i].id,ProductData[i].id,ProductData[i].code,1)
+                        }}/></td>
+                        <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
+                            deleteProduct(Branches[i].id,ProductData[i].id,ProductData[i].code,-1)
+                        }}/></td>
+                
+                        </>
+                    ):(
+                        <>
+                        <td title="Edit"><i onClick={()=>{
+                            setOneProductDataData(ProductData[i])
+                            showModal(1)
+                        }} class="far fa-edit faEdit text-start text-warning "
+                        ></i></td>
+                        <td title="Archive"><FontAwesomeIcon icon={faArchive} className="text-danger faEdit" onClick={()=>{
+                            deleteProduct(Branches[i].id,ProductData[i].id,ProductData[i].code,2)
+                        }}/></td>
+                
+                        </>
+                    )
+                }
+                
+                </tr>
     
-            return result1
-            
-        // } 
-        // else if (val===2) {
-
-        //     for (let i = 0; i < ProductData.length; i++) {
-        //         result1.push(
-        //             <>
-        //             <tr>
-        //             <td>{ProductData[i].batchNumber}</td>
-        //             <td>{ProductData[i].medicineName}</td>
-        //             <td>{ProductData[i].dosageForm}</td>
-        //             <td>{ProductData[i].medicineCategory}</td>
-        //             <td>{ProductData[i].availableQuantity}</td>
-        //             <td>{ProductData[i].costPerUnit}</td>
-        //             <td>{(DayTime(ProductData[i].expiresAt))}</td>
-        //             <td><a title='Edit' onClick={(e)=>{oneMedicine(ProductData[i])}}><FontAwesomeIcon icon={faEdit} className="editA text-warning"/></a></td>
-        //             <td><a title="Delete" onClick={(e)=>{deleteMed(ProductData[i].pharmacy, ProductData[i].batchNumber)}}><FontAwesomeIcon icon={faTrashAlt} className="editA text-danger"/></a></td>
-        //             </tr>
-        
-        //             </>
-        //         )
-        
-        //     }
+                </>
+            )
     
-        //     return result1
+        }
+
+        return result1
             
-        // }
-
-
-        
     }
 
     const getProductData=async(val)=>{
-        toast(val)
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
+        let response=await getProducts(session,val)
 
-        // let response=await axios.get(`/api/v1/controller/medicine?action=getMedicineData&pharmacy=${pharm.id}`)            
-        // toast.dismiss(toastId)
-        // if (response.data.success===true) {
-        //   toast.success(`Successful!`,{id:toastId})
-        //   setProductDataData(response.data.drugs)
-        // }
-        // else{
-            
-        //     toast.error(`Failed! ${response.data.message}`,{id:toastId})
-        // }
+        setProductDataData(response.products)
+        setBranches(response.branches)
+        setAddedBy(response.addedBy)
+        toast.dismiss(toastId)
+        
     }
 
-    const editProduct=()=>{
+    const editProduct=async()=>{
+        toastId=toast.loading('Loading, please wait...',{
+            id:toastId
+        })
+        let editData=await editProducts(oneProductDataData,session)
+        toast.dismiss(toastId)
+
+        if (editData) {
+            toast.success('Successful')
+            getProductData(1)
+        }
+        else{
+            toast.error('Failed!!! Try again later')
+        }
+
         hideModal(1)
     }
 
-    const productIssue=()=>{
-        hideModal(2)
+    const productIssue=async()=>{
+        toastId=toast.loading('Loading, please wait...',{
+            id:toastId
+        })
+        let issueData=await productsIssue(ProductIssue,session)
+        toast.dismiss(toastId)
+
+        if (issueData) {
+            toast.success('Successful')
+            getProductData(1)
+        }
+        else{
+            toast.error('Failed!!! Try again later')
+        }
     }
 
     const handleInputChangeEdit = (e) => {
       
         const { name, value } = e.target;
         setOneProductDataData({ ...oneProductDataData, [name]: value });
-
-        
     }
 
     const handleInputChangeIssue = (e) => {
@@ -191,6 +205,19 @@ export default function ViewProductsPage() {
 
     }
 
+    const renderProducts=()=>{
+
+        const result1=[]
+
+        for (let i = 0; i < ProductData.length; i++) {
+        
+            result1.push(
+                <option key={'a'+i} value={ProductData[i].id}>{ProductData[i].name}</option>
+            )
+            
+        }
+        return result1
+    }
 
   return (
     <>
@@ -213,7 +240,7 @@ export default function ViewProductsPage() {
         }}
 
         >
-        </Toaster>
+    </Toaster>
     <div className="bg-light">
     <div id="wrapper">
         <NavBar />
@@ -235,12 +262,13 @@ export default function ViewProductsPage() {
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
+                                    <a class="dropdown-item" href="/sc/products/newproduct"  >New Product</a>
                                     <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>Dead Stock/Issues</a>
                                     {
                                         achivedProducts ? (
                                             <>
                                     <a class="dropdown-item" onClick={(e)=>{
-                                        getProductData(0)
+                                        getProductData(1)
                                         setproductInfo('Available Products')
                                         setAchivedProducts(false)
                                         setDropDownManu(false)
@@ -250,7 +278,7 @@ export default function ViewProductsPage() {
                                         ):(
                                             <>
                                     <a class="dropdown-item" onClick={(e)=>{
-                                        getProductData(1)
+                                        getProductData(2)
                                         setproductInfo('Archived Products')
                                         setAchivedProducts(true)
                                         setDropDownManu(false)
@@ -291,10 +319,11 @@ export default function ViewProductsPage() {
                                             <th>No.</th>
                                             <th>ID</th>
                                             <th>Name</th>
-                                            <th>Quantity</th>
                                             <th>Price</th>
+                                            <th>Quantity</th>
                                             <th>Branch</th>
-                                            <th colspan={achivedProducts ? '1':'2'}>Action</th>
+                                            <th>Added By</th>
+                                            <th colspan={'2'}>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody style={{maxHeight:'100vh', overflow:'scroll'}}>
@@ -338,8 +367,8 @@ export default function ViewProductsPage() {
                                 <div class="modal-body">
                                     <div
                                         class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                        <p class="fs-5 text-warning">Product 1</p>
-                                        <p className="text-light">290180</p>
+                                        <p class="fs-5 text-warning">{oneProductDataData?.name}</p>
+                                        <p className="text-light">{oneProductDataData?.code}</p>
                                     </div>
                                     <div class="d-grid">
                                             <div class="col ">
@@ -347,7 +376,7 @@ export default function ViewProductsPage() {
                                                     <div class="col d-grid"><label class="form-label">Product
                                                             Name</label><input onChange={handleInputChangeEdit}
                                                             class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
-                                                            type="text" style={{textAlign: "center"}} required name="productName" /></div>
+                                                            type="text" style={{textAlign: "center"}} required name="name" value={oneProductDataData?.name}/></div>
                                                 </div>
                                             </div>
                                             <div class="col d-grid">
@@ -355,7 +384,7 @@ export default function ViewProductsPage() {
                                                     <div class="col d-grid"><label class="form-label">Price Per
                                                             Unit</label><input onChange={handleInputChangeEdit}
                                                             class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
-                                                            type="text" required style={{textAlign: "center"}} name="productPrice"/></div>
+                                                            type="text" required style={{textAlign: "center"}} name="price" value={oneProductDataData?.price}/></div>
                                                 </div>
                                             </div>
 
@@ -390,9 +419,11 @@ export default function ViewProductsPage() {
                                 <div class="modal-body">
                                     <div
                                         class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                        <p class="fs-5 text-warning">Product 1</p>
-                                        <p className="text-light">290180</p>
+                                        {/* <p class="fs-5 text-warning">Product 1</p>
+                                        <p className="text-light">290180</p> */}
+                                        
                                     </div>
+                                    <hr />
                                     <div class="d-flex">
                                         <div class="col me-xxl-0 pe-xxl-1 pt-xxl-0">
                                             <div class="col d-grid">
@@ -401,9 +432,13 @@ export default function ViewProductsPage() {
                                                             Name</label>
                                                             <select onChange={handleInputChangeIssue}
                                                             class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
-                                                             style={{textAlign: "center"}} required name="productId">
+                                                             style={{textAlign: "center"}} required name="id">
                                                                 <option value={''}></option>
-                                                            
+                                                                {
+                                                                    ProductData.length>0 && (
+                                                                        renderProducts()
+                                                                    )
+                                                                }
                                                             </select></div>
                                                 </div>
                                             </div>
@@ -412,7 +447,7 @@ export default function ViewProductsPage() {
                                                     <div class="col d-grid"><label class="form-label">Quantity
                                                             Issue</label><input onChange={handleInputChangeIssue}
                                                             class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
-                                                            type="text" required style={{textAlign: "center"}} name="quantityIssue"/></div>
+                                                            type="text" required style={{textAlign: "center"}} name="quantity"/></div>
                                                 </div>
                                             </div>
                                         </div>

@@ -1,9 +1,14 @@
+import { getServerSession } from "next-auth";
 import ViewSalesPage from "../../../../../../components/sc/products/sales/viewsales";
+import authOptions from "../../../../api/auth/[...nextauth]/options";
 
-export default function ViewSales() {
+export default async function ViewSales() {
+
+  const session=await getServerSession(authOptions)
+
   return (
     <>
-    <ViewSalesPage />
+    <ViewSalesPage session={session}/>
     </>
   )
 }

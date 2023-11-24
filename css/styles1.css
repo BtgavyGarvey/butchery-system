@@ -113,7 +113,7 @@
     display: block;
   }
 
-  .navDiv{
+  .navDiv, .parentProduct{
     display: none;
   }
   

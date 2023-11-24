@@ -6,6 +6,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faClose } from "@fortawesome/free-solid-svg-icons"
 import { Country,State,City } from 'country-state-city'
+import { newButchery } from "../../src/app/api/v1/controller/butchery/route";
 
 
 let initialState = {
@@ -15,7 +16,8 @@ let initialState = {
     firstName:"",
     lastName:"",
     country:"",
-    countryCode:"",
+    phoneCode:"",
+    isoCode:"",
     region:"",
     branch:"",
     mobile:"",
@@ -24,6 +26,7 @@ let initialState = {
     subscription:0,
     name:''
 };
+ 
 export default function RegisterPage() {
 
     let toastId
@@ -41,7 +44,8 @@ export default function RegisterPage() {
         let cityData=City.getCitiesOfCountry('KE')
         setCity(cityData)
         formData.country=country.name
-        formData.countryCode='+'+country.phonecode
+        formData.isoCode=country.isoCode
+        formData.phoneCode='+'+country.phonecode
 
     },[])
 
@@ -74,7 +78,8 @@ export default function RegisterPage() {
 
             setCity(cityData)
             formData.country=countryData.name
-            formData.countryCode='+'+countryData.phonecode
+            formData.isoCode=countryData.isoCode
+            formData.phoneCode='+'+countryData.phonecode
 
         }
         else if(name==='country' && value ===''){
@@ -85,7 +90,6 @@ export default function RegisterPage() {
     }
 
     console.log(formData);
-    
 
     const validate=async()=>{
 
@@ -101,7 +105,8 @@ export default function RegisterPage() {
             !formData.confirmPassword ||
             !formData.password || 
             !formData.name || 
-            !formData.countryCode
+            !formData.phoneCode || 
+            !formData.isoCode
             ){
                 toastId=toast.error('Please fill all required fields',{id:toastId})
 
@@ -179,14 +184,16 @@ export default function RegisterPage() {
             if (isValid) {
                 toastId=toast.loading('Loading, please wait...')
 
-                response=await axios.post('/api/v1/controller/butchery?action=newButchery',formData)
+                response=await newButchery(formData)
+
+                // response=await axios.post('/api/v1/controller/butchery?action=newButchery',formData)
                 toast.dismiss(toastId)
 
-                if (response.data.success===true) {
+                if (response.success) {
                     toast.success(`Successful!`,{id:toastId})
                 }
                 else{
-                    toast.error(`Failed! ${response.data.message}`,{id:toastId})
+                    toast.error(`Failed! ${response.message}`,{id:toastId})
                 }
             }
 
@@ -199,29 +206,30 @@ export default function RegisterPage() {
     <>
     <Toaster 
 
-            toastOptions={{
-                success:{
-                    style:{
-                        background:'green',
-                        color:'white'
-                    }
-                },
-                error:{
-                    style:{
-                        background:'red',
-                        color:'white'
-                    }
-                },
-                
-            }}
+        toastOptions={{
+            success:{
+                style:{
+                    background:'green',
+                    color:'white'
+                }
+            },
+            error:{
+                style:{
+                    background:'red',
+                    color:'white'
+                }
+            },
+            
+        }}
 
         >
-        </Toaster>
+    </Toaster>
+
       <div class="container">
         <div class="card shadow-lg o-hidden border-0 my-5">
             <div >
             <div><a class="text-center" href="/"><button
-                class="btn-close fw-bolder text-center border rounded-circle border-2 border-secondary shadow-sm bounce animated"
+                class="btn-close fw-bolder text-dark text-center border rounded-circle border-2 border-secondary shadow-sm bounce animated"
                 type="button" aria-label="Close"></button></a>
             </div>
             {/* <div className="logo mb-md-5 ">
@@ -252,16 +260,16 @@ export default function RegisterPage() {
                                             type="text" required autofocus="" placeholder="First Name" name="firstName" onChange={handleInputChange} minLength={3}/></div>
                                     <div class="col-sm-6"><label class="form-label">Last Name</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-secondary form-control form-control-lg bounce animated"
-                                            type="text" placeholder="Last Name" autocomplete="off" name="lastName" onChange={handleInputChange} required minLength={3}/></div>
+                                            type="text" placeholder="Last Name"  name="lastName" onChange={handleInputChange} required minLength={3}/></div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Password</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="password" autocomplete="off" required placeholder="New Password" name="password" onChange={handleInputChange} min={8}/>
+                                            type="password"  required placeholder="New Password" name="password" onChange={handleInputChange} min={8}/>
                                     </div>
                                     <div class="col-sm-6"><label class="form-label">Confirm Password</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring form-control form-control-lg bounce animated"
-                                            type="password" placeholder="Confirm Password" autocomplete="off"
+                                            type="password" placeholder="Confirm Password"
                                             required name="confirmPassword" onChange={handleInputChange}/></div>
                                 </div>
                                 <div class="mb-3">
@@ -289,7 +297,7 @@ export default function RegisterPage() {
                                             type="tel" minLength={10} maxLength={10} placeholder="Phone Number" required name="mobile" onChange={handleInputChange}/></div>
                                     <div class="col-sm-6"><label class="form-label">Estate/Branch</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="text" required autocomplete="off" placeholder="Main Branch" minLength={3}/></div>
+                                            type="text" required placeholder="Main Branch" name="branch" minLength={3} onChange={handleInputChange}/></div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Country</label><select
@@ -311,9 +319,13 @@ export default function RegisterPage() {
                                                     renderCountries(2)
                                                 )
                                             }
-                                        </select></div>
+                                        </select>
+                                    </div>
+                                    <div className="col-sm-12">
+                                            <input ref={termsCheckBox} type="checkbox" onChange={handleInputChange} required name="terms" className="checkbox"></input><span>Terms and condition</span>
+                                    </div>
                                 </div><button
-                                    class="btn btn-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"
+                                    class="btn btn-primary bg-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"
                                     type="submit">Register Butchery</button>
                                 <hr />
                             </form>
