@@ -5,7 +5,7 @@ import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
 import toast, { Toaster } from "react-hot-toast"
-import { getProducts } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getProducts, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { Today } from "../../../../layout/utils"
 
 let sellData=[]
@@ -203,6 +203,7 @@ export default function MakeSalesPage({session,data}) {
 
     const checkChange=(val)=>{
 
+
         if (checkRef[`checkBox${val}`].current.checked) {
             inputRef[`input${val}`].current.readOnly=false
             inputRef[`input${val}`].current.focus()
@@ -221,7 +222,6 @@ export default function MakeSalesPage({session,data}) {
 
             sellData.splice(val,1)
             // sellData = sellData.filter((element, index) => index !== val);
-
 
             setTotal((prev)=>({
                 ...prev,
@@ -272,27 +272,26 @@ export default function MakeSalesPage({session,data}) {
         
         for (let i = 0; i < sellData.length; i++) {
             sellData[i]['sellingTime']=Today()
+            sellData[i]['paymentType']=paymentType
         }
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
 
-        console.log(sellData);
-        modalRef1.current.style.display='block'
+        let response=await newSale(sellData,session)
 
         // let response=await axios.post('/api/v1/controller/medicine?action=newSale',sellData)            
         toast.dismiss(toastId)
-        // if (response.data.success===true) {
-        //   toast.success(`Successful!`,{id:toastId})
+        if (response.success===true) {
+          toast.success(`Successful!`,{id:toastId})
             readOnly()
-        //     dialogBox.current.showModal()
+            modalRef1.current.style.display='block'
             sellData=[]
-
-        // }
-        // else{
-        //     toast.error(`Failed! ${response.data.message}`,{id:toastId})
-        // }
+        }
+        else{
+            toast.error(`Failed! ${response.message}`,{id:toastId})
+        }
 
     }
     
@@ -320,7 +319,7 @@ export default function MakeSalesPage({session,data}) {
             myChange=paid_amount-val
             setChange(myChange)
 
-            if (myChange>-1 && total_Price>0) {
+            if (myChange>-1) {
                 saveBtn.current.disabled=false
             }
             else{
@@ -339,22 +338,23 @@ export default function MakeSalesPage({session,data}) {
     }
 
     const Main=()=>{
-    // toast(sellData.length)
-    // console.log(sellData);
-    let currentPrice=0
 
-    if (sellData.length>0) {
-        for (let i = 0; i < sellData.length; i++) {
-            currentPrice=currentPrice+sellData[i]['totalPrice']
+        let currentPrice=0
+
+        if (sellData.length>0) {
+            for (let i = 0; i < sellData.length; i++) {
+                currentPrice=currentPrice+sellData[i]['totalPrice']
+            }
         }
-    }
 
-    if (currentPrice===0) {
-        saveBtn.current.disabled=true
-    }
-    setTotal_Price(currentPrice)
+        if (currentPrice<1) {
+            paymentType.cash=0
+            paymentType.m_pesa=0
+        }
 
-    totalChange(currentPrice)
+        setTotal_Price(currentPrice)
+
+        totalChange(currentPrice)
        
     }
 
@@ -381,10 +381,10 @@ export default function MakeSalesPage({session,data}) {
     >
     </Toaster>
     <div id="wrapper" className="bg-light">
-        <NavBar />
+        <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
-                <Header />
+                <Header session={session.user}/>
                 <div class="container-fluid">
                     <h1
                         class=" font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">

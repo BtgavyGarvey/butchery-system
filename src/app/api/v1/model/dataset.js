@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import mongoose, { Schema, model, models } from 'mongoose'
 
-const salesSchema=new Schema({
+const datasetSchema=new Schema({
 
     branch:{
         type:mongoose.Schema.Types.ObjectId,
@@ -11,8 +11,8 @@ const salesSchema=new Schema({
         type:String,
         required:true
     },
-    hour:{
-        type:String,
+    products:{
+        type:Array,
         required:true
     },
     details:{
@@ -24,8 +24,8 @@ const salesSchema=new Schema({
     timestamps:true
 })
 
-salesSchema.index({branch:1,date:1})
+datasetSchema.index({name:1,date:1})
 
 
-const Sale=models.Selless || model("Selless",salesSchema)
-export default Sale
+const Dataset=models.SetData || model("SetData",datasetSchema)
+export default Dataset

@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import mongoose, { Schema, model, models } from 'mongoose'
 
-const salesSchema=new Schema({
+const rollBackSchema=new Schema({
 
     branch:{
         type:mongoose.Schema.Types.ObjectId,
@@ -11,7 +11,7 @@ const salesSchema=new Schema({
         type:String,
         required:true
     },
-    hour:{
+    user:{
         type:String,
         required:true
     },
@@ -24,8 +24,8 @@ const salesSchema=new Schema({
     timestamps:true
 })
 
-salesSchema.index({branch:1,date:1})
+rollBackSchema.index({branch:1,date:1})
 
 
-const Sale=models.Selless || model("Selless",salesSchema)
-export default Sale
+const RollBackSale=models.Bakrolsel || model("Bakrolsel",rollBackSchema)
+export default RollBackSale

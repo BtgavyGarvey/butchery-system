@@ -4,15 +4,15 @@ import Footer from "../../layout/footer"
 import Header from "../../layout/header"
 import NavBar from "../../layout/navbar"
 
-export default function ExpensePagePage() {
+export default function ExpensePagePage({session}) {
   return (
     <>
     <div className="bg-light">
     <div id="wrapper">
-        <NavBar />
+        <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content" >
-                <Header />
+                <Header session={session.user}/>
                 <div class="container-fluid">
                     <h1
                         class=" font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">

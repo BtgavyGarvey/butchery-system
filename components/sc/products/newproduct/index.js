@@ -82,6 +82,16 @@ export default function NewProductPage({session}) {
             return false
         }
 
+        if (isNaN(formData.quantity) || !(parseFloat(formData.quantity) > 0)) {
+            toastId=toast.error('Invalid Quantity',{id:toastId})
+            return false
+        }
+
+        if (isNaN(formData.price) || !(parseFloat(formData.price) > 0)) {
+            toastId=toast.error('Invalid Price',{id:toastId})
+            return false
+        }
+
         return true
         
     }
@@ -173,10 +183,10 @@ export default function NewProductPage({session}) {
     >
     </Toaster>
     <div id="wrapper" className="bg-light">
-        <NavBar />
+        <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
-                <Header />
+                <Header session={session.user}/>
                 <div class="container-fluid">
                     <h1
                         class="font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">
@@ -195,12 +205,12 @@ export default function NewProductPage({session}) {
                                             type="text" required autofocus="" placeholder="Product Name" name="name" onChange={handleInputChange} minLength={3}/></div>
                                     <div class="col-sm-6"><label class="form-label">Product Unit Price</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-secondary form-control form-control-lg bounce animated"
-                                            type="number" placeholder="Price Per Unit" name="price" onChange={handleInputChange} required/></div>
+                                            type="text" placeholder="Price Per Unit" name="price" onChange={handleInputChange} required/></div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Product Quantity</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="number" autocomplete="off" required  name="quantity" onChange={handleInputChange} />
+                                            type="text" autocomplete="off" required  name="quantity" onChange={handleInputChange} />
                                     </div>
 
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Branch</label><select

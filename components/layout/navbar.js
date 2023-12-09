@@ -5,7 +5,7 @@ import React from "react"
 
 export let navRefDiv
 
-export default function NavBar() {
+export default function NavBar({session}) {
 
         const navRef=React.useRef()
         navRefDiv=React.useRef()
@@ -36,7 +36,7 @@ export default function NavBar() {
                 <a ref={brandText}
                     class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0">
                     <div class="sidebar-brand-icon rotate-n-0"><i class="fas fa-shop"></i></div>
-                    <div class="sidebar-brand-text mx-3"><span>Empire Butchery</span></div>
+                    <div class="sidebar-brand-text mx-3"><span>{session.butcheryName} Butchery</span></div>
                 </a>
                 <hr class="sidebar-divider my-0" />
                 <ul class="navbar-nav text-light" id="accordionSidebar" ref={ulRef}>
@@ -50,10 +50,10 @@ export default function NavBar() {
                     <li class="nav-item" title="View Products"><a class="nav-link" href="/sc/products/viewproducts"><i
                                 class="fas fa-table"></i><span className="p-1">View Products</span></a>
                     </li>
-                    <li class="nav-item" title="Make Sale"><a
+                    {/* <li class="nav-item" title="Make Sale"><a
                             class="nav-link" href="/sc/products/sales/makesales"><i class="far fa-money-bill-alt"></i><span className="p-1">Make
                                 Sale</span></a>
-                    </li>
+                    </li> */}
                     <li class="nav-item" title="View Sales"><a class="nav-link" href="/sc/products/sales/viewsales"><i
                                 class="far fa-money-bill-alt"></i><span className="p-1">View Sales</span></a>
                     </li>

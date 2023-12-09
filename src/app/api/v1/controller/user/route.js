@@ -10,6 +10,7 @@ import crypto from 'crypto'
 import Morgan from 'morgan'
 import User from "../../model/users";
 import Branches from "../../model/branches";
+import Cashier from "../../model/cashiers";
 import { exportEmail } from "../butchery/route";
 import Butchery from "../../model/butchery";
 
@@ -192,7 +193,16 @@ export const newUser=async(value)=>{
         }
 
         if (body.role==='Administrator') {
-            userData.username='000000'
+          userData.username='000000'
+
+          let cashierData={
+            id:userData.id,
+            password:body.password,
+            branch:body.branch,
+          }
+          
+          await newCashier(cashierData)
+          
         }
 
         const insertUser=await User.create(userData)
@@ -474,7 +484,7 @@ export async function loginUser (username, password, req){
         };
       }
   
-      const user = await User.findOne({ username });
+      let user = await User.findOne({ username });
   
       if (!user) {
         return {
@@ -489,10 +499,27 @@ export async function loginUser (username, password, req){
           success: false,
         };
       }
+
+      let cashierUser = await Cashier.findOne({ cashier:user.id });
+
+      if (!user) {
+        return {
+          message: 'Invalid username or password',
+          success: false,
+        };
+      }
   
-      const validPassword = await bcrypt.compare(password, user.password);
+      if (user.__v === -1) {
+        return {
+          message: 'Invalid username or password',
+          success: false,
+        };
+      }
+
+      const validPassword = await bcrypt.compare(password, cashierUser.password);
   
-      let branch=await Branches.findOne({id:user.branch})
+      let branch=await Branches.findOne({id:cashierUser.branch})
+
       let butchery=await Butchery.findOne({id:branch.butchery})
   
       if (validPassword) {
@@ -834,3 +861,112 @@ export async function resetPassword (body) {
     return responseData
   }
 };
+
+export async function newCashier (body) {
+
+  let responseData={
+    message:'',
+    success:false,
+  }
+
+  try {
+
+    let data={
+      cashier:body.id,
+      password:body.password,
+      branch:body.branch,
+      __v:1
+    }
+
+    await Cashier.create(data)
+
+    responseData.success=true
+    return responseData
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}
+
+export async function getCashierById (id) {
+
+  let responseData={
+    message:'',
+    success:false,
+    cashierInfo:''
+  }
+
+  try {
+
+    let cashier
+
+  
+    // let dbCashier=await User.findOne({id}).select('-password -_id')
+    let dbCashier=await Cashier.findOne({cashier:id}).select('-password -_id')
+    let dbEmployee=await User.findOne({id:dbCashier.cashier}).select('-_id -__v -verified')
+
+    // cashier=JSON.stringify(dbCashier) 
+    cashier=JSON.stringify(dbEmployee) 
+
+    let cashierData={
+      cashier:JSON.parse(cashier),
+    }
+
+  // console.log(groupedDocuments);
+
+  responseData.success=true
+  responseData.cashierInfo=cashierData
+  return responseData
+
+ 
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+
+}
+
+export async function getCashiers (branch) {
+
+  let responseData={
+    message:'',
+    success:false,
+    cashierInfo:''
+  }
+
+  try {
+
+    let cashiers
+
+    
+  
+    let dbCashiers=await User.findOne({id}).select('-password -_id -__v -verified')
+    // cashierInfo=cashierInfo.concat(dbCashier)
+    // console.log(cashierInfo);
+
+    cashiers=JSON.stringify(dbCashiers) 
+
+  let cashierData={
+    cashiers:JSON.parse(cashiers),
+  }
+
+  // console.log(groupedDocuments);
+
+  responseData.success=true
+  responseData.cashierInfo=cashierData
+  return responseData
+
+ 
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+
+}
+

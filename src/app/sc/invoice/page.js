@@ -1,9 +1,14 @@
+import { getServerSession } from "next-auth";
 import InvoicePage from "../../../../components/sc/invoice/index";
+import authOptions from "../../api/auth/[...nextauth]/options";
 
-export default function Profile() {
+export default async function Profile() {
+
+  const session=await getServerSession(authOptions)
+
   return (
     <>
-    <InvoicePage />
+    <InvoicePage session={session}/>
     </>
   )
 }

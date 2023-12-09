@@ -30,14 +30,17 @@ const authOptions={
                 if (!userData.success) {
                     throw new Error(userData.message)
                 }
+
                 
                 return {
                     id:userData.user.id,
                     access:userData.access,
                     name:userData.user.firstName+' '+userData.user.lastName,
                     email:userData.butchery.email,
+                    butcheryName:userData.butchery.name,
                     branch:userData.user.branch,
-                    package:userData.branch.subscription.package
+                    package:userData.branch.subscription.package,
+                    branchName:userData.branch.name
                 }
 
             }
@@ -58,6 +61,8 @@ const authOptions={
                 token.name=user.name
                 token.email=user.email
                 token.branch=user.branch
+                token.butcheryName=user.butcheryName
+                token.branchName=user.branchName
             }
             return token
         },
@@ -68,6 +73,8 @@ const authOptions={
                 session.user.name=token.name
                 session.user.email=token.email
                 session.user.branch=token.branch
+                session.user.butcheryName=token.butcheryName
+                session.user.branchName=token.branchName
             }
             return session
         }

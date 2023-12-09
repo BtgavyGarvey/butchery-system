@@ -6,17 +6,17 @@ import Header from "../../layout/header"
 import Footer from "../../layout/footer"
 import MonthYear from '../../layout/utils/index'
 
-export default function DashboardPage() {
+export default function DashboardPage({session}) {
 
   let now=MonthYear()
   return (
     <>
     <div id="page-top " >
     <div id="wrapper" className="bg-light">
-        <NavBar />
+        <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
-                <Header />
+                <Header session={session.user}/>
                 <div class="container-fluid">
                     <div class="d-flex d-sm-flex justify-content-between align-items-center mb-4">
                         <h4 class="text-dark mb-0 text-align-center"><strong><span

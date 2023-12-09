@@ -29,7 +29,7 @@ const branchesSchema=new Schema({
     },
     __v:{
         type: Number,
-        default:0,
+        default:1,
     }
 },{
     timestamps:true

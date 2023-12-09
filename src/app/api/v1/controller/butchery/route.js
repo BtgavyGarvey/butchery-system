@@ -13,6 +13,12 @@ import { newUser } from "../user/route";
 import Product from "../../model/product";
 import LinkedProduct from "../../model/linkedProduct";
 import ProductIssue from "../../model/productIssues";
+import Dataset from "../../model/dataset";
+import Sales from "../../model/sales";
+import RollBackSales from "../../model/rollBackSales";
+import { Today } from "../../../../../../components/layout/utils";
+import mongoose from "mongoose";
+import { format } from "date-fns";
 
 // DB CONNECTION
 
@@ -541,6 +547,29 @@ export async function getBranches(session){
 
 }
 
+export async function getBranchById(id){
+
+  try {
+
+    let branch=await Branch.findOne({id})
+
+    console.log(branch)
+
+    branch=JSON.stringify(branch) 
+
+    let butcheryData={
+      branch:JSON.parse(branch),
+    }
+
+    return butcheryData
+    
+  } catch (error) {
+    
+  }
+
+
+}
+
 export async function newProduct(value,session){
 
   const user=session.user
@@ -597,7 +626,7 @@ export async function newProduct(value,session){
         parent:parentProduct.id,
         quantity,
         child:id,
-        __v:0
+        __v:1
       }
 
       dbPromise.push(
@@ -660,6 +689,7 @@ export async function getProducts(session,val){
     let skip=currentPage*size
 
     let products=await Product.find({branch:user.branch,__v:val}).skip(skip).limit(size)
+    // console.log(products);
 
     if (products.length>0) {
 
@@ -836,3 +866,648 @@ export async function deleteProducts(branch,id,session,val){
     
   }
 }
+
+export async function newSale(value,session){
+
+  const user=session.user
+
+  let responseData={
+      message:'',
+      success:false
+  }
+
+  try {
+      
+      const body=value
+
+      // console.log(body);
+
+      let processes=[]
+
+      processes.push(
+        Sales.findOne({branch:user.branch,__v:0}),
+        Dataset.findOne({branch:user.branch})
+      )
+
+      let wait=await Promise.allSettled(processes)
+
+      let isToday=wait[0].value 
+      let branchDataset=wait[1].value
+
+      let dateObject=new Date(body[0].sellingTime.date)
+      
+      let weekDayName=format(dateObject,'EEEE')
+      
+
+      const branch = user.branch;
+      const date = body[0].sellingTime.date;
+      const hour = body[0].sellingTime.hour;
+
+      const moreHourDetails=async()=>{
+          await Sales.updateOne(
+              {
+              branch,
+              'details.date': date,
+              'details.moreDateDetails.hour': hour,
+              },
+              {
+              
+              $push: {
+                  'details.$[outer].moreDateDetails.$[hour].moreHourDetails': {
+                  $each: body.map((result) => ({
+                      id:result.code.toLowerCase()+result.sellingTime.uniqueDate,
+                      code: result.code.toUpperCase(),
+                      name: result.name,
+                      amountSold: parseInt(result.totalPrice),
+                      date: result.sellingTime.fullDate,
+                      weekDayName,
+                      quantity: parseFloat(result.quantitySold).toFixed(4),
+                      amountProvided:parseInt(result.paymentType.cash) + parseInt(result.paymentType.m_pesa),
+                      change:(parseInt(result.paymentType.cash) + parseInt(result.paymentType.m_pesa)) - parseInt(result.totalPrice),
+                      cashier:user.id,
+                      payedBy:{
+                        type:parseInt(result.paymentType.type),
+                        cash: result.paymentType.type ===2 ? 0 : parseInt(result.paymentType.cash),
+                        m_pesa:result.paymentType.type ===2 ? parseInt(result.paymentType.cash) : parseInt(result.paymentType.m_pesa)
+                      }
+                  })),
+                  },
+              },
+              },
+              {
+              arrayFilters: [
+                  { 'outer.date': date },
+                  { 'hour.hour': hour },
+              ],
+              }
+          )
+      }
+
+      const moreDateDetails=async()=>{
+              await Sales.updateOne(
+                  {
+                  branch,
+                  'details.date': date,
+                  // 'details.moreDateDetails': hour,
+                  },
+                  {
+                      hour:body[0].sellingTime.hour,
+                      $push: {
+                        'details.$[outer].moreDateDetails': {
+                          hour:body[0].sellingTime.hour,
+                          moreHourDetails:[],
+                          }
+                      },
+                    },
+                    {
+                      arrayFilters: [
+                        { 'outer.date': date },
+                      ],
+                    }
+              )
+      }
+
+      const Details=async()=>{
+          await Sales.updateOne(
+                  {
+                  branch,
+                  },
+                  {
+                      date:body[0].sellingTime.date,
+                      $push: {
+                        'details': {
+                              date:body[0].sellingTime.date,
+                              moreDateDetails:[]
+                          }
+                      },
+                  },
+                    
+              )
+      }
+
+      if (isToday) {
+
+          if (isToday.date === body[0].sellingTime.date) {
+
+              if (isToday.hour === body[0].sellingTime.hour) {
+                  moreHourDetails()
+              } else {
+                  await moreDateDetails()
+                  moreHourDetails()
+              }
+              
+          } else {
+              await Details()
+              await moreDateDetails()
+              await moreHourDetails()
+          }
+      }
+      else{
+
+          await Sales.create({
+              branch,
+              date:body[0].sellingTime.date,
+              hour:body[0].sellingTime.hour,
+              details:[]
+          })
+
+          await Details()
+          await moreDateDetails()
+          await moreHourDetails()
+
+      }
+
+      let promises=[]
+
+      const moreDatasetDetails=async(name,quantity)=>{
+        
+        await Dataset.updateOne(
+            {
+            branch:user.branch,
+            'details.name': name,
+            'details.moreNameDateDetails.date': date,
+            },
+            {
+                date:body[0].sellingTime.date,
+                $addToSet: {
+                  'details.$[outer].moreNameDateDetails.$[date].totalQuantity': parseFloat(quantity)
+                },
+              },
+              {
+                arrayFilters: [
+                  { 'outer.name': name },
+                  { 'date.date': date },
+                ],
+              },
+              {
+                $upsert:true
+              }
+        )
+      }
+
+      const moreNameDatasetDetails=async(name)=>{
+        
+        await Dataset.updateOne(
+            {
+            branch:user.branch,
+            'details.name': name,
+            // 'details.moreDateDetails': hour,
+            },
+            {
+                date:body[0].sellingTime.date,
+                $addToSet: {
+                  'details.$[outer].moreNameDateDetails': {
+                      date:body[0].sellingTime.date,
+                      // moreDateDetails:[]
+                    }
+                },
+              },
+              {
+                arrayFilters: [
+                  { 'outer.name': name },
+                ],
+              },
+              {
+                $upsert:true
+              }
+              
+        )
+      }
+
+      const DatasetDetails=async(name)=>{
+
+        let a= []
+
+        a.push(
+          Dataset.updateOne(
+            {
+            branch:user.branch,
+            },
+            {
+              date:body[0].sellingTime.date,
+              $addToSet: {
+                'details':{
+                  name: name,
+                  moreNameDateDetails: []
+                }
+                
+              },
+            },
+            {
+              upsert: true,
+            }
+            
+          ),
+          Dataset.updateOne(
+            {
+            branch:user.branch,
+            },
+            {
+              $addToSet: {
+                'products': name,
+              },
+            },
+            {
+              $upsert:true
+            }
+        )
+        )
+
+        await Promise.allSettled(a)
+          
+      }
+
+      if (!branchDataset) {
+        branchDataset=await Dataset.create({
+          branch:user.branch,
+          date:body[0].sellingTime.date,
+          products:[],
+          details:[]
+        })
+      }
+
+      promises.push(
+          await body.map(async(result)=>{
+
+            let product=await Product.findOne({code:result.code})
+
+            const newQuantity= (product.quantity-result.quantitySold)
+            product.quantity=newQuantity.toFixed(4)
+            console.log(branchDataset.products);
+
+
+            if (!branchDataset.products.includes(result.name)) {
+              await DatasetDetails(result.name)
+              await moreNameDatasetDetails(result.name)
+            }
+
+            if (branchDataset.date !== body[0].sellingTime.date) {
+              await moreNameDatasetDetails(result.name)
+            } 
+            moreDatasetDetails(result.name,result.quantitySold)
+            
+            product.save()
+          })
+      )
+
+      await Promise.allSettled(promises)
+
+      responseData.success=true
+  
+      return responseData
+
+  } catch (error) {
+      
+      console.log(error);
+      responseData.message='Server error has ocurred.'      
+  
+      return responseData
+  }
+  
+}
+
+export async function getSales(data){
+
+  const session=data.session
+  const date=data.date
+  const page=data.page
+  const limit=data.limit
+
+  // console.log(data);
+
+  const user=session.user
+
+  let responseData={
+    message:'',
+    success:false,
+    sales:''
+  }
+
+  try {
+
+  // let dateHour= Today()
+
+  // const today = new Date();
+  // const weekStart = new Date(today);
+  // weekStart.setDate(today.getDate() - today.getDay());
+  // const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  // const yearsAgo = new Date();
+  // yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
+
+  let productMatchQuery
+  let cashierMatchQuery
+
+  productMatchQuery =
+    data.product === 'all'
+    ? {}
+    : { 'details.moreDateDetails.moreHourDetails.name': data.product };
+    cashierMatchQuery =
+    data.cashier === 'all'
+    ? {}
+    : {'details.moreDateDetails.moreHourDetails.cashier': data.cashier};
+  
+    const salesPipeline = [
+      {
+        $match: { branch: new mongoose.Types.ObjectId(user.branch) },
+      },
+      {
+        $unwind: "$details",
+      },
+      {
+        $unwind: "$details.moreDateDetails",
+      },
+      {
+        $unwind: "$details.moreDateDetails.moreHourDetails",
+      },
+      {
+        $match: {
+          "details.date": date,
+          ...productMatchQuery,
+          ...cashierMatchQuery,
+        },
+      },
+      {
+        $sort: {
+          "details.moreDateDetails.moreHourDetails.date": -1,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: "$$ROOT",
+          },
+        },
+      },
+      {
+        $unwind: "$documents",
+      },
+      
+      {
+        $skip: page * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 0,
+          documents: 1,
+          pageCount: 1,
+        },
+      },
+    ];
+
+  const groupedDocuments = await Sales.aggregate(salesPipeline);
+
+  let cashierInfo=[]
+
+  if (groupedDocuments.length>0) {
+    let userArrayTemp=[]
+
+    groupedDocuments.map((result)=>{
+
+      let cashier_id=result.documents.details.moreDateDetails.moreHourDetails.cashier
+  
+      if (!userArrayTemp.includes(cashier_id)) {
+        userArrayTemp.push(cashier_id)
+      }
+  
+    })
+
+    for (let i = 0; i < userArrayTemp.length; i++) {
+      let dbCashier=await User.findOne({id:userArrayTemp[i]}).select('-password -_id -__v -verified')
+      cashierInfo=cashierInfo.concat(dbCashier)
+      console.log(cashierInfo);
+      
+    }
+
+  }
+
+  let products=JSON.stringify(groupedDocuments) 
+  cashierInfo=JSON.stringify(cashierInfo) 
+
+  let productData={
+    products:JSON.parse(products),
+    cashierInfo:JSON.parse(cashierInfo),
+  }
+
+  // console.log(groupedDocuments);
+
+  responseData.success=true
+  responseData.sales=productData
+  return responseData
+
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+};
+
+export async function rollBackSales(data){
+
+  let responseData={
+    message:'',
+    success:false
+  }
+  const sale=data.sale
+
+  // console.log(data);
+
+  // return
+  let promises=[]
+
+  try {
+
+    promises.push(
+    Sales.updateOne(
+      {
+      branch:data.branch,
+      'details.date': data.date,
+      'details.moreDateDetails.hour': data.hour,
+      },
+      {
+          $pull: {
+            'details.$[outer].moreDateDetails.$[hour].moreHourDetails': {id:sale.id}
+          },
+        },
+        {
+          arrayFilters: [
+            { 'outer.date': data.date },
+            { 'hour.hour': data.hour },
+            { 'id.id': sale.id },
+          ],
+        },
+    ))
+
+    promises.push(
+      RollBackSales.create({
+      branch:data.branch,
+      date:data.now.date,
+      user:data.user,
+      details:{
+        rolledAt:data.now.fullDate,
+        ...sale
+      }
+    })
+    )
+    let product=await Product.findOne({branch:data.branch,code:sale.code})
+
+    product.quantity=product.quantity + parseFloat(sale.quantity) || product.quantity
+
+    promises.push(product.save())
+
+    await Promise.allSettled(promises)
+
+    responseData.success=true
+
+    return responseData
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+
+    return responseData
+  }
+
+  
+
+
+}
+
+export async function getRollBackSales(data){
+
+  const session=data.session
+  const date=data.date
+  const page=data.page
+  const limit=data.limit
+
+
+  const user=session.user
+
+  let responseData={
+    message:'',
+    success:false,
+    sales:''
+  }
+
+  try {
+
+  // let dateHour= Today()
+
+  // const today = new Date();
+  // const weekStart = new Date(today);
+  // weekStart.setDate(today.getDate() - today.getDay());
+  // const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  // const yearsAgo = new Date();
+  // yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
+
+  let productMatchQuery
+  let cashierMatchQuery
+
+  productMatchQuery =
+    data.product === 'all'
+    ? {}
+    : { 'details.name': data.product };
+    cashierMatchQuery =
+    data.cashier === 'all'
+    ? {}
+    : {'user': data.cashier};
+  
+    const salesPipeline = [
+      {
+          
+        $match: { branch: new mongoose.Types.ObjectId(user.branch), date },
+      },
+      
+      {
+        $unwind: "$details",
+      },
+      {
+        $sort: {
+          "date": -1,
+        },
+      },
+      {
+        $match: {
+          ...productMatchQuery,
+          ...cashierMatchQuery,
+        },
+      },
+      
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: "$$ROOT",
+          },
+        },
+      },
+      {
+        $unwind: "$documents",
+      },
+      
+      {
+        $skip: page * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 0,
+          documents: 1,
+          pageCount: 1,
+        },
+      },
+    ];
+
+  const groupedDocuments = await RollBackSales.aggregate(salesPipeline);
+
+
+  let cashierInfo=[]
+
+  if (groupedDocuments.length>0) {
+    let userArrayTemp=[]
+
+    groupedDocuments.map((result)=>{
+
+      let cashier_id=result.documents.user
+  
+      if (!userArrayTemp.includes(cashier_id)) {
+        userArrayTemp.push(cashier_id)
+      }
+  
+    })
+
+    for (let i = 0; i < userArrayTemp.length; i++) {
+      let dbCashier=await User.findOne({id:userArrayTemp[i]}).select('-_id -__v -verified')
+      cashierInfo=cashierInfo.concat(dbCashier)
+      
+    }
+
+  }
+
+  let products=JSON.stringify(groupedDocuments) 
+  cashierInfo=JSON.stringify(cashierInfo) 
+
+  let productData={
+    products:JSON.parse(products),
+    cashierInfo:JSON.parse(cashierInfo),
+  }
+
+  // console.log(groupedDocuments);
+
+  responseData.success=true
+  responseData.sales=productData
+  return responseData
+
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+};

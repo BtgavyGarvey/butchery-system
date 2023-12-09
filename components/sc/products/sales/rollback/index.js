@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranchById, getSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranchById, getRollBackSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
@@ -18,7 +18,6 @@ let cashierData=[]
 export default function ViewSalesPage({session}) {
 
     const [SalesData, setSalesData]=React.useState([])
-    const [OneSalesData, setOneSalesData]=React.useState()
 
     const page=React.useRef()
     const Date=React.useRef()
@@ -27,12 +26,13 @@ export default function ViewSalesPage({session}) {
     const product=React.useRef()
     const [pageCount,setPageCount]=React.useState(0)
     const [outOfPage,setOutOfPage]=React.useState(0)
-    const [OneCashier,setOneCashier]=React.useState(0)
+    const [OneCashier,setOneCashier]=React.useState([])
     const [ManyCashiers,setManyCashiers]=React.useState([])
     // const [Date,setDate]=React.useState()
     const modalRef1=React.useRef()
     const modalRef2=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
+    const [OneRollData, setOneRollData]=React.useState()
 
     let toastId
 
@@ -44,41 +44,36 @@ export default function ViewSalesPage({session}) {
         page.current=1
         product.current='all'
         cashier.current='all'
-        getSalesData()
+        getRollBackSalesData()
 
     },[])
 
-    const hideModal=()=>{
-        modalRef2.current.style.display='none'
-        
-    }
-
     const handlePageClick=(e)=>{
         page.current=e.selected+1
-        getSalesData()
+        getRollBackSalesData()
     }
 
     const handlePageLimitClick=(e)=>{
         pageLimit.current=parseInt(e.target.value)
-        getSalesData()
+        getRollBackSalesData()
     }
 
     const handleDateClick=(e)=>{
         Date.current=formatDate(e.target.value)
-        getSalesData()
+        getRollBackSalesData()
     }
 
     const handleCashierClick=(e)=>{
         cashier.current=e.target.value
-        getSalesData()
+        getRollBackSalesData()
     }
 
     const handleProductClick=(e)=>{
         product.current=e.target.value
-        getSalesData()
+        getRollBackSalesData()
     }
 
-    const getSalesData=async()=>{
+    const getRollBackSalesData=async()=>{
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
@@ -90,55 +85,31 @@ export default function ViewSalesPage({session}) {
             session,
             product:product.current
         }
-        let response=await getSales(data)
+        let response=await getRollBackSales(data)
 
         let pages=Math.ceil(response.sales.products[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
         setOutOfPage(response.sales.products[0]?.pageCount)
         setSalesData(response.sales.products)
         setManyCashiers(response.sales.cashierInfo)
-        console.log(response.sales);
         toast.dismiss(toastId)
         
     }
 
-    const rollBackSale=async(data)=>{
-
-        let answer=confirm(`Are you sure you want to roll back the sale of ${data.name}`)
-
-        if (answer) {
-            toastId=toast.loading('Loading, please wait...',{
-                id:toastId
-            })
-    
-            let response=await rollBackSales(data)
-            toast.dismiss(toastId)
-
-            if (response.success) {
-
-                toast.success('Successful')
-                getSalesData()
-            } else {
-                toast.error(`Failed!!! ${response.message}`)
-                
-            }
-        }
-        
-    }
-
-    const viewMore=async(branch,data)=>{
+    const viewMore=async(data)=>{
 
         modalRef2.current.style.display='block'
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
-console.log(data);
+
         let promises=[]
 
         promises.push(
-            getCashierById(data.cashier),
-            getBranchById(branch),
+            getCashierById(data.user),
+            getCashierById(data.details.cashier),
+            getBranchById(data.branch),
         )
 
         let response=await Promise.allSettled(promises)
@@ -147,17 +118,15 @@ console.log(data);
 
         cashiers.push(
             response[0].value.cashierInfo,
-            response[1].value.branch,
+            response[1].value.cashierInfo,
+            response[2].value.branch,
         )
-
-        console.log(cashiers);
-        console.log(data);
 
         toast.dismiss(toastId)
 
         setOneCashier(cashiers)
 
-        setOneSalesData(data)
+        setOneRollData(data)
         
     }
 
@@ -167,32 +136,21 @@ console.log(data);
 
         for (let i = 0; i < SalesData.length; i++) {
 
-            if (!soldProducts.includes(SalesData[i].documents.details.moreDateDetails.moreHourDetails.name)) {
-                soldProducts.push(SalesData[i].documents.details.moreDateDetails.moreHourDetails.name)
+            if (!soldProducts.includes(SalesData[i].documents.details.name)) {
+                soldProducts.push(SalesData[i].documents.details.name)
             }
 
             result1.push(
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.name}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.quantity}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.amountSold}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.date}</td>
+                <td>{SalesData[i].documents.details.name}</td>
+                <td>{SalesData[i].documents.details.quantity}</td>
+                <td>{SalesData[i].documents.details.amountSold}</td>
+                <td>{SalesData[i].documents.details.rolledAt}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
-                    viewMore(SalesData[i].documents.branch,SalesData[i].documents.details.moreDateDetails.moreHourDetails)
-                }}/></td>
-                <td title="Roll Back"><FontAwesomeIcon icon={faArrowAltCircleUp} className="text-danger fw-bold faEdit" onClick={()=>{
-                    let data={
-                        user:session.user.id,
-                        now:Today(),
-                        date:SalesData[i].documents.details.date,
-                        hour:SalesData[i].documents.details.moreDateDetails.hour,
-                        name:SalesData[i].documents.details.moreDateDetails.moreHourDetails.name,
-                        branch:session.user.branch,
-                        sale:SalesData[i].documents.details.moreDateDetails.moreHourDetails
-                    }
-                    rollBackSale(data)
+                    viewMore(SalesData[i].documents)
+
                 }}/></td>
                 </tr>
     
@@ -205,18 +163,8 @@ console.log(data);
             
     }
 
-    const getCashier=async(id)=>{
-        toastId=toast.loading('Loading, please wait...',{
-            id:toastId
-        })
-
-        let response=await getCashierById(id)
-        setOneCashier(response.cashierInfo)
-        toast.dismiss(toastId)
-
-    }
-
-    const getCashiers=()=>{
+    const hideModal=()=>{
+        modalRef2.current.style.display='none'
         
     }
 
@@ -229,6 +177,7 @@ console.log(data);
         
         return name
     }
+
 
   return (
     <>
@@ -260,21 +209,19 @@ console.log(data);
                 <div class="container-fluid">
                     <h1
                         class=" font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">
-                        View Sales</h1>
+                        Roll Back Report</h1>
                     <div class="card shadow">
                     <div class="card-header d-flex justify-content-between py-3">
-                            <p class="text-primary m-0 fw-bold">Sales Info</p>
+                            <p class="text-primary m-0 fw-bold">Roll Back Info</p>
                             <div class="dropdown border rounded-pill">
                                 <button onClick={()=>{setDropDownManu(!dropDownManu)}}
                                     class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
                                     aria-expanded="false" data-bs-toggle="dropdown"
-                                    type="button"><strong>Sales&nbsp;</strong>
+                                    type="button"><strong>Roll Back&nbsp;</strong>
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
-                                    <a class="dropdown-item" href="#"  >Sales Reports</a>
+                                    <a class="dropdown-item" href="#">Roll Back Dashboard</a>
                                 </div>
                                     
                             </div>
@@ -345,8 +292,8 @@ console.log(data);
                                             <th>Product Name</th>
                                             <th>Sold Quantity</th>
                                             <th>Sold Amount</th>
-                                            <th>Sold At</th>
-                                            <th colSpan={2}>Action</th>
+                                            <th>Rolled Back Date</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -360,8 +307,8 @@ console.log(data);
                                             <td><strong>Product Name</strong></td>
                                             <td><strong>Sold Quantity</strong></td>
                                             <td><strong>Sold Amount</strong></td>
-                                            <td><strong>Sold At</strong></td>
-                                            <td colSpan={2}><strong>Action</strong></td>
+                                            <td><strong>Rolled Back Date</strong></td>
+                                            <td><strong>Action</strong></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -396,7 +343,7 @@ console.log(data);
                                         />
                                     </nav>
                                 </div>
-                                <div ref={modalRef2} class="modal" role="dialog"
+                            <div ref={modalRef2} class="modal" role="dialog"
                             tabindex="-1" id="modal-2">
                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                             <div class="modal-content bg-dark">
@@ -411,13 +358,13 @@ console.log(data);
                                             <>
                                             <div
                                                 class="font-monospace text-capitalize fw-bolder d-flex justify-content-center">
-                                                <p class="fs-5 text-warning">{OneCashier[1].name} Branch</p>
+                                                <p class="fs-5 text-warning">{OneCashier[2].name} Branch</p>
                                                 
                                             </div>
                                             <div
                                                 class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                                <p class="fs-5 text-warning">{OneSalesData.name}</p>
-                                                <p className="text-light">{OneSalesData.code}</p>
+                                                <p class="fs-5 text-warning">{OneRollData.details.name}</p>
+                                                <p className="text-light">{OneRollData.details.code}</p>
                                                 
                                             </div>
                                             <hr />
@@ -430,7 +377,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Quantity Sold:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.quantity.toLocaleString()}</label>
+                                                                <label class="form-label">{OneRollData.details.quantity.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -444,7 +391,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Amount Sold:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.amountSold.toLocaleString()}</label>
+                                                                <label class="form-label">{OneRollData.details.amountSold.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -458,7 +405,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Sold By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneCashier[0].cashier.firstName} {OneCashier[0].cashier.lastName} ({OneCashier[0].cashier.username})</label>
+                                                                <label class="form-label">{OneCashier[1].cashier.firstName} {OneCashier[1].cashier.lastName} ({OneCashier[1].cashier.username})</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -472,7 +419,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Sold Date:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.date}</label>
+                                                                <label class="form-label">{OneRollData.details.date}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -486,7 +433,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Week Day Name:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.weekDayName}</label>
+                                                                <label class="form-label">{OneRollData.details.weekDayName}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -500,7 +447,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Paid By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{paidTypeName(OneSalesData.payedBy.type)}</label>
+                                                                <label class="form-label">{paidTypeName(OneRollData.details.payedBy.type)}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -514,7 +461,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Cash Payment:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.payedBy.cash.toLocaleString()}</label>
+                                                                <label class="form-label">{OneRollData.details.payedBy.cash.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -528,7 +475,7 @@ console.log(data);
                                                                 <label class="form-label text-light">M-Pesa Payment:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.payedBy.m_pesa.toLocaleString()}</label>
+                                                                <label class="form-label">{OneRollData.details.payedBy.m_pesa.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -540,10 +487,10 @@ console.log(data);
                                                     <div class="col">
                                                         <div class="row d-grid d-flex">
                                                             <div class="col d-grid">
-                                                                <label class="form-label text-light">Paid Amount:</label>
+                                                                <label class="form-label text-light">Rolled Back By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.amountProvided.toLocaleString()}</label>
+                                                                <label class="form-label">{OneCashier[0].cashier.firstName} {OneCashier[0].cashier.lastName} ({OneCashier[0].cashier.username})</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -554,10 +501,10 @@ console.log(data);
                                                     <div class="col">
                                                         <div class="row d-grid d-flex">
                                                             <div class="col d-grid">
-                                                                <label class="form-label text-light">Change:</label>
+                                                                <label class="form-label text-light">Rolled Back Date:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.change.toLocaleString()}</label>
+                                                                <label class="form-label">{OneRollData.details.rolledAt}</label>
                                                             </div>
                                                         </div>
                                                     </div>

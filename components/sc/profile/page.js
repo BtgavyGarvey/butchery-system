@@ -184,10 +184,10 @@ export default function ProfilePage({session}) {
     </Toaster>
     <div className="bg-light">
     <div id="wrapper">
-        <NavBar />
+        <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
-                <Header />
+                <Header session={session.user}/>
                 <div class="container-fluid">
                     <h1
                         class=" font-monospace text-uppercase fw-bold text-center text-light text-bg-secondary mb-4">
