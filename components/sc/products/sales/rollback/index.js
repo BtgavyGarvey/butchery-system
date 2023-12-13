@@ -8,7 +8,7 @@ import { getBranchById, getRollBackSales, rollBackSales } from "../../../../../s
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
-import { Today, formatDate } from "../../../../layout/utils"
+import { DateTime, Today, formatDate } from "../../../../layout/utils"
 import ReactPaginate from "react-paginate"
 import { getCashierById } from "../../../../../src/app/api/v1/controller/user/route"
 
@@ -147,7 +147,7 @@ export default function ViewSalesPage({session}) {
                 <td>{SalesData[i].documents.details.name}</td>
                 <td>{SalesData[i].documents.details.quantity}</td>
                 <td>{SalesData[i].documents.details.amountSold}</td>
-                <td>{SalesData[i].documents.details.rolledAt}</td>
+                <td>{DateTime(SalesData[i].documents.details.rolledAt)}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
                     viewMore(SalesData[i].documents)
 
@@ -227,7 +227,7 @@ export default function ViewSalesPage({session}) {
                             </div>
                         </div>
                         
-                        <div class="card-body">
+                        <div class="card-body bg-dark">
                             <div class="row">
                                 <div class="col-md-3 text-wrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
@@ -405,7 +405,7 @@ export default function ViewSalesPage({session}) {
                                                                 <label class="form-label text-light">Sold By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneCashier[1].cashier.firstName} {OneCashier[1].cashier.lastName} ({OneCashier[1].cashier.username})</label>
+                                                                <label class="form-label">{OneCashier[1].cashiers.firstName} {OneCashier[1].cashiers.lastName} ({OneCashier[1].cashiers.username})</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -419,7 +419,7 @@ export default function ViewSalesPage({session}) {
                                                                 <label class="form-label text-light">Sold Date:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneRollData.details.date}</label>
+                                                                <label class="form-label">{DateTime(OneRollData.details.date)}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -490,7 +490,7 @@ export default function ViewSalesPage({session}) {
                                                                 <label class="form-label text-light">Rolled Back By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneCashier[0].cashier.firstName} {OneCashier[0].cashier.lastName} ({OneCashier[0].cashier.username})</label>
+                                                                <label class="form-label">{OneCashier[0].cashiers.firstName} {OneCashier[0].cashiers.lastName} ({OneCashier[0].cashiers.username})</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -504,7 +504,7 @@ export default function ViewSalesPage({session}) {
                                                                 <label class="form-label text-light">Rolled Back Date:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneRollData.details.rolledAt}</label>
+                                                                <label class="form-label">{DateTime(OneRollData.details.rolledAt)}</label>
                                                             </div>
                                                         </div>
                                                     </div>

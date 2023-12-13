@@ -8,7 +8,7 @@ import { getBranchById, getSales, rollBackSales } from "../../../../../src/app/a
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
-import { Today, formatDate } from "../../../../layout/utils"
+import { DateTime, Today, formatDate } from "../../../../layout/utils"
 import ReactPaginate from "react-paginate"
 import { getCashierById } from "../../../../../src/app/api/v1/controller/user/route"
 
@@ -21,7 +21,7 @@ export default function ViewSalesPage({session}) {
     const [OneSalesData, setOneSalesData]=React.useState()
 
     const page=React.useRef()
-    const Date=React.useRef()
+    const DateRef=React.useRef()
     const cashier=React.useRef()
     const pageLimit=React.useRef()
     const product=React.useRef()
@@ -39,7 +39,7 @@ export default function ViewSalesPage({session}) {
     React.useEffect(()=>{
         modalRef2.current.style.display='none'
         let date=Today()
-        Date.current=date.date
+        DateRef.current=date.date
         pageLimit.current=25
         page.current=1
         product.current='all'
@@ -64,7 +64,7 @@ export default function ViewSalesPage({session}) {
     }
 
     const handleDateClick=(e)=>{
-        Date.current=formatDate(e.target.value)
+        DateRef.current=formatDate(e.target.value)
         getSalesData()
     }
 
@@ -84,7 +84,7 @@ export default function ViewSalesPage({session}) {
         })
         let data={
             cashier:cashier.current,
-            date:Date.current,
+            date:DateRef.current,
             page:page.current-1,
             limit:pageLimit.current,
             session,
@@ -133,7 +133,7 @@ export default function ViewSalesPage({session}) {
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
-console.log(data);
+// console.log(data);
         let promises=[]
 
         promises.push(
@@ -178,7 +178,7 @@ console.log(data);
                 <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.name}</td>
                 <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.quantity}</td>
                 <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.amountSold}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.date}</td>
+                <td>{DateTime(SalesData[i].documents.details.moreDateDetails.moreHourDetails.date)}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
                     viewMore(SalesData[i].documents.branch,SalesData[i].documents.details.moreDateDetails.moreHourDetails)
                 }}/></td>
@@ -280,7 +280,7 @@ console.log(data);
                             </div>
                         </div>
                         
-                        <div class="card-body">
+                        <div class="card-body bg-dark">
                             <div class="row">
                                 <div class="col-md-3 text-wrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
@@ -330,7 +330,7 @@ console.log(data);
                                 </div>
                                 <div class="col-md-3 text-wrap">
                                     <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Date&nbsp;<input type="date" ref={Date} onChange={handleDateClick}
+                                        <label class="form-label">Date&nbsp;<input type="date" ref={DateRef} onChange={handleDateClick}
                                                 class="d-inline-block form-control form-control-sm" />
                                             &nbsp;</label></div>
                                 </div>
@@ -396,12 +396,12 @@ console.log(data);
                                         />
                                     </nav>
                                 </div>
-                                <div ref={modalRef2} class="modal" role="dialog"
+                                <div ref={modalRef2} class="modal font-monospace border rounded" role="dialog"
                             tabindex="-1" id="modal-2">
-                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
                             <div class="modal-content bg-dark">
                                 <div class="modal-header text-capitalize">
-                                    <h2 class="modal-title fw-bolder">More On Rolled Back Sale</h2><button class="btn-close"
+                                    <h2 class="modal-title fw-bolder">More On {OneSalesData?.name} Sale</h2><button class="btn-close"
                                         type="button" aria-label="Close" data-bs-dismiss="modal"></button>
                                 </div>
 
@@ -411,13 +411,13 @@ console.log(data);
                                             <>
                                             <div
                                                 class="font-monospace text-capitalize fw-bolder d-flex justify-content-center">
-                                                <p class="fs-5 text-warning">{OneCashier[1].name} Branch</p>
+                                                <p class="fs-5 text-warning">{OneCashier[1]?.name} Branch</p>
                                                 
                                             </div>
                                             <div
                                                 class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                                <p class="fs-5 text-warning">{OneSalesData.name}</p>
-                                                <p className="text-light">{OneSalesData.code}</p>
+                                                <p class="fs-5 text-warning">{OneSalesData?.name}</p>
+                                                <p className="text-light">{OneSalesData?.code}</p>
                                                 
                                             </div>
                                             <hr />
@@ -430,7 +430,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Quantity Sold:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.quantity.toLocaleString()}</label>
+                                                                <label class="form-label">{OneSalesData?.quantity.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -444,7 +444,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Amount Sold:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.amountSold.toLocaleString()}</label>
+                                                                <label class="form-label">{OneSalesData?.amountSold.toLocaleString()}</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -458,7 +458,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Sold By:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneCashier[0].cashier.firstName} {OneCashier[0].cashier.lastName} ({OneCashier[0].cashier.username})</label>
+                                                                <label class="form-label">{OneCashier[0]?.cashiers.firstName} {OneCashier[0].cashiers.lastName} ({OneCashier[0].cashiers.username})</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -472,7 +472,7 @@ console.log(data);
                                                                 <label class="form-label text-light">Sold Date:</label>
                                                             </div>
                                                             <div class="col d-grid">
-                                                                <label class="form-label">{OneSalesData.date}</label>
+                                                                <label class="form-label">{DateTime(OneSalesData?.date)}</label>
                                                             </div>
                                                         </div>
                                                     </div>

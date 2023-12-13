@@ -293,7 +293,7 @@ export default function ViewProductsPage({session}) {
                                     
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body bg-dark">
                             <div class="row">
                                 <div class="col-md-6 text-nowrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">

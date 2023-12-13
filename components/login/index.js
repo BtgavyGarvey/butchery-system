@@ -115,22 +115,25 @@ export default function LoginPage(){
                     </div>
                     
                     <div className="card-body p-3 text-center">
+
                         <div className="mb-md-5 mt-md-4 pb-3">
+                        <form onSubmit={login}>
 
                         <div className="logo mb-md-5 mt-md-4 pb-3">
                             <h1 className="logo-caption fw-bold"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
                         </div>
 
                         <h2 className="fw-bold mb-3 text-uppercase text-warning">Login</h2>
-                        <p className="text-white-50 mb-5">Please enter your email and password!</p>
+                        <p className="text-white-50 mb-5">Please enter your username and password!</p>
+
 
                         <div className="form-outline form-white mb-4">
-                            <input type="email" name="username" className="form-control form-control-lg" 
+                            <input type="text" name="username" className="form-control form-control-lg" 
                             onChange={handleInputChange}
                             autoFocus
                             autoComplete='false' 
                             />
-                            <label className="form-label" >Email Address</label>
+                            <label className="form-label" >Username</label>
                         </div>
 
                         <div className="form-outline form-white mb-4">
@@ -144,13 +147,14 @@ export default function LoginPage(){
 
                         <p className="small mb-5 pb-lg-2"><a className="text-white-50" href="/resetpassword">Forgot password?</a></p>
 
-                        <button className="btn btn-outline-light btn-lg px-5" type="button" onClick={login}>Login</button>
+                        <button className="btn btn-outline-light btn-lg px-5" type="submit">Login</button>
 
                         {/* <div className="d-flex justify-content-center text-center mt-4 pt-1">
                             <a href="#!" className="text-white"><i className="fab fa-facebook-f fa-lg"></i></a>
                             <a href="#!" className="text-white"><i className="fab fa-twitter fa-lg mx-4 px-2"></i></a>
                             <a href="#!" className="text-white"><i className="fab fa-google fa-lg"></i></a>
                         </div> */}
+                        </form>
 
                         </div>
 
@@ -158,7 +162,7 @@ export default function LoginPage(){
                         <p className="mb-0">Don't have an account? <a href="/register" className="text-white-50 fw-bold">Sign Up</a>
                         </p>
                         </div>
-
+                        
                     </div>
                     </div>
                 </div>

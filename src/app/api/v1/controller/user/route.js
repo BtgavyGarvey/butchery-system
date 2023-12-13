@@ -13,6 +13,10 @@ import Branches from "../../model/branches";
 import Cashier from "../../model/cashiers";
 import { exportEmail } from "../butchery/route";
 import Butchery from "../../model/butchery";
+import EmployeesPayments from "../../model/employeesPayments";
+import LoginDetails from '../../model/loginDetailsModel'
+import mongoose from "mongoose";
+import { Country } from "country-state-city";
 
 
 // DB CONNECTION
@@ -144,9 +148,9 @@ async function generateUniqueUserId(prefix) {
     return username;
 }
 
-//NEW MEDICINE
+//NEW USER
 
-export const newUser=async(value)=>{
+export async function newUser(value){
 
     let responseData={
         message:'',
@@ -154,7 +158,7 @@ export const newUser=async(value)=>{
     }
 
     try {
-        
+
         const validate=await newUserValidation(value)
       
         if (validate.error) {
@@ -169,6 +173,7 @@ export const newUser=async(value)=>{
         const promises=[
             generateUniqueUserId(3),
             generateUniqueUsername(),
+            User.findOne({mobile:body.mobile})
         ]
 
         const promise=await Promise.allSettled(promises)
@@ -177,6 +182,8 @@ export const newUser=async(value)=>{
           response.status==='fulfilled' ? [response.value] : []
         );
 
+        let mobileExist=data[2]
+
         let userData={
             id:data[0],
             username:data[1],
@@ -184,24 +191,40 @@ export const newUser=async(value)=>{
             lastName:body.lastName,
             password:body.password,
             role:body.role,
+            mobile:body.mobile,
+            nationalId:body.nationalId,
             branch:body.branch,
-            salary:{
-              basicSalary:body.salary,
-              remainingSalary:body.salary,
-            },
-            __v:0
+            salary:body.salary,
+            __v:1
+        }
+
+        if (mobileExist) {
+          responseData.message='Phone number already exist'
+          return responseData
         }
 
         if (body.role==='Administrator') {
           userData.username='000000'
+        }
 
+        if (body.role==='Administrator' || body.role==='Employer') {
           let cashierData={
             id:userData.id,
             password:body.password,
             branch:body.branch,
           }
-          
           await newCashier(cashierData)
+        }
+
+        if (body.role ==='Employee') {
+          
+          let IdExist=await User.findOne({nationalId:userData.nationalId})
+
+          if (IdExist) {
+            responseData.message='National ID already exist.'      
+    
+            return responseData
+          }
           
         }
 
@@ -245,27 +268,142 @@ export const newUser=async(value)=>{
     
 }
 
-export const getMedicineData=async(value)=>{
+export async function getUsers(data){
 
     let responseData={
         message:'',
         success:false,
-        drugs:[]
+        users:[]
     }
 
+    let branch=data.branch
+    let searchParams=data.searchParams
+    let limit=data.pageLimit
+    let page=data.page
+// console.log(branch,searchParams);
     try {
+
+      const matchQuery = 
+        searchParams==='all' 
+        ? {}
+        :
+        {
+          $or: [
+          { username: { $regex: searchParams, $options: 'i' } },
+          { firstName: { $regex: searchParams, $options: 'i' } },
+          { lastName: { $regex: searchParams, $options: 'i' } },
+          { mobile: { $regex: searchParams, $options: 'i' } },
+          { nationalId: { $regex: searchParams, $options: 'i' } },
+          ],
+        }
         
-        let drugs=await NewMedicine.find()
+      
+  
+      // const missionMatchQuery = mixsion === 'all' ? {} : { $or: [{ mission1: mission._id }, { mission2: mission._id }] };
+  
+      let pipeline = [
+        {
+          $match: {
+            ...matchQuery,
+            branch: new mongoose.Types.ObjectId(branch),
+            // __v: 1,
+            role:'Employee'
+          },
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+        {
+          $group: {
+            _id: null,
+            pageCount: { $sum: 1 },
+            documents: {
+              $push: "$$ROOT",
+            },
+          },
+        },
+        {
+          $unwind: "$documents",
+        },
+        {
+          $skip:page * limit
+        },
+        {
+          $limit:limit
+        },
+        {
+          $project: {
+            _id: 0,
+          },
+        },
+      ];
+  
+      let users = await User.aggregate(pipeline);
 
-        if (drugs.length>0) {
-            responseData.success=true
-            responseData.drugs=drugs
-        }
-        else{
-            responseData.message='No medicine data found'
+      // console.log(users);
+        
+      if (users.length>0) {
+
+        let branches=[]
+        let payments=[]
+
+        for (let i = 0; i < users.length; i++) {
+
+          pipeline=[
+            {
+              $match:{
+                employee:new mongoose.Types.ObjectId(users[i].documents.id),
+                branch:new mongoose.Types.ObjectId(users[i].documents.branch),
+                __v:1
+              }
+              
+            },
+            {
+              $lookup: {
+                from: 'usars',
+                localField: 'cashier',
+                foreignField: 'id',
+                as: 'cashierInfo',
+              },
+            },
+            {
+              $unwind: { path: '$cashierInfo', preserveNullAndEmptyArrays: true },
+            }
+
+          ]
+
+          let promises=[
+            Branches.findOne({id:users[i].documents.branch}),
+            EmployeesPayments.aggregate(pipeline)
+          ]
+
+          const element =  await Promise.allSettled(promises)
+
+          // console.log(element);
+
+          branches.push(element[0].value)
+          payments.push(element[1].value)
+          
         }
 
-        return responseData
+        users=JSON.stringify(users) 
+        branches=JSON.stringify(branches)
+        payments=JSON.stringify(payments)
+        
+        let data={
+          users:JSON.parse(users),
+          branches:JSON.parse(branches),
+          payments:JSON.parse(payments),
+        }
+
+        responseData.success=true
+        responseData.users=data
+      }
+      else{
+        responseData.message='No employee data found'
+      }
+
+      return responseData
 
     } catch (error) {
         console.log(error);
@@ -276,206 +414,199 @@ export const getMedicineData=async(value)=>{
     }
 }
 
-export const newSale=async(value)=>{
+export async function editUser(body){
 
-    let responseData={
-        message:'',
-        success:false
+  let responseData={
+    message:'',
+    success:false,
+  }
+
+  try {
+    
+    let user=await User.findOne({id:body.id})
+
+    if (user) {
+
+      user.firstName=body.firstName || user.firstName
+      user.lastName=body.lastName || user.lastName
+      user.salary=body.salary || user.salary
+      user.branch=body.branch || user.branch
+      user.mobile=body.mobile || user.mobile
+
+      let mobileExist=await User.findOne({mobile:body.mobile,id:{$ne:body.id}})
+
+      if (mobileExist) {
+        responseData.message='Phone number already exist'
+        return responseData
+      }
+
+      await user.save()
+      
     }
-  
+    responseData.success=true
+    return responseData
 
-    try {
-        
-        // const validate=await newMedicineValidation(value)
-      
-        // if (validate.error) {
-        //     console.log(validate.error);
-        //     responseData.message='Fill in all fields.'      
-      
-        //     return responseData
-        // }
-      
-        // const body=validate.value
-        const body=value
-        // console.log(body);
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error occured'
+    return responseData
+  }
+}
 
-        let isToday=await Sales.findOne({pharmacy:body[0].pharmacy})
+export async function deleteUser(id){
 
-        if (isToday) {
+  try {
+    await User.deleteOne({id})
 
-            // console.log(isToday.details[isToday.lastIndexDetails].moreDateDetails[isToday.lastIndexDate].moreHourDetails);
-            
-
-
-            body.flatMap((result)=>{
-
-                
-                let v=isToday.details[isToday.lastIndexDetails].moreDateDetails[isToday.lastIndexDate].moreHourDetails({
-                    batchNumber:result.batchNumber.toUpperCase(),
-                    medicineName:result.medicineName,
-                    saleAmount:result.totalPrice,
-                    medicineCategory:result.medicineCategory,
-                    quantitySold:result.quantitySold,
-                })
-
-                console.log(v);
-                
-            })
-
-            await isToday.save()
-
-            // if (isToday.date === body[0].sellingTime.date) {
-                
-            //     isToday.details.flatMap((result1:any)=>{
-
-            //         console.log(result1);
-                    
-                    
-            //         result1.moreDateDetails.flatMap((result2:any)=>{
-
-
-            //             if (isToday.hour === body[0].sellingTime.hour) {
-            //             console.log(result2);
-                            
-            //                 body.flatMap((result:any)=>{
-            //                     isToday.details[isToday.lastIndexDetails].moreDateDetails[isToday.lastIndexDate].moreHourDetails[isToday.lastIndexHour].push({
-            //                         batchNumber:result.batchNumber.toUpperCase(),
-            //                         medicineName:result.medicineName,
-            //                         saleAmount:result.totalPrice,
-            //                         medicineCategory:result.medicineCategory,
-            //                         quantitySold:result.quantitySold,
-            //                     })
-            //                 })
-
-            //                 isToday.save()
-
-            //                 // return
-
-            //             } else {
-                            
-            //             }
+    return true
     
-                        
-            //         })
-    
-    
-            //     })
-                
-            // } else {
-                
-                
-            // }
+  } catch (error) {
+    console.log(error)
+    return false
+  }
 
-            
-            
+}
+
+export async function getEmployeePayments(branch,employee){
+
+  let responseData={
+    message:'',
+    success:false,
+    payments:[]
+  }
+
+  try {
+    let payments=await EmployeesPayments.find({branch,employee,__v:1})
+
+    let cashier=[]
+
+    if (payments > 0) {
+      
+      for (let i = 0; i < payments.length; i++) {
+        const element = await User.find({id:payments[i].cashier});
+        cashier.push(element)
+      }
+    }
+
+    payments=JSON.stringify(payments)
+    cashier=JSON.stringify(cashier)
+    
+    let data={
+      cashier:JSON.parse(cashier),
+      payments:JSON.parse(payments),
+    }
+
+    responseData.success=true
+    responseData.payments=data
+    
+  } catch (error) {
+    
+  }
+
+}
+
+export async function newEmployeePayment(data){
+  let responseData={
+    message:'',
+    success:false,
+  }
+  try {
+
+    // let a=await EmployeesPayments.deleteMany({})
+
+    // console.log(a);
+
+    let user= await User.findOne({id:data.employee})
+    let pipeline=[
+      {
+        $match:{
+          employee:new mongoose.Types.ObjectId(data.employee),
+          branch:new mongoose.Types.ObjectId(user.branch),
+          __v:1
         }
-
-
-      
-        // const promise=await Promise.allSettled(promises)
-      
-        // const data=promise.filter((res)=> res.status==='fulfilled') as PromiseFulfilledResult<any>[]
-      
-        let promises
-
-        // body.flatMap((result:any)=>{
-
-        //     let details=[{
-        //         date:result.sellingTime.date,
-        //         moreDateDetails:[{
-        //             hour:result.sellingTime.hour,
-        //             moreHourDetails:[{
-        //                 batchNumber:result.batchNumber.toUpperCase(),
-        //                 medicineName:result.medicineName,
-        //                 saleAmount:result.totalPrice,
-        //                 medicineCategory:result.medicineCategory,
-        //                 quantitySold:result.quantitySold,
-        //             }]
-                    
-        //         }]
-        //     }]
-
-            
-
-        //     promises.push(
-        //         Sales.create({
-        //             pharmacy:result.pharmacy,
-        //             date:result.sellingTime.date,
-        //             hour:result.sellingTime.hour,
-        //             lastIndexDate:0,
-        //             lastIndexHour:0,
-        //             lastIndexDetails:0,
-        //             details
-        //         })
-        //     )
-
-
-        // })
-
-        // let b=await Promise.allSettled(promises)
-
-        // console.log(b);
         
+      },
+      {
+          $group:{
+            _id:null,
+            totalPayment:{$sum:'$amount'}
+          }
+      }
+    ]
 
-        // const batchNumberExist=data[0].value
-        // console.log(data);
-    
-        // if (batchNumberExist) {
-        //     responseData.message='Batch Number has already been registered'
-        //     return responseData
-        // }
+    let payments=await EmployeesPayments.aggregate(pipeline)
 
-        // let details={
-        //     date:body.sellingTime.toLocaleDateString(),
-        //     moreDetails:{
-        //         hour:new Date(body.sellingTime).getHours(),
-        //         batchNumber:body.batchNumber.toUpperCase(),
-        //         medicineName:body.medicineName,
-        //         saleAmount:body.totalPrice,
-        //         medicineCategory:body.medicineCategory,
-        //         quantitySold:body.quantitySold,
-        //     }
-        // }
+    console.log(payments);
 
-        
-    
-        // const insertMedicine=await NewMedicine.create({
-        //     pharmacy:body.pharmacy,
-        //     medicineName:body.medicineName,
-        //     costPerUnit:body.costPerUnit,
-        //     dosageForm:body.dosageForm,
-        //     batchNumber:body.batchNumber.toUpperCase(),
-        //     expiresAt:body.expiresAt,
-        //     medicineCategory:body.medicineCategory,
-        //     availableQuantity:body.availableQuantity,
-        //     __v:0,
-        // })
-    
-        // if (!insertMedicine) {
-        //     responseData.message='Invalid data'
-        //     return responseData
-        // }
-    
-        responseData.success=true
-    
+    if (payments.length>0) {
+      if (parseFloat(user.salary) <= parseFloat(payments[0]) || (parseFloat(payments) + parseFloat(data.amount)) > parseFloat(user.salary)) {
+
+        responseData.message='Insufficient salary balance'
         return responseData
-
-    } catch (error) {
-        
-        console.log(error);
-        responseData.message='Server error has ocurred.'      
+      }
+    }
     
-        return responseData
+    let insertPayment=await EmployeesPayments.create({
+      ...data,
+      branch:user.branch,
+      __v:1
+    })
+
+    insertPayment.__v=1
+
+    await insertPayment.save()
+
+    console.log(insertPayment);
+
+    responseData.success=true
+    return responseData
+
+    
+  } catch (error) {
+    console.log(error)
+    responseData.message='Server error occurred'
+    return responseData
+  }
+
+}
+
+export async function resetEmployeePayment(value){
+
+  try {
+
+    if (value.action === 1) {
+      await EmployeesPayments.updateMany({branch:value.branch},{$set:{__v:-1}})
+    } else if (value.action === 2){
+      await EmployeesPayments.updateMany({branch:value.branch, employee:value.employee},{$set:{__v:-1}})
     }
 
-
+    return true
     
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+
+}
+
+export async function reverseEmployeePayment(id){
+
+  try {
+    await EmployeesPayments.findByIdAndDelete(id)
+
+    return true
+    
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+
 }
 
 // USER LOGIN
 
 export async function loginUser (username, password, req){
-  
+  console.log(req);
     try {
       if (!username || !password) {
         return {
@@ -531,9 +662,8 @@ export async function loginUser (username, password, req){
         }
   
         if (process.env.NODE_ENV === 'production') {
-          // loginDetails(req, pharmacy.id, pharmacy.email, pharmacy.pharmacy);
+          loginDetails(req, cashierUser.cashier, butchery.email, butchery.name);
         }
-
         
         let access = true;
   
@@ -558,7 +688,100 @@ export async function loginUser (username, password, req){
       };
     }
 };
-  
+
+export const loginDetails = async (req, id, email, name) => {
+  try {
+    const { headers, connection } = req;
+
+    const device = headers['user-agent'];
+    const ipAddress = headers['x-real-ip'] || headers._remoteAddress;
+    const location = {
+      country: headers['x-vercel-ip-country'],
+      city: headers['x-vercel-ip-city'],
+      latitude: headers['x-vercel-ip-latitude'],
+      longitude: headers['x-vercel-ip-longitude'],
+      timeZone: headers['x-vercel-ip-timezone'],
+    };
+
+    if (!device || !ipAddress || !location.country || !location.city) {
+      return; 
+    }
+
+    const rootDomain = headers.host;
+    const protocol = headers['x-forwarded-proto'] || (connection.encrypted ? 'https' : 'http');
+
+    const country = Country.getCountryByCode(location.country);
+    location.country = country.name;
+
+    const options = {
+      timeZone: location.timeZone,
+      dateStyle: 'full',
+      timeStyle: 'medium',
+    };
+    const d = new Date();
+    const date = new Intl.DateTimeFormat('en-US', options).format(d);
+
+    const login = await LoginStatus.findOneAndUpdate(
+      { cashier: id },
+      { __v: 1},
+      { upsert: true, new: true },
+      
+    );
+
+    const logindetails = await LoginDetails.findOne({ cashier: id });
+
+    if (logindetails) {
+      if (logindetails.device !== device) {
+        const message = `
+          <h4>Hello ${name}</h4>
+          <p>Your Legio Mariae Management System account was just signed in to from a new device.</p><br />
+          <p><b>When:</b> ${date}</P>
+          <p><b>Time Zone:</b> ${location.timeZone}</P>
+          <p><b>Device:</b> ${device}</P>
+          <p><b>IP Address:</b> ${ipAddress}</P>
+          <p><b>Location:</b> ${location.city}/${location.country}</P><br />
+          <p>If this was you, then you don't need to do anything.</P>
+          <p>If you don't recognize this activity, please <a href="${protocol}://${rootDomain}/sections/forgotpassword">change your password</a>.</P>
+        `;
+        const subject = 'New Sign in to your Butchery Account';
+        const send_to = email;
+        const sent_from = process.env.EMAIL_USER;
+
+        // Sanitize the message before sending it via email
+        const sanitizedMessage = await sanitizeMessage(message);
+
+        sendEmail(subject, sanitizedMessage, send_to, sent_from);
+      }
+
+      logindetails.device = device;
+      logindetails.location = location;
+      logindetails.ipAddress = ipAddress;
+      await logindetails.save();
+
+      
+    } else {
+      let insert=await LoginDetails.create({
+        cashier: id,
+        details:{
+          ipAddress,
+          device,
+          location,
+        },
+        __v: 1,
+      });
+
+      insert.__v=1
+      await insert.save()
+
+    }
+    return
+
+  } catch (error) {
+    console.error(error);
+    return
+  }
+};
+
   // LOGIN DETAILS - EXTENSION OF loginUser() FUNCTION
   
   // export const loginDetails = async (req: { headers: any; connection: any; }, id: any, email: any, name: any) => {
@@ -873,7 +1096,7 @@ export async function newCashier (body) {
 
     let data={
       cashier:body.id,
-      password:body.password,
+      password:body.id,
       branch:body.branch,
       __v:1
     }
@@ -890,47 +1113,21 @@ export async function newCashier (body) {
   }
 }
 
-export async function getCashierById (id) {
-
-  let responseData={
-    message:'',
-    success:false,
-    cashierInfo:''
-  }
+export async function updateCashier (id,value) {
 
   try {
 
-    let cashier
+    await Cashier.updateOne({cashier:id},{$set:{__v:value}})
 
-  
-    // let dbCashier=await User.findOne({id}).select('-password -_id')
-    let dbCashier=await Cashier.findOne({cashier:id}).select('-password -_id')
-    let dbEmployee=await User.findOne({id:dbCashier.cashier}).select('-_id -__v -verified')
-
-    // cashier=JSON.stringify(dbCashier) 
-    cashier=JSON.stringify(dbEmployee) 
-
-    let cashierData={
-      cashier:JSON.parse(cashier),
-    }
-
-  // console.log(groupedDocuments);
-
-  responseData.success=true
-  responseData.cashierInfo=cashierData
-  return responseData
-
- 
-    
+    return true
   } catch (error) {
-    console.log(error);
-    responseData.message='Server error has ocurred.'      
-    return responseData
+    console.log(error)
+    return false
   }
 
 }
 
-export async function getCashiers (branch) {
+export async function getCashierById (id) {
 
   let responseData={
     message:'',
@@ -968,5 +1165,103 @@ export async function getCashiers (branch) {
     return responseData
   }
 
+}
+
+export async function getCashiers(data){
+
+  let responseData={
+      message:'',
+      success:false,
+      cashiers:[]
+  }
+
+  let branch=data.branch
+  let limit=data.pageLimit
+  let page=data.page
+  try {
+
+    let pipeline = [
+      {
+        $match: {
+          branch: new mongoose.Types.ObjectId(branch),
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $lookup: {
+          from: 'usars',
+          localField: 'cashier',
+          foreignField: 'id',
+          as: 'cashierInfo',
+        },
+      },
+      {
+        $unwind: { path: '$cashierInfo', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'brunchees',
+          localField: 'branch',
+          foreignField: 'id',
+          as: 'branchInfo',
+        },
+      },
+      {
+        $unwind: { path: '$branchInfo', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: "$$ROOT",
+          },
+        },
+      },
+      {
+        $unwind: "$documents",
+      },
+      {
+        $skip:page * limit
+      },
+      {
+        $limit:limit
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ];
+
+    let cashiers = await Cashier.aggregate(pipeline);
+
+    console.log(cashiers);
+      
+    if (cashiers.length>0) {
+      cashiers=JSON.stringify(cashiers) 
+      
+      let data={
+        cashiers:JSON.parse(cashiers),
+      }
+
+      responseData.success=true
+      responseData.cashiers=data
+    }
+    else{
+      responseData.message='No employee data found'
+    }
+
+    return responseData
+
+  } catch (error) {
+      console.log(error);
+      responseData.message='Server error has ocurred.'      
+  
+      return responseData
+      
+  }
 }
 

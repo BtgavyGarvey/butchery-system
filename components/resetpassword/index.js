@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import React from "react"
 import toast, {Toaster} from 'react-hot-toast'
 import axios from 'axios';
+import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../src/app/api/v1/controller/user/route";
 
 let initialState = {
     password: "",
@@ -37,9 +38,9 @@ export default function ForgotPasswordPage(){
                     id:toastId
                 })
 
-                const response=await axios.post('/api/v1/controller/user?action=forgotpassword',formData)
+                const response=await forgotPassword(formData)
                 toast.dismiss(toastId)
-                if (response.data.success) {
+                if (response.success) {
                     toast.success(response.data.message)
                     if (emailDiv.current) emailDiv.current.style.pointerEvents='none'
                     if (codeDiv.current) codeDiv.current.style.display='block'
@@ -47,7 +48,7 @@ export default function ForgotPasswordPage(){
                     if (sendCodeBtn.current) sendCodeBtn.current.style.display='none'
                 }
                 else{
-                    toast.error(response.data.message,{
+                    toast.error(response.message,{
                         id:toastId
                     })
                 }
@@ -77,16 +78,16 @@ export default function ForgotPasswordPage(){
                     id:toastId
                 })
 
-                const response=await axios.post(`/api/v1/controller/user?action=checkcode`,data)
+                const response=await checkResetPasswordCode(data)
                 toast.dismiss(toastId)
-                if (response.data.success) {
+                if (response.success) {
                     if (codeDiv.current) codeDiv.current.style.pointerEvents='none'
                     if (passwordDiv.current) passwordDiv.current.style.display='block'
                     if (resetPassBtn.current) resetPassBtn.current.style.display='block'
                     if (confirmCodeBtn.current) confirmCodeBtn.current.style.display='none'
                 }
                 else{
-                    toast.error(response.data.message,{
+                    toast.error(response.message,{
                         id:toastId
                     })
                 }
@@ -130,16 +131,16 @@ export default function ForgotPasswordPage(){
                             id:toastId
                         })
         
-                        const response=await axios.put(`/api/v1/controller/user?action=resetPassword`,formData)
+                        const response=await resetPassword(formData)
                         toast.dismiss(toastId)
-                        if (response.data.success) {
-                            toast.success(response.data.message,{
+                        if (response.success) {
+                            toast.success(response.message,{
                                 id:toastId
                             })
                             router.push('/login')
                         }
                         else{
-                            toast.error(response.data.message,{
+                            toast.error(response.message,{
                                 id:toastId
                             })
                         }

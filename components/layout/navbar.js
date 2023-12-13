@@ -1,11 +1,14 @@
 'use client'
 
 import { signOut } from "next-auth/react"
+import {useRouter } from "next/navigation"
 import React from "react"
 
 export let navRefDiv
 
 export default function NavBar({session}) {
+
+        const router=useRouter()
 
         const navRef=React.useRef()
         navRefDiv=React.useRef()
@@ -21,6 +24,11 @@ export default function NavBar({session}) {
                         
                 }
                 
+        }
+
+        const logOut=async()=>{
+                signOut()
+                router.push('/')
         }
 
         
@@ -57,21 +65,21 @@ export default function NavBar({session}) {
                     <li class="nav-item" title="View Sales"><a class="nav-link" href="/sc/products/sales/viewsales"><i
                                 class="far fa-money-bill-alt"></i><span className="p-1">View Sales</span></a>
                     </li>
-                    <li class="nav-item" title="New Employee"><a class="nav-link"
+                    {/* <li class="nav-item" title="New Employee"><a class="nav-link"
                             href="/sc/employees"><i class="fas fa-table"></i><span className="p-1">New Employees</span></a>
-                    </li>
+                    </li> */}
                     <li class="nav-item" title="View Employees"><a class="nav-link"
                             href="/sc/employees/view"><i class="fas fa-table"></i><span className="p-1">View Employees</span></a>
                     </li>
-                    <li class="nav-item" title="View Cashier"><a class="nav-link"
+                    {/* <li class="nav-item" title="View Cashier"><a class="nav-link"
                             href="/sc/employees/cashiers"><i class="fas fa-table"></i><span className="p-1">View Cashiers</span></a>
-                    </li>
+                    </li> */}
                     <li class="nav-item" title="Expenses"><a class="nav-link"
-                            href="/sc/employees"><i class="fas fa-table"></i><span className="p-1">Expenses</span></a>
+                            href="/sc/expenses"><i class="fas fa-table"></i><span className="p-1">Expenses</span></a>
                     </li>
                     
-                    <li class="nav-item " title="Log Out"><a class="nav-link text-dark fw-bold" onClick={signOut}
-                            href="/"><i class="fas fa-sign-out"></i><span className="p-1">Log Out</span></a>
+                    <li class="nav-item " title="Log Out"><button type="button" class="btn btn-default text-dark fw-bold" onClick={logOut}
+                            ><i class="fas fa-sign-out"></i><span className="p-1">Log Out</span></button>
                     </li>
                    
                 </ul>

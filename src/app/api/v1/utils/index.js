@@ -94,7 +94,7 @@ export async function newButcheryValidation (data){
     const schema = Joi.object({
         subscription: Joi.number().required(),
         mobile: Joi.number().required(),
-        email: Joi.string().trim().required(),
+        email: Joi.string().trim().email().required(),
         password: Joi.string().trim().required(),
         confirmPassword: Joi.string().trim().required(),
         firstName: Joi.string().trim().required(),
@@ -129,10 +129,12 @@ export async function newBranchValidation (data){
 export async function newUserValidation (data){
     const schema = Joi.object({
         branch: Joi.string().trim().required(),
+        nationalId: Joi.number(),
         firstName: Joi.string().trim().required(),
         lastName: Joi.string().trim().required(),
+        mobile: Joi.string().trim().required(),
         salary: Joi.number().required(),
-        password: Joi.string().trim().required(),
+        password: Joi.string(),
         role: Joi.string().required().required(),
     });
 

@@ -24,12 +24,20 @@ const userSchema=new Schema({
         type:String,
         required:true,
     },
+    mobile:{
+        type:String,
+        required:true,
+    },
+    nationalId:{
+        type:String,
+        required:true,
+    },
     branch:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
     salary:{
-        type:Array,
+        type:Number,
         required:true,
     },
     __v:{

@@ -15,8 +15,8 @@ import LinkedProduct from "../../model/linkedProduct";
 import ProductIssue from "../../model/productIssues";
 import Dataset from "../../model/dataset";
 import Sales from "../../model/sales";
+import Expenses from "../../model/expenses";
 import RollBackSales from "../../model/rollBackSales";
-import { Today } from "../../../../../../components/layout/utils";
 import mongoose from "mongoose";
 import { format } from "date-fns";
 
@@ -177,6 +177,14 @@ async function generateUniqueProductId(prefix) {
   return id;
 }
 
+async function NationalID() {
+  let id;
+  do {
+    id = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
+  } while (await User.findOne({ nationalId:id }));
+  return id;
+}
+
 async function generateUniqueProductCode(prefix,branch) {
   let code;
   do {
@@ -235,6 +243,8 @@ export async function newButchery(value){
       generateUniqueBranchId(2),
       AddDate(1),
       Butchery.findOne(),
+      NationalID(),
+
     ]
 
     const promise=await Promise.allSettled(promises)
@@ -251,6 +261,7 @@ export async function newButchery(value){
     const ButcheryId=data[3]
     const BranchId=data[4]
     const dbNotNull=data[6]
+    const nationalId=data[7]
 
     if (!dbNotNull) {
       body.role='Administrator'
@@ -281,7 +292,7 @@ export async function newButchery(value){
       country,
       verified:false,
       terms:body.terms,
-      __v:0,
+      __v:1,
     })
 
     if (!insertButchery) {
@@ -307,6 +318,8 @@ export async function newButchery(value){
       lastName:body.lastName,
       password:body.password,
       role:body.role,
+      mobile:body.mobile,
+      nationalId,
       branch:BranchId,
       salary:0,
     }
@@ -418,7 +431,7 @@ export async function newBranch(value){
         expiryDate:body.expiryDate,
       },
       mobile:body.mobile,
-      __v:0
+      __v:1
     }
 
     await Branch.create(branchData)
@@ -822,7 +835,7 @@ export async function productsIssue(body,session){
         branch:user.branch,
         addedBy:user.id,
         date,
-        __v:0
+        __v:1
       }
 
       promises.push(
@@ -877,22 +890,32 @@ export async function newSale(value,session){
   }
 
   try {
-      
-      const body=value
 
+    // console.log(value)
+      
+      const body=[]
+
+      value.map((result)=>{
+
+        if(parseFloat(result.quantitySold) >0 && parseFloat(result.totalPrice) >0){
+          body.push(result)
+        }
+      })
       // console.log(body);
+
 
       let processes=[]
 
       processes.push(
-        Sales.findOne({branch:user.branch,__v:0}),
-        Dataset.findOne({branch:user.branch})
+        Sales.findOne({branch:user.branch}),
+        // Dataset.findOne({branch:user.branch})
       )
 
       let wait=await Promise.allSettled(processes)
+      // console.log(wait)
 
       let isToday=wait[0].value 
-      let branchDataset=wait[1].value
+      // let branchDataset=wait[1].value
 
       let dateObject=new Date(body[0].sellingTime.date)
       
@@ -985,6 +1008,7 @@ export async function newSale(value,session){
               )
       }
 
+
       if (isToday) {
 
           if (isToday.date === body[0].sellingTime.date) {
@@ -1017,140 +1041,140 @@ export async function newSale(value,session){
 
       }
 
-      let promises=[]
+      // let promises=[]
 
-      const moreDatasetDetails=async(name,quantity)=>{
+      // const moreDatasetDetails=async(name,quantity)=>{
         
-        await Dataset.updateOne(
-            {
-            branch:user.branch,
-            'details.name': name,
-            'details.moreNameDateDetails.date': date,
-            },
-            {
-                date:body[0].sellingTime.date,
-                $addToSet: {
-                  'details.$[outer].moreNameDateDetails.$[date].totalQuantity': parseFloat(quantity)
-                },
-              },
-              {
-                arrayFilters: [
-                  { 'outer.name': name },
-                  { 'date.date': date },
-                ],
-              },
-              {
-                $upsert:true
-              }
-        )
-      }
+      //   await Dataset.updateOne(
+      //       {
+      //       branch:user.branch,
+      //       'details.name': name,
+      //       'details.moreNameDateDetails.date': date,
+      //       },
+      //       {
+      //           date:body[0].sellingTime.date,
+      //           $addToSet: {
+      //             'details.$[outer].moreNameDateDetails.$[date].totalQuantity': parseFloat(quantity)
+      //           },
+      //         },
+      //         {
+      //           arrayFilters: [
+      //             { 'outer.name': name },
+      //             { 'date.date': date },
+      //           ],
+      //         },
+      //         {
+      //           $upsert:true
+      //         }
+      //   )
+      // }
 
-      const moreNameDatasetDetails=async(name)=>{
+      // const moreNameDatasetDetails=async(name)=>{
         
-        await Dataset.updateOne(
-            {
-            branch:user.branch,
-            'details.name': name,
-            // 'details.moreDateDetails': hour,
-            },
-            {
-                date:body[0].sellingTime.date,
-                $addToSet: {
-                  'details.$[outer].moreNameDateDetails': {
-                      date:body[0].sellingTime.date,
-                      // moreDateDetails:[]
-                    }
-                },
-              },
-              {
-                arrayFilters: [
-                  { 'outer.name': name },
-                ],
-              },
-              {
-                $upsert:true
-              }
+      //   await Dataset.updateOne(
+      //       {
+      //       branch:user.branch,
+      //       'details.name': name,
+      //       // 'details.moreDateDetails': hour,
+      //       },
+      //       {
+      //           date:body[0].sellingTime.date,
+      //           $addToSet: {
+      //             'details.$[outer].moreNameDateDetails': {
+      //                 date:body[0].sellingTime.date,
+      //                 // moreDateDetails:[]
+      //               }
+      //           },
+      //         },
+      //         {
+      //           arrayFilters: [
+      //             { 'outer.name': name },
+      //           ],
+      //         },
+      //         {
+      //           $upsert:true
+      //         }
               
-        )
-      }
+      //   )
+      // }
 
-      const DatasetDetails=async(name)=>{
+      // const DatasetDetails=async(name)=>{
 
-        let a= []
+      //   let a= []
 
-        a.push(
-          Dataset.updateOne(
-            {
-            branch:user.branch,
-            },
-            {
-              date:body[0].sellingTime.date,
-              $addToSet: {
-                'details':{
-                  name: name,
-                  moreNameDateDetails: []
-                }
+      //   a.push(
+      //     Dataset.updateOne(
+      //       {
+      //       branch:user.branch,
+      //       },
+      //       {
+      //         date:body[0].sellingTime.date,
+      //         $addToSet: {
+      //           'details':{
+      //             name: name,
+      //             moreNameDateDetails: []
+      //           }
                 
-              },
-            },
-            {
-              upsert: true,
-            }
+      //         },
+      //       },
+      //       {
+      //         upsert: true,
+      //       }
             
-          ),
-          Dataset.updateOne(
-            {
-            branch:user.branch,
-            },
-            {
-              $addToSet: {
-                'products': name,
-              },
-            },
-            {
-              $upsert:true
-            }
-        )
-        )
+      //     ),
+      //     Dataset.updateOne(
+      //       {
+      //       branch:user.branch,
+      //       },
+      //       {
+      //         $addToSet: {
+      //           'products': name,
+      //         },
+      //       },
+      //       {
+      //         $upsert:true
+      //       }
+      //   )
+      //   )
 
-        await Promise.allSettled(a)
+      //   await Promise.allSettled(a)
           
-      }
+      // }
 
-      if (!branchDataset) {
-        branchDataset=await Dataset.create({
-          branch:user.branch,
-          date:body[0].sellingTime.date,
-          products:[],
-          details:[]
-        })
-      }
+      // if (!branchDataset) {
+      //   branchDataset=await Dataset.create({
+      //     branch:user.branch,
+      //     date:body[0].sellingTime.date,
+      //     products:[],
+      //     details:[]
+      //   })
+      // }
 
-      promises.push(
-          await body.map(async(result)=>{
+      // promises.push(
+      //     body.map(async(result)=>{
 
-            let product=await Product.findOne({code:result.code})
+      //       let product=await Product.findOne({code:result.code})
 
-            const newQuantity= (product.quantity-result.quantitySold)
-            product.quantity=newQuantity.toFixed(4)
-            console.log(branchDataset.products);
+      //       const newQuantity= (product.quantity-result.quantitySold)
+      //       product.quantity=newQuantity.toFixed(4)
+      //       console.log(branchDataset.products);
 
 
-            if (!branchDataset.products.includes(result.name)) {
-              await DatasetDetails(result.name)
-              await moreNameDatasetDetails(result.name)
-            }
+      //       if (!branchDataset.products.includes(result.name)) {
+      //         await DatasetDetails(result.name)
+      //         await moreNameDatasetDetails(result.name)
+      //       }
 
-            if (branchDataset.date !== body[0].sellingTime.date) {
-              await moreNameDatasetDetails(result.name)
-            } 
-            moreDatasetDetails(result.name,result.quantitySold)
+      //       if (branchDataset.date !== body[0].sellingTime.date) {
+      //         await moreNameDatasetDetails(result.name)
+      //       } 
+      //       moreDatasetDetails(result.name,result.quantitySold)
             
-            product.save()
-          })
-      )
+      //       product.save()
+      //     })
+      // )
 
-      await Promise.allSettled(promises)
+      // await Promise.allSettled(promises)
 
       responseData.success=true
   
@@ -1509,5 +1533,372 @@ export async function getRollBackSales(data){
     console.log(error);
     responseData.message='Server error has ocurred.'      
     return responseData
+  }
+};
+
+export async function getExpense(data){
+
+  const session=data.session
+  const date=data.date
+  const page=data.page
+  const limit=data.limit
+
+  const user=session.user
+
+  let responseData={
+    message:'',
+    success:false,
+    expense:''
+  }
+
+  try {
+
+  let cashierMatchQuery
+  let expenseMatchQuery
+
+    cashierMatchQuery =
+    data.cashier === 'all'
+    ? {}
+    : {'details.moreDateDetails.cashier': data.cashier};
+
+    expenseMatchQuery =
+    data.expense === 'all'
+    ? {}
+    : {'details.moreDateDetails.name': data.expense};
+  
+    const expensePipeline = [
+      {
+        $match: { branch: new mongoose.Types.ObjectId(user.branch) },
+      },
+      {
+        $unwind: "$details",
+      },
+      {
+        $unwind: "$details.moreDateDetails",
+      },
+      {
+        $match: {
+          "details.date": date,
+          ...cashierMatchQuery,
+          ...expenseMatchQuery,
+        },
+      },
+      {
+        $sort: {
+          "details.moreDateDetails.date": -1,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: "$$ROOT",
+          },
+        },
+      },
+      {
+        $unwind: "$documents",
+      },
+      
+      {
+        $skip: page * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 0,
+          documents: 1,
+          pageCount: 1,
+        },
+      },
+    ];
+
+  const groupedDocuments = await Expenses.aggregate(expensePipeline);
+
+  let cashierInfo=[]
+  let cashiers=[]
+
+  if (groupedDocuments.length>0) {
+    let userArrayTemp=[]
+
+    await Promise.all(groupedDocuments.map(async(result)=>{
+
+      let cashier_id=result.documents.details.moreDateDetails.cashier
+      let dbCashier=await User.findOne({id:cashier_id}).select('-_id -__v -verified')
+
+      if (!userArrayTemp.includes(cashier_id)) {
+        userArrayTemp.push(cashier_id)
+        cashierInfo.push(dbCashier)
+      }
+      cashiers.push(dbCashier)
+        
+    }))
+
+  }
+
+  let expenses=JSON.stringify(groupedDocuments) 
+  cashierInfo=JSON.stringify(cashierInfo) 
+  cashiers=JSON.stringify(cashiers) 
+
+  let productData={
+    expenses:JSON.parse(expenses),
+    cashierInfo:JSON.parse(cashierInfo),
+    cashiers:JSON.parse(cashiers),
+  }
+
+  responseData.success=true
+  responseData.expense=productData
+  return responseData
+
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+};
+
+export async function newExpense(data){
+  let responseData={
+    message:'',
+    success:false,
+    expense:''
+  }
+
+  try {
+
+    // await Expenses.deleteMany({})
+    
+    let expenseData=await Expenses.findOne({branch:data.branch})
+
+      const moreDateDetails=async(data)=>{
+        
+        await Expenses.updateOne(
+            {
+            branch:data.branch,
+            'details.date': data.date.date,
+            },
+            {
+                date:data.date.date,
+                $push: {
+                  'details.$[date].moreDateDetails': {
+                    cashier:data.cashier,
+                    date:data.date.fullDate,
+                    name:data.name,
+                    amount:parseFloat(data.amount)
+                  }
+                },
+              },
+              {
+                arrayFilters: [
+                  { 'date.date': data.date.date },
+                ],
+              },
+              {
+                $upsert:true
+              }
+        )
+      }
+
+      const setDetails=async(data)=>{
+
+          await Expenses.updateOne(
+            {
+            branch:data.branch,
+            },
+            {
+              date:data.date.date,
+              $push: {
+                'details':{
+                  date:data.date.date,
+                  moreDateDetails:[]
+                }
+              },
+            },
+            {
+              upsert: true,
+            }
+            
+          )
+          
+      }
+
+      if (!expenseData) {
+        expenseData=await Expenses.create({
+          branch:data.branch,
+          date:data.date.date,
+          expenseName:[],
+          details:[]
+        })
+
+        await setDetails(data)
+      }
+
+      if (!expenseData.expenseName.includes(data.name)) {
+        await Expenses.updateOne(
+          {
+          branch:data.branch
+          },
+          {
+            $addToSet: {
+              'expenseName': data.name,
+            },
+          },
+          {
+            $upsert:true
+          }
+        )
+      }
+
+      if (expenseData.date !== data.date.date) {
+        await setDetails(data)
+      }
+
+      await moreDateDetails(data)
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}
+
+export const getReportData = async (branch,Today,val) => {
+
+  let responseData={
+      message:'',
+      success:false,
+      reports:[]
+  }
+
+  try {
+
+  let dateHour= Today
+
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const yearsAgo = new Date();
+  yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
+  
+  const salesPipelineRevenue = [
+    {
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $unwind: "$details.moreDateDetails.moreHourDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.yearsAgo },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          date: "$details.date",
+        },
+        totalAmount: { $sum: "$details.moreDateDetails.moreHourDetails.amountSold" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        date: "$_id.date",
+        totalAmount: 1,
+        // documents: 1,
+      },
+    },
+    {
+      $sort: { date: 1 },
+    },
+  ];
+
+  const salesPipelineExpense = [
+    {
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.yearsAgo },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          date: "$details.date",
+        },
+        totalAmount: { $sum: "$details.moreDateDetails.amount" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        date: "$_id.date",
+        totalAmount: 1,
+        // documents: 1,
+      },
+    },
+    {
+      $sort: { date: 1},
+    },
+  ];
+
+  let revenue
+  let expense
+  let report
+
+
+  if (val===1) {
+
+    let promise=[
+      Sales.aggregate(salesPipelineRevenue),
+      Expenses.aggregate(salesPipelineExpense)
+    ]
+
+    let response=await Promise.allSettled(promise)
+
+    revenue=response[0].value
+    expense=response[1].value
+    
+  } else {
+    
+  }
+
+  let data={
+    revenue,expense,report
+  }
+  
+  responseData.success = true;
+  responseData.reports = data;
+  return responseData;
+
+  } catch (error) {
+      console.log(error);
+      responseData.message='Server error has ocurred.'      
+      return responseData
   }
 };

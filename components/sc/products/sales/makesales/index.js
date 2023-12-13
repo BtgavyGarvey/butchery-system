@@ -8,13 +8,16 @@ import toast, { Toaster } from "react-hot-toast"
 import { getProducts, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { Today } from "../../../../layout/utils"
 
-let sellData=[]
 let paymentType={
     type:1,
     cash:0,
     m_pesa:0
 }
+
+let sellData=[]
+
 export default function MakeSalesPage({session,data}) {
+
     let toastId
     const modalRef1=React.useRef()
 
@@ -393,7 +396,7 @@ export default function MakeSalesPage({session,data}) {
                         <div class="card-header py-3">
                             <p class="text-primary m-0 fw-bold">Product Info</p>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body bg-dark">
                             <div class="row">
                                 <div class="col-md-6 text-nowrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">

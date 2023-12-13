@@ -5,51 +5,45 @@ import Footer from "../../layout/footer";
 import Header from "../../layout/header";
 import NavBar from "../../layout/navbar";
 import { Country, City } from "country-state-city";
+import toast, { Toaster } from "react-hot-toast";
+import { newUser } from "../../../src/app/api/v1/controller/user/route";
+import { getBranches } from "../../../src/app/api/v1/controller/butchery/route";
 
 let initialState = {
-    password: "",
-    email:"",
-    confirmPassword:"",
     firstName:"",
     lastName:"",
-    country:"",
-    countryCode:"",
-    region:"",
     branch:"",
     mobile:"",
-    terms:false,
-    role:'Employer',
-    subscription:0,
-    name:''
+    nationalId:"",
+    password:"0",
+    salary:"",
+    role:'Employee',
 };
 
 export default function NewEmployeePage({session}) {
 
     let toastId
 
-    const termsCheckBox=React.useRef()
-
     const [formData, setFormData] = React.useState(initialState);
-    const [Cities, setCity]=React.useState(null)
-    const [Countries, setCountries]=React.useState(null)
+    const [Branches, setBranches] = React.useState([]);
+
+    React.useEffect(()=>{
+        myBranches()
+    },[])
+
+    const myBranches=async()=>{
+
+        let response=await getBranches(session)
+
+        setBranches(response.branches)
+
+    }
 
     const handleInputChange = (e) => {
         
         const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
 
-        if (name==='terms') {
-
-            if (termsCheckBox.current.checked) {
-                formData.terms=true  
-            } else {
-                formData.terms=false  
-
-            }
-        }
-        else{
-          setFormData({ ...formData, [name]: value });
-
-        }
     };
 
     const validate=async()=>{
@@ -57,33 +51,18 @@ export default function NewEmployeePage({session}) {
         if(
             !formData.firstName || 
             !formData.lastName || 
-            !formData.country ||
             !formData.branch ||
-            !formData.region ||
-            !formData.email ||
-            !formData.mobile ||
-            !formData.terms ||
-            !formData.confirmPassword ||
-            !formData.password || 
-            !formData.name || 
-            !formData.countryCode
+            !formData.nationalId ||
+            !formData.salary ||
+            !formData.mobile
             ){
                 toastId=toast.error('Please fill all required fields',{id:toastId})
 
             return false
         }
 
-        if(
-            !formData.email.match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            )
-            ){
-                toastId=toast.error('Please enter a valid email address',{id:toastId})
-                return false
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            toastId=toast.error(`Password don't match`,{id:toastId})
+        if (isNaN(formData.nationalId)) {
+            toastId=toast.error(`Invalid National ID`,{id:toastId})
 
             return false
         }
@@ -98,40 +77,6 @@ export default function NewEmployeePage({session}) {
         
     }
 
-    const renderCountries=(num)=>{
-
-        const result1=[]
-        const result2=[]
-
-        if (num===1) {
-            for (let i = 0; i < Countries.length; i++) {
-            
-                result1.push(
-                    <option key={'a'+i} value={Countries[i].isoCode}>{Countries[i].name}</option>
-    
-                )
-                
-            }
-    
-            return result1
-        }
-        else{
-            for (let i = 0; i < Cities.length; i++) {
-            
-                result2.push(
-                    <option key={'b'+i} value={Cities[i].name}>{Cities[i].name}</option>
-    
-                )
-                
-            }
-    
-            return result2
-        }
-
-
-        
-    }
-
     const onSubmit=async(e)=>{
 
         e.preventDefault()
@@ -142,16 +87,17 @@ export default function NewEmployeePage({session}) {
             let response
 
             if (isValid) {
+
                 toastId=toast.loading('Loading, please wait...')
 
-                response=await axios.post('/api/v1/controller/butchery?action=newButchery',formData)
+                response=await newUser(formData)
                 toast.dismiss(toastId)
 
-                if (response.data.success===true) {
+                if (response.success===true) {
                     toast.success(`Successful!`,{id:toastId})
                 }
                 else{
-                    toast.error(`Failed! ${response.data.message}`,{id:toastId})
+                    toast.error(`Failed! ${response.message}`,{id:toastId})
                 }
             }
 
@@ -163,6 +109,26 @@ export default function NewEmployeePage({session}) {
 
   return (
     <>
+    <Toaster 
+
+    toastOptions={{
+        success:{
+            style:{
+                background:'green',
+                color:'white',
+            }
+        },
+        error:{
+            style:{
+                background:'red',
+                color:'white'
+            }
+        },
+        
+    }}
+
+    >
+    </Toaster>
     <div id="wrapper" className="bg-light">
         <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
@@ -191,18 +157,41 @@ export default function NewEmployeePage({session}) {
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Phone Number</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="number" autocomplete="off" required placeholder="0712345678" name="mobile" onChange={handleInputChange} minLength={10}/>
+                                            type="text" autocomplete="off" required placeholder="0712345678" name="mobile" onChange={handleInputChange} minLength={10}/>
                                     </div>
 
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">National ID/Passport</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="number" autocomplete="off" required placeholder="National ID" name="nationalID" onChange={handleInputChange}/>
+                                            type="text" autocomplete="off" required placeholder="National ID" name="nationalId" onChange={handleInputChange}/>
                                     </div>
                                     
                                 </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Salary</label><input
+                                            class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
+                                            type="text" autocomplete="off" required placeholder="Salary" name="salary" onChange={handleInputChange}/>
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Branch</label><select
+                                            class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-select form-select-lg bounce animated"
+                                            autocomplete="off" required name="branch" onChange={handleInputChange} >
+                                                <option></option>
+                                                {
+                                                    Branches.map((result)=>{
+                                                        return (
+                                                            <>
+                                                                <option value={result.id}>{result.name}</option>
+                                                            </>
+                                                        )
+                                                    })
+                                                }
+                                            </select>
+                                    </div>
+
+                                </div>
                                 
                                 <button
-                                    class="btn btn-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"
+                                    class="btn btn-primary bg-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"
                                     type="submit">Register Employee</button>
                                 <hr />
                             </form>

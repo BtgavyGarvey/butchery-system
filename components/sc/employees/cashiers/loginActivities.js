@@ -10,7 +10,7 @@ import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import { deleteCashiers, deleteUser, editUser, getCashiers, getUsers, newCashier, updateCashier } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
 
-export default function CashiersPage({session}) {
+export default function CashiersLoginActivitiesPage({session}) {
 
     let toastId
 
@@ -70,7 +70,7 @@ export default function CashiersPage({session}) {
                     showModal()
                 }}/></td>
                 <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
-                    deleteCashier(CashiersData[i].documents.cashier,-1)
+                    deleteCashier(CashiersData[i].documents.cashier,CashiersData[i].documents)
                 }}/></td>
                 
                 </tr>
@@ -171,7 +171,7 @@ export default function CashiersPage({session}) {
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
-        let response=await updateCashier(id,data)
+        let response=await deleteCashiers(id)
 
         toast.dismiss(toastId)
 
@@ -224,7 +224,7 @@ export default function CashiersPage({session}) {
                 <div class="container-fluid">
                     <h1
                         class="font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">
-                        My Cashiers</h1>
+                        Login Activities</h1>
                     <div class="card shadow">
                         <div class="card-header d-flex justify-content-between py-3">
                             <p class="text-primary m-0 fw-bold">Cashiers Info</p>
@@ -236,12 +236,15 @@ export default function CashiersPage({session}) {
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/employees/cashiers/logins">Login Activities</a>
+                                    <a class="dropdown-item" href="/sc/Cashiers">Login Activities</a>
+                                    {/* <a class="dropdown-item" href="/sc/Cashiers/view/payments"  >Cashiers Payments</a> */}
+                                    {/* <a class="dropdown-item" href="/sc/Cashiers/cashiers"  >Cashiers</a> */}
+                                    {/* <a class="dropdown-item" href="#"  >Sales Reports</a> */}
                                 </div>
                                     
                             </div>
                         </div>
-                        <div class="card-body bg-dark">
+                        <div class="card-body">
                             <div class="row">
                             <div class="col-md-4 text-wrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
@@ -405,7 +408,7 @@ export default function CashiersPage({session}) {
                                         oneCashiersData?.__v===1 ? (
                                             <>
                                             <button class="btn btn-danger bg-danger fw-bolder"
-                                                type="button" data-bs-target="#modal-1" data-bs-toggle="modal" onClick={e=>{editCashier(oneCashiersData.cashier,2)}}>Deny Access</button>
+                                                type="button" data-bs-target="#modal-1" data-bs-toggle="modal" onClick={e=>{editCashier(oneCashiersData.cashier,-1)}}>Deny Access</button>
                                             </>
                                         ):(
                                             <>
