@@ -1,14 +1,25 @@
 import { getServerSession } from "next-auth";
 import NewProductPage from "../../../../../components/sc/products/newproduct";
 import authOptions from "../../../api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 export default async function NewProduct() {
 
   const session=await getServerSession(authOptions)
 
+  const logOut=()=>{
+    redirect('/')
+  }
+
   return (
     <>
-    <NewProductPage session={session}/>
+    {
+      session ? (
+        <NewProductPage session={session}/>
+      ):(
+        logOut()
+      )
+    }
     </>
   )
 }

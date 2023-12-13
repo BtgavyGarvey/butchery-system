@@ -245,7 +245,7 @@ export default function RegisterPage() {
                         </div>
                     </div> */}
                     <div class="col-lg-12">
-                        <div class="p-5">
+                        <div class="p-1">
                             
                             <div class="text-center">
                                 <h2 class="text-capitalize fw-bolder text-center text-success flash animated mb-4">

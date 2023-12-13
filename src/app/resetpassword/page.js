@@ -1,9 +1,25 @@
+import { getServerSession } from "next-auth";
 import ResetPasswordPage from "../../../components/resetpassword";
+import authOptions from "../api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
-export default function ResetPassword() {
+export default async function ResetPassword() {
+
+  const session=await getServerSession(authOptions)
+
+  const toDashboard=()=>{
+    redirect('/sc/dashboard')
+  }
+
   return (
     <>
-    <ResetPasswordPage />
+    {
+      !session ? (
+        <ResetPasswordPage />
+      ):(
+        toDashboard()
+      )
+    }
     </>
   )
 }

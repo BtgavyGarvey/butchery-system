@@ -318,7 +318,7 @@ export async function newButchery(value){
       lastName:body.lastName,
       password:body.password,
       role:body.role,
-      mobile:body.mobile,
+      mobile:'0'+(body.mobile).toString(),
       nationalId,
       branch:BranchId,
       salary:0,

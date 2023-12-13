@@ -25,12 +25,6 @@ export default function NavBar({session}) {
                 }
                 
         }
-
-        const logOut=async()=>{
-                signOut()
-                router.push('/')
-        }
-
         
 
 
@@ -78,8 +72,8 @@ export default function NavBar({session}) {
                             href="/sc/expenses"><i class="fas fa-table"></i><span className="p-1">Expenses</span></a>
                     </li>
                     
-                    <li class="nav-item " title="Log Out"><button type="button" class="btn btn-default text-dark fw-bold" onClick={logOut}
-                            ><i class="fas fa-sign-out"></i><span className="p-1">Log Out</span></button>
+                    <li class="nav-item " title="Log Out"><a href="/" class="nav-link text-dark fw-bold" onClick={signOut}
+                            ><i class="fas fa-sign-out"></i><span className="p-1">Log Out</span></a>
                     </li>
                    
                 </ul>

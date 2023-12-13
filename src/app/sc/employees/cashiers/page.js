@@ -1,14 +1,25 @@
 import { getServerSession } from "next-auth";
 import CashierPage from "../../../../../components/sc/employees/cashiers";
 import authOptions from "../../../api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 export default async function Cashier() {
 
   const session=await getServerSession(authOptions)
 
+  const logOut=()=>{
+    redirect('/')
+  }
+
   return (
     <>
-    <CashierPage session={session}/>
+    {
+      session ? (
+        <CashierPage session={session}/>
+      ):(
+        logOut()
+      )
+    }
     </>
   )
 }
