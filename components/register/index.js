@@ -246,10 +246,14 @@ export default function RegisterPage() {
                     </div> */}
                     <div class="col-lg-12">
                         <div class="p-1">
+
+                            <div className="logo text-center mb-md-5 mt-md-4 pb-3">
+                                <h1 className="logo-caption fw-bold"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
+                            </div>
                             
                             <div class="text-center">
                                 <h2 class="text-capitalize fw-bolder text-center text-success flash animated mb-4">
-                                    register butchery</h2>
+                                    Registration</h2>
                                 <h4 class="fw-bolder text-center text-dark pulse animated mb-4">Owner Details</h4>
                             </div>
                             <form class="user" onSubmit={onSubmit}>
@@ -322,8 +326,8 @@ export default function RegisterPage() {
                                         </select>
                                     </div>
                                     <div className="col-sm-12 m-2">
-                                            <input ref={termsCheckBox} type="checkbox" onChange={handleInputChange} required name="terms" className="checkbox"></input>By checking this checkbox, you have 
-                                            agreed to our <a href='#' className='text-decoration-none fw-bold'>Terms and conditions</a>
+                                            <input ref={termsCheckBox} type="checkbox" onChange={handleInputChange} required name="terms" className="checkbox"></input> By checking this checkbox, you have 
+                                            agreed to our <a href='#' className='fw-bold text-primary'>Terms and conditions</a>
                                     </div>
                                 </div><button
                                     class="btn btn-primary bg-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"

@@ -896,7 +896,7 @@ export const loginDetails = async (req, id, email, name) => {
           return responseData
         }
 
-        let butchery=await Butchery.findOne({id:butcheryToken.butchery})
+        let butchery=await Butchery.findOne({id:butcheryToken.id})
 
         if (butchery.verified) {
           responseData.message='You have already verified your email.'      

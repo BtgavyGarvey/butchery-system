@@ -198,7 +198,7 @@ export default function ForgotPasswordPage(){
                         class="btn-close text-center border rounded-circle border-2 border-light shadow-sm bounce animated"
                         type="button" aria-label="Close"></button></a>
                     </div>
-                    <div className="card-body p-3 text-center">
+                    <div className="card-body p-2 text-center">
 
                         <div className="mb-md-5 mt-md-4 pb-3">
 
