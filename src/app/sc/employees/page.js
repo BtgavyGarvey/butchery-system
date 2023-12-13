@@ -3,6 +3,10 @@ import NewEmployeesPage from "../../../../components/sc/employees";
 import authOptions from "../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - New Employee',
+}
+
 export default async function Employees() {
 
   const session=await getServerSession(authOptions)

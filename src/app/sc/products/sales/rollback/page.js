@@ -3,6 +3,10 @@ import RollBackPage from "../../../../../../components/sc/products/sales/rollbac
 import authOptions from "../../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - Roll Back Sales',
+}
+
 export default async function ViewSales() {
 
   const session=await getServerSession(authOptions)

@@ -8,7 +8,7 @@ import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../src
 
 let initialState = {
     password: "",
-    email:"",
+    username:"",
     confirmPassword:"",
     code:"",
 };
@@ -31,7 +31,7 @@ export default function ForgotPasswordPage(){
     
     const sendCode=async()=>{
 
-        if (formData.email.trim() !=="") {
+        if (formData.username.trim() !=="") {
 
             try {
                 toastId=toast.loading('Please wait. Loading...',{
@@ -207,14 +207,14 @@ export default function ForgotPasswordPage(){
                         </div>
 
                         <h2 className="fw-bold mb-3 text-uppercase text-warning">Reset Password</h2>
-                        <p className="text-white-50 mb-5">Please enter your email to proceed!</p>
+                        <p className="text-white-50 mb-5">Please enter your username to proceed!</p>
 
                         <div ref={emailDiv} className="form-outline form-white mb-4">
-                            <input type="email" name="email" className="form-control form-control-lg" 
+                            <input type="text" name="username" className="form-control form-control-lg" 
                             onChange={handleInputChange}
                             required
                             />
-                            <label className="form-label" >Email Address</label>
+                            <label className="form-label" >Username</label>
                         </div>
 
                         <div ref={codeDiv} className="form-outline form-white mb-4 dblock">

@@ -19,8 +19,22 @@ config.autoAddCss=false
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Butchery System',
+  title: 'Butchery System - Home',
   description: 'P.O.S solution for your butchery business',
+  icons: {
+    icon: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: '/logo.ico',
+        href: '/logo.ico',
+      },
+      {
+        media: '(prefers-color-scheme: dark)',
+        url: '/logo.ico',
+        href: '/logo.ico',
+      },
+    ],
+  },
 }
 
 export default function RootLayout({ children }) {

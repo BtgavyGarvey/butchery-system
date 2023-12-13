@@ -3,6 +3,10 @@ import ViewSalesPage from "../../../../../../components/sc/products/sales/viewsa
 import authOptions from "../../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - View Sales',
+}
+
 export default async function ViewSales() {
 
   const session=await getServerSession(authOptions)

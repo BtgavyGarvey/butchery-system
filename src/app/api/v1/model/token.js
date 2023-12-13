@@ -3,7 +3,7 @@ import mongoose, { Schema, model, models } from 'mongoose'
 
 const tokenSchema=new Schema({
 
-    butchery:{
+    id:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },

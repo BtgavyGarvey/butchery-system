@@ -4,6 +4,10 @@ import authOptions from "../../../../api/auth/[...nextauth]/options";
 import { getProducts } from "../../../../api/v1/controller/butchery/route";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - New Sales',
+}
+
 export default async function MakeSales() {
 
   const session=await getServerSession(authOptions)

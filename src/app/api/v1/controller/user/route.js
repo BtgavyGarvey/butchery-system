@@ -930,16 +930,19 @@ export async function forgotPassword(body) {
 
   try {
 
-    const { email } = body;
-    const pharmacy = await Pharmacy.findOne({ email });
+    const { username } = body;
+    const user = await User.findOne({ username });
 
-    if (!pharmacy) {
+    if (!user) {
       responseData.message='Invalid Username.'      
       return responseData
     }
 
+    const branch = await Branches.findOne({ id:user.branch });
+    const butchery = await Butchery.findOne({ id:branch.butchery });
+
     // Delete existing token for the user from DB if it exists
-    await Token.deleteMany({ pharmacy: pharmacy.id });
+    await Token.deleteMany({ id: user.id });
 
     // Generate a random token and hash it before saving to DB
     const resetToken = crypto.randomBytes(8).toString("hex").toUpperCase();
@@ -948,7 +951,7 @@ export async function forgotPassword(body) {
     // console.log(resetToken);
     // Save the new token to DB
     await Token.create({
-      pharmacy: pharmacy.id,
+      id: user.id,
       token: hashedToken,
       createdAt: Date.now(),
       expiresAt: Date.now() + 5 * (60 * 1000) // 5 minutes
@@ -956,7 +959,7 @@ export async function forgotPassword(body) {
 
     // Email the reset token to the user
     const message = `
-      <h2>Hello ${pharmacy.pharmacy}</h2>
+      <h2>Hello ${user.firstName}</h2>
       <p>You requested a password reset.</p>
       <p>Please use the code below to reset your password.</p>
       <p>The reset code is valid for only 5 minutes.</p><br />
@@ -964,7 +967,7 @@ export async function forgotPassword(body) {
       <p>Kind Regards</P>
     `;
     const subject = "Password Reset Request";
-    const send_to = pharmacy.email;
+    const send_to = butchery.email;
     const sent_from = process.env.EMAIL_USER;
 
     try {
@@ -973,7 +976,7 @@ export async function forgotPassword(body) {
 
       sendEmail(subject, sanitizedMessage, send_to, sent_from);
 
-      responseData.message='Password reset code sent to your email.'      
+      responseData.message='Password reset code sent to your butchery email.'      
       responseData.success=true    
       return responseData
 
@@ -1006,7 +1009,7 @@ export async function checkResetPasswordCode(body) {
     const user = await User.findOne({ username:body.username });
 
     const userToken = await Token.findOne({
-        user: user.id,
+        id: user.id,
         token: hashedToken,
         expiresAt: { $gt: Date.now() }
     });
@@ -1045,13 +1048,19 @@ export async function resetPassword (body) {
       responseData.message='User not found, please sign up.'      
       return responseData
     }
-    
+
+    const cashier = await Cashier.findOne({ cashier:user.id }).select("-password");
+
+    if (!cashier) {
+      responseData.message='Access denied. User not cashier.'      
+      return responseData
+    }
     let branch=await Branches.findOne({id:user.branch})
 
     let butchery=await Butchery.findOne({id:branch.butchery})
   
-    user.password = password;
-    await user.save();
+    cashier.password = password;
+    await cashier.save();
 
     const message = `
       <h2>Hello ${user.user.firstName} ${user.user.firstName},</h2>
@@ -1096,7 +1105,7 @@ export async function newCashier (body) {
 
     let data={
       cashier:body.id,
-      password:body.id,
+      password:body.password,
       branch:body.branch,
       __v:1
     }

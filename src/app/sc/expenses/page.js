@@ -3,6 +3,10 @@ import ExpensesPage from "../../../../components/sc/expenses";
 import authOptions from "../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - Expenses',
+}
+
 export default async function Dashboard() {
 
   const session=await getServerSession(authOptions)

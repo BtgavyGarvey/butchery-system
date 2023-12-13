@@ -203,7 +203,7 @@ export async function tokenGeneration (id, emailToken) {
     }
 
     await Token.create({
-      butchery: id,
+      id,
       token: emailToken,
       createdAt: Date.now(),
       expiresAt: Date.now() + 2880 * 60 * 1000, // 2880 minutes => 2 days

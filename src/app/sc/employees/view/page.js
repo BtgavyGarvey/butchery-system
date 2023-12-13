@@ -3,6 +3,10 @@ import EmployeesPage from "../../../../../components/sc/employees/view";
 import authOptions from "../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - View Employees',
+}
+
 export default async function ViewEmployees() {
 
   const session=await getServerSession(authOptions)

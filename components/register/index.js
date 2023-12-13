@@ -321,8 +321,9 @@ export default function RegisterPage() {
                                             }
                                         </select>
                                     </div>
-                                    <div className="col-sm-12">
-                                            <input ref={termsCheckBox} type="checkbox" onChange={handleInputChange} required name="terms" className="checkbox"></input><span>Terms and condition</span>
+                                    <div className="col-sm-12 m-2">
+                                            <input ref={termsCheckBox} type="checkbox" onChange={handleInputChange} required name="terms" className="checkbox"></input>By checking this checkbox, you have 
+                                            agreed to our <a href='#' className='text-decoration-none fw-bold'>Terms and conditions</a>
                                     </div>
                                 </div><button
                                     class="btn btn-primary bg-primary fw-bolder text-center d-block rubberBand animated btn-user w-100"

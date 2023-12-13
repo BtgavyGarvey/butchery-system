@@ -3,6 +3,10 @@ import EmployeesPaymentPage from '../../../../../../components/sc/employees/paym
 import authOptions from "../../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: 'Butchery System - Employees Payments',
+}
+
 export default async function ViewEmployeesPayments() {
 
   const session=await getServerSession(authOptions)
