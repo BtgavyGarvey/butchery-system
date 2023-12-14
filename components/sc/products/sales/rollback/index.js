@@ -283,7 +283,7 @@ export default function ViewSalesPage({session}) {
                                 </div>
                             </div>
                             
-                            <div class="table-responsive font-monospace border-1 shadow-sm table mt-2"
+                            <div class="table-responsive table-height font-monospace border-1 shadow-sm table mt-2"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">
                                 <table class="table table-striped table-hover table-bordered my-0" id="dataTable">
                                     <thead>

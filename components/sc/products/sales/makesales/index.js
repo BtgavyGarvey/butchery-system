@@ -7,6 +7,7 @@ import NavBar from "../../../../layout/navbar"
 import toast, { Toaster } from "react-hot-toast"
 import { getProducts, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { Today } from "../../../../layout/utils"
+import lodash from 'lodash'
 
 let paymentType={
     type:1,
@@ -22,15 +23,20 @@ export default function MakeSalesPage({session,data}) {
     const modalRef1=React.useRef()
 
     const [ProductData, setProductDataData]=React.useState(data.products)
-    const [Branches, setBranches]=React.useState([])
-    const [AddedBy, setAddedBy]=React.useState([])
-    const [oneProductDataData, setOneProductDataData]=React.useState()
 
-    const getProductData=async(val)=>{
+    const getProductData=async()=>{
+
+        let data={
+            page:0,
+            pageLimit:1000,
+            branch:session?.user.branch,
+            searchParams:'all',
+            value:1
+        }
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
-        let response=await getProducts(session,val)
+        let response=await getProducts(data)
 
         setProductDataData(response.products)
         toast.dismiss(toastId)
@@ -54,16 +60,16 @@ export default function MakeSalesPage({session,data}) {
     }
     
 // console.log(ProductData);
-    const paidAmount=React.useRef()
+    const promptM_Pesa=React.useRef()
     const saveBtn=React.useRef()
-    const dialogBox=React.useRef()
+    const totalPrice=React.useRef(0)
     const bothRef=React.useRef()
     const paidAmountCash=React.useRef()
     const paidAmountMpesa=React.useRef()
     const [total, setTotal]=React.useState(totalState)
     const [change, setChange]=React.useState()
     const [display, setDisplay]=React.useState(false)
-    const [total_Price, setTotal_Price]=React.useState(0)
+    // const [total_Price, setTotal_Price]=React.useState(totalPrice.current)
 
     if (ProductData.length>0) {
 
@@ -75,29 +81,30 @@ export default function MakeSalesPage({session,data}) {
     }
 
     React.useEffect(()=>{
-
+        saveBtn.current.disabled=true
         if (ProductData.length>0) {
             for (let i = 0; i < ProductData.length; i++) {
                 inputRef[`input${i}`].current.readOnly=true
-                saveBtn.current.disabled=true
-                ProductData[i]['quantitySold']=0
-                ProductData[i]['totalPrice']=0
-                ProductData[i]['sellingTime']=Today()
+                ProductData[i].documents['quantitySold']=0
+                ProductData[i].documents['totalPrice']=0
+                ProductData[i].documents['sellingTime']=Today()
             }
         }
     },[ProductData])
 
     const readOnly=()=>{
+        totalPrice.current=0
+        // setTotal_Price(0)
+        saveBtn.current.disabled=true
+
         if (ProductData) {
             for (let i = 0; i < ProductData.length; i++) {
                 inputRef[`input${i}`].current.readOnly=true
                 checkRef[`checkBox${i}`].current.checked=false
                 inputRef[`input${i}`].current.value=''
-                saveBtn.current.disabled=true
-                ProductData[i]['quantitySold']=0
-                ProductData[i]['totalPrice']=0
-                ProductData[i]['sellingTime']=Today()
-                setTotal_Price(0)
+                ProductData[i].documents['quantitySold']=0
+                ProductData[i].documents['totalPrice']=0
+                ProductData[i].documents['sellingTime']=Today()
                 // paidAmount.current.value=''
                 setTotal((prev)=>({
                     ...prev,
@@ -121,17 +128,28 @@ export default function MakeSalesPage({session,data}) {
             paymentType.type=parseInt(value)
 
             if (value==='1' || value==='2') {
+                if (value==='1') {
+                    promptM_Pesa.current.style.display='none'
+                    
+                } else {
+                    promptM_Pesa.current.style.display='block'
+                    
+                }
                 bothRef.current.style.display='none'
                 paidAmountMpesa.current.value=''
+                setDisplay(false)
+
             }
             else{
+
+                promptM_Pesa.current.style.display='block'
                 bothRef.current.style.display='block'
                 paymentType.m_pesa='0'
                 setDisplay(true)
             }
         }
 
-        if (total_Price>0) {
+        if (totalPrice.current>0) {
             if (name==='cash') {
                 paymentType.cash=value
             } 
@@ -157,7 +175,7 @@ export default function MakeSalesPage({session,data}) {
             }
         }
 
-        totalChange(total_Price)
+        totalChange(totalPrice.current)
     }
 
     const handleInputChange=(val)=>{
@@ -169,16 +187,16 @@ export default function MakeSalesPage({session,data}) {
             return
         }
         else{
-            let totalQuantity=(amountEntered/ProductData[val].price).toFixed(4)
+            let totalQuantity=(amountEntered/ProductData[val].documents.price).toFixed(4)
 
-            if (totalQuantity > ProductData[val].quantity) {
+            if (totalQuantity > ProductData[val].documents.quantity) {
                 toast.error('Insufficient Available Quantity',{id:toastId})
                 return
             }
 
 
-            ProductData[val]['quantitySold']=parseFloat(totalQuantity)
-            ProductData[val]['totalPrice']=parseFloat(amountEntered)
+            ProductData[val].documents['quantitySold']=parseFloat(totalQuantity)
+            ProductData[val].documents['totalPrice']=parseFloat(amountEntered)
 
             setTotal((prev)=>({
                 ...prev,
@@ -190,11 +208,25 @@ export default function MakeSalesPage({session,data}) {
 
     }
 
-    const reload=()=>{
-        dialogBox.current.close()
-        getProductData(1)
+    const promptM_PesaAmount=async()=>{
+        
+        let answer=prompt('Enter customer phone number')
 
-        // router.push('/sc/user/medicine/sales#fourth')
+        if (!answer) {
+            return
+        }
+
+        if (isNaN(answer)) {
+            toast.error('Invalid input')
+            return
+        }
+
+        if (answer.length<10) {
+            toast.error('Input is too short')
+            return
+        }
+
+        toast.success(answer)
 
     }
 
@@ -204,7 +236,7 @@ export default function MakeSalesPage({session,data}) {
     //     ...array.slice(index)
     // }
 
-    const checkChange=(val)=>{
+    const checkChange=(val,arr)=>{
 
 
         if (checkRef[`checkBox${val}`].current.checked) {
@@ -212,7 +244,7 @@ export default function MakeSalesPage({session,data}) {
             inputRef[`input${val}`].current.focus()
 
 
-            sellData.splice(val,0,ProductData[val])
+            sellData.push(ProductData[val]?.documents)
             
             setTotal((prev)=>({
                 ...prev,
@@ -223,8 +255,7 @@ export default function MakeSalesPage({session,data}) {
         else{
             inputRef[`input${val}`].current.readOnly=true
 
-            sellData.splice(val,1)
-            // sellData = sellData.filter((element, index) => index !== val);
+            lodash.pullAllWith(sellData, [arr],lodash.isEqual)
 
             setTotal((prev)=>({
                 ...prev,
@@ -233,8 +264,8 @@ export default function MakeSalesPage({session,data}) {
 
             inputRef[`input${val}`].current.value=''
 
-            ProductData[val]['quantitySold']=0
-            ProductData[val]['totalPrice']=0
+            ProductData[val].documents['quantitySold']=0
+            ProductData[val].documents['totalPrice']=0
 
         }
 
@@ -253,12 +284,12 @@ export default function MakeSalesPage({session,data}) {
                     <>
                     <tr>
                     <td>{i+1}</td>
-                    <td>{ProductData[i]?.name}</td>
-                    <td>{ProductData[i]?.quantity}</td>
-                    <td>{ProductData[i]?.price}</td>
+                    <td>{ProductData[i]?.documents.name}</td>
+                    <td>{ProductData[i]?.documents.quantity}</td>
+                    <td>{ProductData[i]?.documents.price}</td>
                     <td ><input ref={inputRef[`input${i}`]} type="text" className="form-control" onChange={(e)=>handleInputChange(i)}></input></td>
                     <td>{total[`total${i}`]}</td>
-                    <td><input ref={checkRef[`checkBox${i}`]} type="checkbox" onChange={(e)=>checkChange(i)}></input></td>
+                    <td><input ref={checkRef[`checkBox${i}`]} type="checkbox" onChange={(e)=>checkChange(i,ProductData[i]?.documents)}></input></td>
                     </tr>
         
                     </>
@@ -271,7 +302,9 @@ export default function MakeSalesPage({session,data}) {
         return result1
     }
 
-    const submit=async()=>{
+    const submit=async(e)=>{
+
+        e.preventDefault()
         
         for (let i = 0; i < sellData.length; i++) {
             sellData[i]['sellingTime']=Today()
@@ -317,7 +350,7 @@ export default function MakeSalesPage({session,data}) {
             return
         }
 
-        if (total_Price>0 && paid_amount>0) {
+        if (totalPrice.current>0 && paid_amount>0) {
 
             myChange=paid_amount-val
             setChange(myChange)
@@ -345,19 +378,22 @@ export default function MakeSalesPage({session,data}) {
         let currentPrice=0
 
         if (sellData.length>0) {
-            for (let i = 0; i < sellData.length; i++) {
-                currentPrice=currentPrice+sellData[i]['totalPrice']
-            }
+
+            sellData.map((result)=>{
+                currentPrice=currentPrice+result['totalPrice']
+            })
+            
         }
 
-        if (currentPrice<1) {
+        if (currentPrice < 1) {
             paymentType.cash=0
             paymentType.m_pesa=0
         }
 
-        setTotal_Price(currentPrice)
+        totalPrice.current=currentPrice
+        // setTotal_Price(currentPrice)
 
-        totalChange(currentPrice)
+        totalChange(totalPrice.current)
        
     }
 
@@ -397,29 +433,13 @@ export default function MakeSalesPage({session,data}) {
                             <p class="text-primary m-0 fw-bold">Product Info</p>
                         </div>
                         <div class="card-body bg-dark">
-                            <div class="row">
-                                <div class="col-md-6 text-nowrap">
-                                    <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Show&nbsp;<select
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="10" selected="">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                            </select>&nbsp;</label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label"><input type="search" class="form-control form-control-sm"
-                                                aria-controls="dataTable" placeholder="Search" /></label></div>
-                                </div>
-                            </div>
-                            <div class="table-responsive font-monospace text-center border-2  shadow-sm table mt-2"
+
+                        <div class="table-responsive font-monospace border-2 table-height  shadow-sm table mt-2"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">
                                 <table class="table table-striped table-hover table-bordered my-0" id="dataTable">
                                     <thead >
                                         <tr>
-                                            <th>Number</th>
+                                            <th>No.</th>
                                             <th>Name</th>
                                             <th>Quantity</th>
                                             <th>Price</th>
@@ -429,132 +449,133 @@ export default function MakeSalesPage({session,data}) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* <tr>
-                                            <td>1</td>
-                                            <td>Beef Liver</td>
-                                            <td>50.8798</td>
-                                            <td>640</td>
-                                            <td><input class="border rounded-pill border-2 border-success shadow"
-                                                    type="number" data-bss-hover-animate="pulse"
-                                                    placeholder="Enter amount" readonly="" /></td>
-                                            <td>0</td>
-                                            <td><input type="checkbox" data-bss-hover-animate="pulse" /></td>
-                                        </tr> */}
                                         {
                                             getTableData()
                                         }
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                        <td><strong>No.</strong></td>
+                                        <td><strong>Name</strong></td>
+                                        <td><strong>Quantity</strong></td>
+                                        <td><strong>Price</strong></td>
+                                        <td style={{width:'15%'}}><strong>Amount</strong></td>
+                                        <td><strong>Sold</strong></td>
+                                        <td colspan="1" style={{width:'3%'}}><strong>Action</strong></td>
+                                        </tr>
+                                        
+                                    </tfoot>
                                     
                                 </table>
                             </div>
+
                             <div class="row">
-                                <div class="col-md-6 align-self-center">
-                                    <p id="dataTable_info" class="dataTables_info" role="status" aria-live="polite">
-                                        Showing 1 to 10 of 27</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <nav
-                                        class="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
-                                        <ul class="pagination">
-                                            <li class="page-item disabled"><a class="page-link" aria-label="Previous"
-                                                    href="#"><span aria-hidden="true">«</span></a></li>
-                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item"><a class="page-link" aria-label="Next" href="#"><span
-                                                        aria-hidden="true">»</span></a></li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                                <div class="col-sm-12" style={{width: "100%"}}>
-                                    <div class="text-center d-flex flex-grow-1 flex-shrink-1 flex-fill justify-content-center align-items-start align-content-start align-self-start flex-wrap order-first m-auto"
-                                        style={{width: "100%"}}>
-                                        <div class="row text-center d-flex">
-                                            <div
-                                                class="col font-monospace text-uppercase text-center d-flex align-content-start align-self-center flex-wrap order-first m-auto">
-                                                <div class="row text-start d-grid me-xl-0">
-                                                    <div class="col d-grid"><strong
-                                                            class="text-uppercase text-center mb-xl-0 pb-xl-2">Total
-                                                            Amount</strong><input value={total_Price}
-                                                            class="border tex-align-center fw-bold text-primary rounded-pill border-2 border-success shadow form-control-lg"
-                                                            type="text" required
-                                                            disabled /></div>
-                                                    <div class="col d-grid"><strong
-                                                            class="text-uppercase text-center pt-xl-0 mt-xl-3">Change</strong>
-                                                            <input value={change?.toLocaleString()}
-                                                            class="border tex-align-center fw-bold text-danger rounded-pill border-2 border-success shadow form-control-lg"
-                                                            type="text" disabled
-                                                             />
-                                                    </div>
-                                                </div>
-                                                <div class="row d-grid ms-xl-0">
-                                                    <div class="col text-center d-grid"><strong
-                                                            class="text-uppercase text-align-center mb-xl-2"
-                                                            >Payment Type</strong><select onChange={handleInputChange1}
-                                                            class="border tex-align-center fw-bold rounded-pill border-2 border-success shadow form-select-lg"
-                                                            name="type" >
-                                                            <option value={1}>Cash</option>
-                                                            <option value={2}>M-Pesa</option>
-                                                            <option value={3}>Cash &amp; M-Pesa</option>
-                                                        </select></div>
-                                                    
-                                                    <div class="col d-grid">
-                                                        <strong
-                                                            class="text-uppercase text-center text-danger mt-xl-2">Enter
-                                                            Amount</strong><span class="text-start tex-align-center fw-bold text-primary text-decoration-italic"
-                                                            style={{fontStyle: "italic",marginTop: "3px",display: display ? 'block' : 'none'}}>Cash
-                                                            Amount</span><input ref={paidAmountCash} onChange={(e)=>{
-                                                                handleInputChange1(e);
-                                                                // totalChange(total_Price)
-                                                            }}
-                                                            class="border rounded-pill fw-bold text-success border-2 border-danger shadow form-control-lg"
-                                                            type="text" name="cash"
-                                                            />
-                                                            <div ref={bothRef}>
-                                                                <span 
-                                                                class="text-start tex-align-center fw-bold text-primary text-decoration-italic"
-                                                                style={{fontStyle: "italic",marginTop: "3px",display: display ? 'block' : 'none'}}>M-Pesa
-                                                                Amount</span><input ref={paidAmountMpesa} onChange={(e)=>{
-                                                                    handleInputChange1(e);
-                                                                    // totalChange(total_Price)
-                                                                }}
-                                                                class="border rounded-pill fw-bold text-danger border-2 border-success shadow form-control-lg"
-                                                                type="text" name="m_pesa"
-                                                                />
-                                                            </div>
-                                                            
-                                                            
-                                                    </div>
-                                                </div>
+                    
+                                <div class="col-md-12">
+                                    <div class="p-0">
+
+                                        <form onSubmit={submit} className="user">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6 mb-3 mb-sm-0 d-grid">
+                                                <strong
+                                                class="text-uppercase text-light text-center">Total
+                                                Amount</strong><input value={totalPrice.current}
+                                                class="border text-center fw-bold text-primary rounded-pill border-2 border-success shadow form-control"
+                                                type="text" required
+                                                disabled />
+                                            </div>
+                                            <div class="col-md-6 mb-3 mb-sm-0 d-grid">
+                                                <strong
+                                                class="text-uppercase text-light text-center mb-xl-2">Change</strong>
+                                                <input value={change?.toLocaleString()}
+                                                class="border text-center text-danger fw-bold rounded-pill border-2 border-success shadow form-control"
+                                                type="text" disabled
+                                                    />
+                                                
                                             </div>
                                         </div>
-                                        <div class="me-xl-5 ms-xl-5 mt-xl-5 mb-xl-5"><button ref={saveBtn} onClick={submit}
+                                        <div class="row mb-3">
+                                            <div class="col-md-6 mb-3 mb-sm-0 d-grid">
+                                                <strong
+                                                class="text-uppercase text-light text-center mb-xl-2"
+                                                >Payment Type</strong>
+                                                <select onChange={handleInputChange1}
+                                                class="border text-center fw-bold rounded-pill border-2 border-success shadow form-select"
+                                                name="type" >
+                                                <option value={1}>Cash</option>
+                                                <option value={2}>M-Pesa</option>
+                                                <option value={3}>Cash &amp; M-Pesa</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3 mb-sm-0 d-grid">
+                                                
+                                                <strong
+                                                class="text-uppercase text-light text-center text-danger mt-xl-2">Enter
+                                                Amount</strong><span class="text-start fw-bold text-warning text-decoration-italic"
+                                                style={{fontStyle: "italic",marginTop: "3px", display: display ? 'block' : 'none'}}>Cash
+                                                Amount</span><input ref={paidAmountCash} onChange={(e)=>{
+                                                    handleInputChange1(e);
+                                                    // totalChange(total_Price)
+                                                }}
+                                                class="border rounded-pill  text-center fw-bold text-success border-2 border-danger shadow form-control"
+                                                type="text" name="cash"
+                                                />
+                                                <div ref={bothRef} className='col-md-12 mb-3 mb-sm-0 bothRef'>
+                                                    <span 
+                                                    class="text-start fw-bold text-warning text-decoration-italic"
+                                                    style={{fontStyle: "italic",marginTop: "3px", display: display ? 'block' : 'none'}}>M-Pesa
+                                                    Amount</span><input ref={paidAmountMpesa} onChange={(e)=>{
+                                                        handleInputChange1(e);
+                                                        // totalChange(total_Price)
+                                                    }}
+                                                    class="border col-md-12  text-center rounded-pill fw-bold text-success border-2 border-success shadow form-control"
+                                                    type="text" name="m_pesa"
+                                                    />
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                            <div className="col-md-12 d-flex justify-content-center p-3">
+                                            <a onClick={promptM_PesaAmount} ref={promptM_Pesa} className="bothRef text-light text-decoration-underlined" href="#">Prompt Customer</a>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                        <div class="col-sm-12 mb-3 mb-sm-0 d-flex justify-content-center"><button ref={saveBtn} 
                                                 class="btn btn-outline-primary btn-md active font-monospace text-uppercase fs-1 fw-bolder text-center border rounded-pill border-2 border-success shadow"
                                                 type="submit" style={{marginTop: "6px"}}>Make Sale</button></div>
+                                        </div>
+                                        </form>
+
                                     </div>
                                 </div>
-
                             </div>
+                            
                             <div ref={modalRef1} class="modal" role="dialog"
                         tabindex="-1" id="modal-2">
                         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-                            <div class="modal-content bg-dark">
+                            <div class="modal-content bg-primary">
                                 <div class="modal-header text-capitalize d-flex justify-content-center">
-                                    <h1 class="modal-title fw-bolder text-warning">CHANGE</h1>
+                                    <h1 class="display-4 modal-title fw-bolder text-warning">CHANGE</h1>
                                 </div>
+
+                                <form onSubmit={e=>{
+                                    e.preventDefault()
+                                    getProductData()
+                                    modalRef1.current.style.display='none'
+                                }}>
                                 <div class="display-2 modal-body d-flex justify-content-center">
                                     
-                                    <h1 className="text-light fw-bold">{change?.toLocaleString()}</h1>
+                                    <h1 className="display-1 text-light fw-bold">{change?.toLocaleString()}</h1>
                                         
                                 </div>
                                 <div class="modal-footer d-flex justify-content-center">
                                     
-                                        <button class="btn btn-primary bg-success btn-lg"
-                                        type="button" data-bs-target="#modal-2" data-bs-toggle="modal" onClick={()=>{
-                                            getProductData(1)
-                                            modalRef1.current.style.display='none'
-                                        }}>CLOSE</button>
+                                    <button class="btn btn-primary bg-success btn-lg"
+                                    type="submit" data-bs-target="#modal-2" data-bs-toggle="modal">CLOSE</button>
                                 </div>
+                                </form>
+                                
                             </div>
                         </div>
                     </div>

@@ -12,7 +12,15 @@ export default async function MakeSales() {
 
   const session=await getServerSession(authOptions)
   let response
-  response=await getProducts(session,1)
+  let data={
+    page:0,
+    pageLimit:1000,
+    branch:session?.user.branch,
+    searchParams:'all',
+    value:1
+  }
+  
+  response=await getProducts(data)
 
   const logOut=()=>{
     redirect('/')

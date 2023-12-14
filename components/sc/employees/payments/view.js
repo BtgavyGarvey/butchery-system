@@ -397,7 +397,7 @@ export default function EmployeesPaymentPage({session}) {
                                         </select>&nbsp;</label></div>
                                 </div>
                             </div>
-                            <div class="table-responsive font-monospace border-1 shadow-sm table mt-2"
+                            <div class="table-responsive table-height font-monospace border-1 shadow-sm table mt-2"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">
                                 <table class="table table-striped table-hover table-bordered my-0" id="dataTable">
                                     <thead>
@@ -481,7 +481,7 @@ export default function EmployeesPaymentPage({session}) {
                                         <div class="row d-flex">
                                             <div class="col">
                                                 <div class="row me-xl-0 ms-xl-" style={{width: "100%"}}>
-                                                <div class="table-responsive font-monospace border-1 shadow-sm table mt-2"
+                                                <div class="table-responsive table-height font-monospace border-1 shadow-sm table mt-2"
                                                     id="dataTable" role="grid" aria-describedby="dataTable_info">
                                                     <table  class="table table-striped table-hover table-bordered my-0" id="dataTable">
                                                         <thead>

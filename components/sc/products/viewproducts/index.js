@@ -275,7 +275,7 @@ export default function ViewProductsPage({session}) {
         for (let i = 0; i < ProductData.length; i++) {
         
             result1.push(
-                <option key={'a'+i} value={ProductData[i].id}>{ProductData[i].name}</option>
+                <option key={'a'+i} value={ProductData[i].documents.id}>{ProductData[i].documents.name}</option>
             )
             
         }
@@ -392,7 +392,7 @@ export default function ViewProductsPage({session}) {
                                         </select>&nbsp;</label></div>
                                 </div>
                             </div>
-                            <div class="table-responsive font-monospace border-2  shadow-sm table"
+                            <div class="table-responsive table-height font-monospace border-2  shadow-sm table"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">
                                 <table class="table table-striped  table-hover table-bordered" id="dataTable">
                                     <thead>
@@ -546,13 +546,14 @@ export default function ViewProductsPage({session}) {
                                                 </div>
                                             </div>
                                             <div class="col d-grid">
-                                                <div class="row">
-                                                    <div class="col d-grid"><label class="form-label">Quantity
+                                                <div class="row d-grid">
+                                                <div class="col d-grid"><label class="form-label">Quantity
                                                             Issue</label><input onChange={handleInputChangeIssue}
                                                             class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
                                                             type="text" required style={{textAlign: "center"}} name="quantity"/></div>
                                                 </div>
                                             </div>
+                                           
                                         </div>
                                     </div>
                                 </div>

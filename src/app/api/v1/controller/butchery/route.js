@@ -1058,6 +1058,7 @@ export async function newSale(value,session){
                     
               )
       }
+      // console.log(isToday);
 
 
       if (isToday) {
@@ -1092,7 +1093,7 @@ export async function newSale(value,session){
 
       }
 
-      // let promises=[]
+      let promises=[]
 
       // const moreDatasetDetails=async(name,quantity)=>{
         
@@ -1201,31 +1202,31 @@ export async function newSale(value,session){
       //   })
       // }
 
-      // promises.push(
-      //     body.map(async(result)=>{
+      promises.push(
+          body.map(async(result)=>{
 
-      //       let product=await Product.findOne({code:result.code})
+            let product=await Product.findOne({code:result.code})
 
-      //       const newQuantity= (product.quantity-result.quantitySold)
-      //       product.quantity=newQuantity.toFixed(4)
-      //       console.log(branchDataset.products);
+            const newQuantity= (product.quantity-result.quantitySold)
+            product.quantity=newQuantity.toFixed(4)
+            // console.log(branchDataset.products);
 
 
-      //       if (!branchDataset.products.includes(result.name)) {
-      //         await DatasetDetails(result.name)
-      //         await moreNameDatasetDetails(result.name)
-      //       }
+            // if (!branchDataset.products.includes(result.name)) {
+            //   await DatasetDetails(result.name)
+            //   await moreNameDatasetDetails(result.name)
+            // }
 
-      //       if (branchDataset.date !== body[0].sellingTime.date) {
-      //         await moreNameDatasetDetails(result.name)
-      //       } 
-      //       moreDatasetDetails(result.name,result.quantitySold)
+            // if (branchDataset.date !== body[0].sellingTime.date) {
+            //   await moreNameDatasetDetails(result.name)
+            // } 
+            // moreDatasetDetails(result.name,result.quantitySold)
             
-      //       product.save()
-      //     })
-      // )
+            product.save()
+          })
+      )
 
-      // await Promise.allSettled(promises)
+      await Promise.allSettled(promises)
 
       responseData.success=true
   
