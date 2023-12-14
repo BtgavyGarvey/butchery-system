@@ -915,18 +915,11 @@ export async function deleteProducts(branch,id,session,val){
 
   try {
     
-    let product=await Product.findOne({id,branch})
+    let productHasChild=await Product.findOne({ 'linked.parent': id, __v: { $ne: -1 } })
 
-    if (product) {
+    if (!productHasChild) {
 
-      if (product.linked[0].status) {
-        return false
-      }
-
-      product.__v=val || product.__v
-      product.updatedBy=user.id || product.updatedBy
-
-      await product.save()
+      await Product.updateOne({id,branch},{$set:{__v:val,updatedBy:user.id}})
       
     }else{
       return false
