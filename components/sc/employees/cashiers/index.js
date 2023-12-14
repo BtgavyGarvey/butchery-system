@@ -61,16 +61,16 @@ export default function CashiersPage({session}) {
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{CashiersData[i].documents.cashierInfo.username}</td>
-                <td>{CashiersData[i].documents.cashierInfo.firstName} {CashiersData[i].documents.cashierInfo.lastName}</td>
-                <td>{CashiersData[i].documents.__v===1 ? 'Yes' : 'No'}</td>
-                <td>{CashiersData[i].documents.branchInfo.name}</td>
+                <td>{CashiersData[i]?.documents.cashierInfo.username}</td>
+                <td>{CashiersData[i]?.documents.cashierInfo.firstName} {CashiersData[i]?.documents.cashierInfo.lastName}</td>
+                <td>{CashiersData[i]?.documents.__v===1 ? 'Yes' : 'No'}</td>
+                <td>{CashiersData[i]?.documents.branchInfo.name}</td>
                 <td title="Edit"><FontAwesomeIcon icon={faEdit} className="text-warning faEdit" onClick={()=>{
-                    setOneCashiersData(CashiersData[i].documents)
+                    setOneCashiersData(CashiersData[i]?.documents)
                     showModal()
                 }}/></td>
                 <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
-                    deleteCashier(CashiersData[i].documents.cashier,-1)
+                    deleteCashier(CashiersData[i]?.documents.cashier,-1)
                 }}/></td>
                 
                 </tr>
@@ -103,13 +103,13 @@ export default function CashiersPage({session}) {
         console.log(response);
 
         if (response.success) {
-            let pages=Math.ceil(response.cashiers.cashiers[0]?.pageCount / pageLimit.current)
+            let pages=Math.ceil(response.cashiers?.cashiers[0]?.pageCount / pageLimit.current)
 
-            setCashiersData(response.cashiers.cashiers)
+            setCashiersData(response.cashiers?.cashiers)
             setPageCount(pages)
-            setOutOfPage(response.cashiers.cashiers[0]?.pageCount)
+            setOutOfPage(response.cashiers?.cashiers[0]?.pageCount)
 
-            let brunches=response.cashiers.cashiers
+            let brunches=response.cashiers?.cashiers
 
             let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 

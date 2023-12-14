@@ -63,18 +63,18 @@ export default function EmployeesPage({session}) {
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{EmployeesData[i].documents.username}</td>
-                <td>{EmployeesData[i].documents.firstName} {EmployeesData[i].documents.lastName}</td>
-                <td>{EmployeesData[i].documents.mobile}</td>
-                <td>{(EmployeesData[i].documents.salary).toLocaleString()}</td>
-                <td>{new Date(EmployeesData[i].documents.createdAt).toDateString()}</td>
-                <td>{EmployeesData[i].documents.nationalId}</td>
+                <td>{EmployeesData[i]?.documents.username}</td>
+                <td>{EmployeesData[i]?.documents.firstName} {EmployeesData[i]?.documents.lastName}</td>
+                <td>{EmployeesData[i]?.documents.mobile}</td>
+                <td>{(EmployeesData[i]?.documents.salary).toLocaleString()}</td>
+                <td>{new Date(EmployeesData[i]?.documents.createdAt).toDateString()}</td>
+                <td>{EmployeesData[i]?.documents.nationalId}</td>
                 <td title="Edit"><FontAwesomeIcon icon={faEdit} className="text-warning faEdit" onClick={()=>{
-                    setOneEmployeesData(EmployeesData[i].documents)
+                    setOneEmployeesData(EmployeesData[i]?.documents)
                     showModal()
                 }}/></td>
                 <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
-                    deleteEmployee(EmployeesData[i].documents.id,EmployeesData[i].documents)
+                    deleteEmployee(EmployeesData[i]?.documents.id,EmployeesData[i].documents)
                 }}/></td>
                 
                 </tr>
@@ -108,14 +108,15 @@ export default function EmployeesPage({session}) {
         console.log(response);
 
         if (response.success) {
-            let pages=Math.ceil(response.users.users[0]?.pageCount / pageLimit.current)
+            let pages=0
+            pages=Math.ceil(response.users?.users[0]?.pageCount / pageLimit.current)
 
-            setEmployeesData(response.users.users)
-            setBranches(response.users.branches)
+            setEmployeesData(response.users?.users)
+            setBranches(response.users?.branches)
             setPageCount(pages)
-            setOutOfPage(response.users.users[0]?.pageCount)
+            setOutOfPage(response.users?.users[0]?.pageCount)
 
-            let brunches=response.users.branches
+            let brunches=response.users?.branches
 
             let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 

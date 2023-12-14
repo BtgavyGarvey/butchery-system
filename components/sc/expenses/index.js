@@ -113,13 +113,13 @@ export default function ViewExpensePage({session}) {
 
         console.log(response);
 
-        let pages=Math.ceil(response.expense.expenses[0]?.pageCount / pageLimit.current)
+        let pages=Math.ceil(response.expense?.expenses[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
-        setOutOfPage(response.expense.expenses[0]?.pageCount)
-        setExpenseData(response.expense.expenses)
-        setManyCashiers(response.expense.cashierInfo)
-        setCashiers(response.expense.cashiers)
-        soldProducts=response.expense.expenses[0]?.documents.expenseName
+        setOutOfPage(response.expense?.expenses[0]?.pageCount)
+        setExpenseData(response.expense?.expenses)
+        setManyCashiers(response.expense?.cashierInfo)
+        setCashiers(response.expense?.cashiers)
+        soldProducts=response.expense?.expenses[0]?.documents.expenseName
         toast.dismiss(toastId)
         
     }
@@ -138,10 +138,10 @@ export default function ViewExpensePage({session}) {
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{ExpenseData[i].documents.details.moreDateDetails.name}</td>
-                <td>{ExpenseData[i].documents.details.moreDateDetails.amount}</td>
-                <td>{DateTime(ExpenseData[i].documents.details.moreDateDetails.date)}</td>
-                <td title={Cashiers[i].username} onClick={e=>{toast(Cashiers[i].username)}} className="faEdit">{Cashiers[i].firstName} {Cashiers[i].lastName}</td>
+                <td>{ExpenseData[i]?.documents.details.moreDateDetails.name}</td>
+                <td>{ExpenseData[i]?.documents.details.moreDateDetails.amount}</td>
+                <td>{DateTime(ExpenseData[i]?.documents.details.moreDateDetails.date)}</td>
+                <td title={Cashiers[i]?.username} onClick={e=>{toast(Cashiers[i]?.username)}} className="faEdit">{Cashiers[i]?.firstName} {Cashiers[i]?.lastName}</td>
                 </tr>
     
                 </>

@@ -253,9 +253,9 @@ export default function MakeSalesPage({session,data}) {
                     <>
                     <tr>
                     <td>{i+1}</td>
-                    <td>{ProductData[i].name}</td>
-                    <td>{ProductData[i].quantity}</td>
-                    <td>{ProductData[i].price}</td>
+                    <td>{ProductData[i]?.name}</td>
+                    <td>{ProductData[i]?.quantity}</td>
+                    <td>{ProductData[i]?.price}</td>
                     <td ><input ref={inputRef[`input${i}`]} type="text" className="form-control" onChange={(e)=>handleInputChange(i)}></input></td>
                     <td>{total[`total${i}`]}</td>
                     <td><input ref={checkRef[`checkBox${i}`]} type="checkbox" onChange={(e)=>checkChange(i)}></input></td>

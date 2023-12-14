@@ -87,11 +87,11 @@ export default function ViewSalesPage({session}) {
         }
         let response=await getRollBackSales(data)
 
-        let pages=Math.ceil(response.sales.products[0]?.pageCount / pageLimit.current)
+        let pages=Math.ceil(response.sales?.products[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
-        setOutOfPage(response.sales.products[0]?.pageCount)
-        setSalesData(response.sales.products)
-        setManyCashiers(response.sales.cashierInfo)
+        setOutOfPage(response.sales?.products[0]?.pageCount)
+        setSalesData(response.sales?.products)
+        setManyCashiers(response.sales?.cashierInfo)
         toast.dismiss(toastId)
         
     }
@@ -136,20 +136,20 @@ export default function ViewSalesPage({session}) {
 
         for (let i = 0; i < SalesData.length; i++) {
 
-            if (!soldProducts.includes(SalesData[i].documents.details.name)) {
-                soldProducts.push(SalesData[i].documents.details.name)
+            if (!soldProducts.includes(SalesData[i]?.documents.details.name)) {
+                soldProducts.push(SalesData[i]?.documents.details.name)
             }
 
             result1.push(
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{SalesData[i].documents.details.name}</td>
-                <td>{SalesData[i].documents.details.quantity}</td>
-                <td>{SalesData[i].documents.details.amountSold}</td>
-                <td>{DateTime(SalesData[i].documents.details.rolledAt)}</td>
+                <td>{SalesData[i]?.documents.details.name}</td>
+                <td>{SalesData[i]?.documents.details.quantity}</td>
+                <td>{SalesData[i]?.documents.details.amountSold}</td>
+                <td>{DateTime(SalesData[i]?.documents.details.rolledAt)}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
-                    viewMore(SalesData[i].documents)
+                    viewMore(SalesData[i]?.documents)
 
                 }}/></td>
                 </tr>

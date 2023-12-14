@@ -279,12 +279,14 @@ export async function getUsers(data){
         success:false,
         users:[]
     }
+    let branches=[]
+    let payments=[]
 
     let branch=data.branch
     let searchParams=data.searchParams
     let limit=data.pageLimit
     let page=data.page
-// console.log(branch,searchParams);
+
     try {
 
       const matchQuery = 
@@ -303,14 +305,12 @@ export async function getUsers(data){
         
       
   
-      // const missionMatchQuery = mixsion === 'all' ? {} : { $or: [{ mission1: mission._id }, { mission2: mission._id }] };
-  
       let pipeline = [
         {
           $match: {
             ...matchQuery,
             branch: new mongoose.Types.ObjectId(branch),
-            // __v: 1,
+            __v: 1,
             role:'Employee'
           },
         },
@@ -344,12 +344,7 @@ export async function getUsers(data){
   
       let users = await User.aggregate(pipeline);
 
-      // console.log(users);
-        
       if (users.length>0) {
-
-        let branches=[]
-        let payments=[]
 
         for (let i = 0; i < users.length; i++) {
 
@@ -383,29 +378,24 @@ export async function getUsers(data){
 
           const element =  await Promise.allSettled(promises)
 
-          // console.log(element);
-
           branches.push(element[0].value)
           payments.push(element[1].value)
           
         }
-
-        users=JSON.stringify(users) 
-        branches=JSON.stringify(branches)
-        payments=JSON.stringify(payments)
         
-        let data={
-          users:JSON.parse(users),
-          branches:JSON.parse(branches),
-          payments:JSON.parse(payments),
-        }
+      }
 
-        responseData.success=true
-        responseData.users=data
+      users=JSON.stringify(users) 
+      branches=JSON.stringify(branches)
+      payments=JSON.stringify(payments)
+
+      let data={
+        users:JSON.parse(users),
+        branches:JSON.parse(branches),
+        payments:JSON.parse(payments),
       }
-      else{
-        responseData.message='No employee data found'
-      }
+      responseData.users=data
+      responseData.success=true
 
       return responseData
 
@@ -485,11 +475,13 @@ export async function getEmployeePayments(branch,employee){
     let cashier=[]
 
     if (payments > 0) {
-      
-      for (let i = 0; i < payments.length; i++) {
-        const element = await User.find({id:payments[i].cashier});
-        cashier.push(element)
-      }
+
+      await Promise.all(
+        payments.map(async(result)=>{
+          const element = await User.find({id:result.cashier});
+          cashier.push(element)
+        })
+      )
     }
 
     payments=JSON.stringify(payments)
@@ -609,90 +601,89 @@ export async function reverseEmployeePayment(id){
 
 // USER LOGIN
 
-export async function loginUser (username, password, req){
-
+export async function loginUser(username, password, req) {
   try {
-      if (!username || !password) {
-        return {
-          message: 'Please enter username and password',
-          success: false,
-        };
-      }
-  
-      let user = await User.findOne({ username });
-  
-      if (!user) {
-        return {
-          message: 'User not found',
-          success: false,
-        };
-      }
-  
-      if (user.__v === -1) {
-        return {
-          message: 'Invalid username or password',
-          success: false,
-        };
-      }
-
-      let cashierUser = await Cashier.findOne({ cashier:user.id });
-
-      if (!cashierUser) {
-        return {
-          message: 'Invalid username or password',
-          success: false,
-        };
-      }
-  
-      if (cashierUser.__v === -1) {
-        return {
-          message: 'Access denied',
-          success: false,
-        };
-      }
-
-      const validPassword = await bcrypt.compare(password, cashierUser.password);
-  
-      let branch=await Branches.findOne({id:cashierUser.branch})
-
-      let butchery=await Butchery.findOne({id:branch.butchery})
-  
-      if (validPassword) {
-        if (!butchery.verified) {
-          return {
-            message: 'Email not verified. Please verify your business email address',
-            success: false,
-          };
-        }
-  
-        let cashierName=user.firstName=' '+user.lastName+' ('+user.username+')'
-        if (process.env.NODE_ENV === 'production') {
-          loginDetails(req, cashierUser.cashier, butchery.email, butchery.name,cashierName);
-        }
-        
-        let access = true;
-  
-        return {
-          success: true,
-          user,
-          butchery,
-          access,
-          branch
-        };
-      } else {
-        return {
-          message: 'Invalid username or password',
-          success: false,
-        };
-      }
-    } catch (error) {
-      console.log('Error =>' + error);
+    if (!username || !password) {
       return {
-        message: 'Unknown server error has occurred',
+        message: 'Please enter username and password',
         success: false,
       };
     }
-};
+
+    const user = await User.findOne({ username }).lean().exec();
+
+    if (!user) {
+      return {
+        message: 'User not found',
+        success: false,
+      };
+    }
+
+    if (user.__v === -1) {
+      return {
+        message: 'Invalid username or password',
+        success: false,
+      };
+    }
+
+    const cashierUser = await Cashier.findOne({ cashier: user.id }).lean().exec();
+
+    if (!cashierUser) {
+      return {
+        message: 'Invalid username or password',
+        success: false,
+      };
+    }
+
+    if (cashierUser.__v === -1) {
+      return {
+        message: 'Access denied',
+        success: false,
+      };
+    }
+
+    const validPassword = await bcrypt.compare(password, cashierUser.password);
+
+    const branch = await Branches.findOne({ id: cashierUser.branch }).lean().exec();
+
+    const butchery = await Butchery.findOne({ id: branch.butchery }).lean().exec();
+
+    if (validPassword) {
+      if (!butchery.verified) {
+        return {
+          message: 'Email not verified. Please verify your business email address',
+          success: false,
+        };
+      }
+
+      const cashierName = user.firstName + ' ' + user.lastName + ' (' + user.username + ')';
+      if (process.env.NODE_ENV === 'production') {
+        loginDetails(req, cashierUser.cashier, butchery.email, butchery.name, cashierName);
+      }
+
+      const access = true;
+
+      return {
+        success: true,
+        user,
+        butchery,
+        access,
+        branch,
+      };
+    } else {
+      return {
+        message: 'Invalid username or password',
+        success: false,
+      };
+    }
+  } catch (error) {
+    console.log('Error =>' + error);
+    return {
+      message: 'Unknown server error has occurred',
+      success: false,
+    };
+  }
+}
 
 export const loginDetails = async (req, id, email, name, cashierName) => {
 

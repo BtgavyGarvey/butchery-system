@@ -124,7 +124,7 @@ export default function EmployeesPaymentPage({session}) {
                 <tr>
                 <td>{i+1}</td>
                 <td>{EmployeesData[i]?.documents.username}</td>
-                <td>{EmployeesData[i]?.documents.firstName} {EmployeesData[i].documents.lastName}</td>
+                <td>{EmployeesData[i]?.documents.firstName} {EmployeesData[i]?.documents.lastName}</td>
                 <td>{(EmployeesData[i]?.documents.salary).toLocaleString()}</td>
                 <td>{(totalAmount(Payments[i])).toLocaleString()}</td>
                 <td>{(parseFloat(EmployeesData[i]?.documents.salary) - totalAmount(Payments[i])).toLocaleString()}</td>
@@ -164,15 +164,15 @@ export default function EmployeesPaymentPage({session}) {
         console.log(response);
 
         if (response.success) {
-            let pages=Math.ceil(response.users.users[0]?.pageCount / pageLimit.current)
+            let pages=Math.ceil(response.users?.users[0]?.pageCount / pageLimit.current)
 
-            setEmployeesData(response.users.users)
-            setBranches(response.users.branches)
-            setPayments(response.users.payments)
+            setEmployeesData(response.users?.users)
+            setBranches(response.users?.branches)
+            setPayments(response.users?.payments)
             setPageCount(pages)
-            setOutOfPage(response.users.users[0]?.pageCount)
+            setOutOfPage(response.users?.users[0]?.pageCount)
 
-            let brunches=response.users.branches
+            let brunches=response.users?.branches
 
             let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 

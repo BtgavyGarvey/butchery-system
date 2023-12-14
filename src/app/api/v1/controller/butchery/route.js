@@ -696,71 +696,116 @@ export async function newProduct(value,session){
 
 }
 
-export async function getProducts(session,val){
-  const user=session.user
+export async function getProducts(data) {
+  const branch = data.branch;
+  const searchParams = data.searchParams;
+  const page = data.page;
+  const value = data.value;
+  const limit = data.pageLimit;
 
-  let productData
-  let branches=[]
-  let addedBy=[]
+  let responseData = {
+    message: '',
+    success: false,
+    products: '',
+  };
 
   try {
+    const matchQuery =
+      searchParams === 'all'
+        ? {}
+        : {
+            $or: [
+              { code: { $regex: searchParams, $options: 'i' } },
+              { name: { $regex: searchParams, $options: 'i' } },
+            ],
+          };
 
-    let currentPage=0
-    let size=10
+    const pipeline = [
+      {
+        $match: {
+          $and: [
+            { branch: new mongoose.Types.ObjectId(branch) },
+            matchQuery,
+            { __v: value },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'usars',
+          localField: 'addedBy',
+          foreignField: 'id',
+          as: 'addedBy',
+        },
+      },
+      {
+        $unwind: { path: '$addedBy', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'usars',
+          localField: 'updatedBy',
+          foreignField: 'id',
+          as: 'updatedBy',
+        },
+      },
+      {
+        $unwind: { path: '$updatedBy', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: 'brunchees',
+          localField: 'branch',
+          foreignField: 'id',
+          as: 'branches',
+        },
+      },
+      {
+        $unwind: { path: '$branches', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: '$$ROOT',
+          },
+        },
+      },
+      {
+        $unwind: '$documents',
+      },
+      {
+        $skip: page * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 0,
+          documents: 1,
+          pageCount: 1,
+        },
+      },
+    ];
 
-    let skip=currentPage*size
+    const groupedDocuments = await Product.aggregate(pipeline);
 
-    let products=await Product.find({branch:user.branch,__v:val}).skip(skip).limit(size)
-    // console.log(products);
+    let products = JSON.stringify(groupedDocuments);
 
-    if (products.length>0) {
+    products = JSON.parse(products);
 
-      for (let i = 0; i < products.length; i++) {
-
-        const promises=[
-          Branch.findOne({id:products[i].branch}),
-          User.findOne({id:products[i].addedBy})
-        ]
-    
-        const promise=await Promise.allSettled(promises)
-    
-        let data = promise.flatMap((response) =>
-          response.status==='fulfilled' ? [response.value] : []
-        );
-        branches.push(data[0])
-        addedBy.push(data[1])
-
-        
-      }
-
-      products=JSON.stringify(products) 
-      branches=JSON.stringify(branches) 
-      addedBy=JSON.stringify(addedBy) 
-
-      productData={
-        products:JSON.parse(products),
-        branches:JSON.parse(branches),
-        addedBy:JSON.parse(addedBy),
-      }
-      
-    } else {
-      productData={
-        products,
-        branches,
-        addedBy,
-      }
-    }
-
-    // console.log(productData);
-
-    return productData
-    
+    responseData.success = true;
+    responseData.products = products;
+    return responseData;
   } catch (error) {
-    
+    console.log(error);
+    responseData.message = 'Server error has occurred.';
+    return responseData;
   }
-
-
 }
+
 
 export async function editProducts(body,session){
 

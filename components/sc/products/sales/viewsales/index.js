@@ -92,11 +92,11 @@ export default function ViewSalesPage({session}) {
         }
         let response=await getSales(data)
 
-        let pages=Math.ceil(response.sales.products[0]?.pageCount / pageLimit.current)
+        let pages=Math.ceil(response.sales?.products[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
-        setOutOfPage(response.sales.products[0]?.pageCount)
-        setSalesData(response.sales.products)
-        setManyCashiers(response.sales.cashierInfo)
+        setOutOfPage(response.sales?.products[0]?.pageCount)
+        setSalesData(response.sales?.products)
+        setManyCashiers(response.sales?.cashierInfo)
         console.log(response.sales);
         toast.dismiss(toastId)
         
@@ -167,30 +167,30 @@ export default function ViewSalesPage({session}) {
 
         for (let i = 0; i < SalesData.length; i++) {
 
-            if (!soldProducts.includes(SalesData[i].documents.details.moreDateDetails.moreHourDetails.name)) {
-                soldProducts.push(SalesData[i].documents.details.moreDateDetails.moreHourDetails.name)
+            if (!soldProducts.includes(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name)) {
+                soldProducts.push(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name)
             }
 
             result1.push(
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.name}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.quantity}</td>
-                <td>{SalesData[i].documents.details.moreDateDetails.moreHourDetails.amountSold}</td>
-                <td>{DateTime(SalesData[i].documents.details.moreDateDetails.moreHourDetails.date)}</td>
+                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name}</td>
+                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.quantity}</td>
+                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold}</td>
+                <td>{DateTime(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.date)}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
-                    viewMore(SalesData[i].documents.branch,SalesData[i].documents.details.moreDateDetails.moreHourDetails)
+                    viewMore(SalesData[i]?.documents.branch,SalesData[i]?.documents.details.moreDateDetails.moreHourDetails)
                 }}/></td>
                 <td title="Roll Back"><FontAwesomeIcon icon={faArrowAltCircleUp} className="text-danger fw-bold faEdit" onClick={()=>{
                     let data={
-                        user:session.user.id,
+                        user:session?.user.id,
                         now:Today(),
-                        date:SalesData[i].documents.details.date,
-                        hour:SalesData[i].documents.details.moreDateDetails.hour,
-                        name:SalesData[i].documents.details.moreDateDetails.moreHourDetails.name,
-                        branch:session.user.branch,
-                        sale:SalesData[i].documents.details.moreDateDetails.moreHourDetails
+                        date:SalesData[i]?.documents.details.date,
+                        hour:SalesData[i]?.documents.details.moreDateDetails.hour,
+                        name:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name,
+                        branch:session?.user.branch,
+                        sale:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails
                     }
                     rollBackSale(data)
                 }}/></td>
