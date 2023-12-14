@@ -130,7 +130,6 @@ export async function DELETE(request) {
     
 }
 
-
 async function generateUniqueUserId(prefix) {
     let id;
     do {
@@ -234,6 +233,10 @@ export async function newUser(value){
             responseData.message='Invalid data'
             return responseData
         }
+
+        insertUser.__v=1
+
+        await insertUser.save()
 
         const message=`
         <h3>Registration of ${body.role} ${body.firstName} ${body.lastName},</h3>
@@ -606,8 +609,8 @@ export async function reverseEmployeePayment(id){
 // USER LOGIN
 
 export async function loginUser (username, password, req){
-  console.log(req);
-    try {
+
+  try {
       if (!username || !password) {
         return {
           message: 'Please enter username and password',
@@ -619,7 +622,7 @@ export async function loginUser (username, password, req){
   
       if (!user) {
         return {
-          message: 'Invalid username or password',
+          message: 'User not found',
           success: false,
         };
       }
@@ -633,16 +636,16 @@ export async function loginUser (username, password, req){
 
       let cashierUser = await Cashier.findOne({ cashier:user.id });
 
-      if (!user) {
+      if (!cashierUser) {
         return {
           message: 'Invalid username or password',
           success: false,
         };
       }
   
-      if (user.__v === -1) {
+      if (cashierUser.__v === -1) {
         return {
-          message: 'Invalid username or password',
+          message: 'Access denied',
           success: false,
         };
       }
@@ -690,6 +693,9 @@ export async function loginUser (username, password, req){
 };
 
 export const loginDetails = async (req, id, email, name) => {
+
+  console.log(req);
+
   try {
     const { headers, connection } = req;
 
@@ -1110,7 +1116,11 @@ export async function newCashier (body) {
       __v:1
     }
 
-    await Cashier.create(data)
+    let insert=await Cashier.create(data)
+
+    insert.__v=1
+
+    await insert.save()
 
     responseData.success=true
     return responseData

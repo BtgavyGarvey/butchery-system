@@ -41,7 +41,7 @@ export default function ForgotPasswordPage(){
                 const response=await forgotPassword(formData)
                 toast.dismiss(toastId)
                 if (response.success) {
-                    toast.success(response.data.message)
+                    toast.success(response.message)
                     if (emailDiv.current) emailDiv.current.style.pointerEvents='none'
                     if (codeDiv.current) codeDiv.current.style.display='block'
                     if (confirmCodeBtn.current) confirmCodeBtn.current.style.display='block'

@@ -195,7 +195,7 @@ export default function NewProductPage({session}) {
                 <div class="row">
                     
                     <div class="col-lg-12">
-                        <div class="p-5">
+                        <div class="p-2">
                             
                             <form class="user" onSubmit={onSubmit}>
                                 <div class="row mb-3">

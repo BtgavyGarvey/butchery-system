@@ -300,6 +300,8 @@ export async function newButchery(value){
       return responseData
     }
 
+    insertButchery.__v=1
+
     butcheryName=insertButchery.name
     email=insertButchery.email
 
@@ -350,7 +352,7 @@ export async function newButchery(value){
 
     sendEmail(subject,sanitizedMessage,send_to,sent_from)
 
-    await Promise.allSettled([newBranch(branchData),newUser(userData)])
+    await Promise.allSettled([insertButchery.save(),newBranch(branchData),newUser(userData)])
     
     responseData.message='Check your business email for more information'
     responseData.success=true
@@ -434,7 +436,11 @@ export async function newBranch(value){
       __v:1
     }
 
-    await Branch.create(branchData)
+    let insert=await Branch.create(branchData)
+
+    insert.__v=1
+
+    await insert.save()
 
     responseData.success=true
 
@@ -646,7 +652,7 @@ export async function newProduct(value,session){
       LinkedProduct.updateMany({parent:parentProduct.id},{$set:{quantity}},{$upsert:false})
       )
       dbPromise.push(
-      LinkedProduct.create(parentData)
+        LinkedProduct.create(parentData)
       )
       
     }
@@ -667,9 +673,12 @@ export async function newProduct(value,session){
       __v:1
     }
 
+    let insert=await Product.create(productData)
+
+    insert.__v=1
 
     dbPromise.push(
-      Product.create(productData)
+      insert.save()
     )
 
     await Promise.allSettled(dbPromise)
