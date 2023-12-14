@@ -6,7 +6,15 @@ const loginDetailsSchema= new Schema({
         type:mongoose.Schema.Types.ObjectId,
         required:true
     },
-    details:{
+    ipAddress:{
+        type:String,
+        required:true
+    },
+    device:{
+        type:String,
+        required:true
+    },
+    location:{
         type:Array,
         required:true
     },

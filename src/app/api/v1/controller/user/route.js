@@ -15,6 +15,7 @@ import { exportEmail } from "../butchery/route";
 import Butchery from "../../model/butchery";
 import EmployeesPayments from "../../model/employeesPayments";
 import LoginDetails from '../../model/loginDetailsModel'
+import LoginStatus from '../../model/loginStatusModel'
 import mongoose from "mongoose";
 import { Country } from "country-state-city";
 
@@ -664,8 +665,9 @@ export async function loginUser (username, password, req){
           };
         }
   
+        let cashierName=user.firstName=' '+user.lastName+' ('+user.username+')'
         if (process.env.NODE_ENV === 'production') {
-          loginDetails(req, cashierUser.cashier, butchery.email, butchery.name);
+          loginDetails(req, cashierUser.cashier, butchery.email, butchery.name,cashierName);
         }
         
         let access = true;
@@ -692,11 +694,10 @@ export async function loginUser (username, password, req){
     }
 };
 
-export const loginDetails = async (req, id, email, name) => {
-
-  console.log(req);
+export const loginDetails = async (req, id, email, name, cashierName) => {
 
   try {
+    loginStatus(id)
     const { headers, connection } = req;
 
     const device = headers['user-agent'];
@@ -710,7 +711,7 @@ export const loginDetails = async (req, id, email, name) => {
     };
 
     if (!device || !ipAddress || !location.country || !location.city) {
-      return; 
+      return;
     }
 
     const rootDomain = headers.host;
@@ -727,27 +728,25 @@ export const loginDetails = async (req, id, email, name) => {
     const d = new Date();
     const date = new Intl.DateTimeFormat('en-US', options).format(d);
 
-    const login = await LoginStatus.findOneAndUpdate(
-      { cashier: id },
-      { __v: 1},
-      { upsert: true, new: true },
-      
-    );
+    let logindetails
+    const result = await LoginDetails.find({cashier: id}).sort({ _id: -1 }).limit(1).toArray();
 
-    const logindetails = await LoginDetails.findOne({ cashier: id });
 
-    if (logindetails) {
+    if (result.length >0) {
+      logindetails = result[0];
+
       if (logindetails.device !== device) {
         const message = `
-          <h4>Hello ${name}</h4>
-          <p>Your Legio Mariae Management System account was just signed in to from a new device.</p><br />
+          <h4>Hello ${name} Butchery</h4>
+          <p>Your Butchery Management System account was just signed in to from a new device.</p><br />
+          <p><b>Cashier:</b> ${cashierName}</P>
           <p><b>When:</b> ${date}</P>
           <p><b>Time Zone:</b> ${location.timeZone}</P>
           <p><b>Device:</b> ${device}</P>
           <p><b>IP Address:</b> ${ipAddress}</P>
           <p><b>Location:</b> ${location.city}/${location.country}</P><br />
-          <p>If this was you, then you don't need to do anything.</P>
-          <p>If you don't recognize this activity, please <a href="${protocol}://${rootDomain}/sections/forgotpassword">change your password</a>.</P>
+          <p>If you recognize this activity, then you don't need to do anything.</P>
+          <p>If you don't recognize this activity, please contact us through <a href="emailto:mylegiomariae.systems@gmail.com">mylegiomariae.systems@gmail.com</a>.</P>
         `;
         const subject = 'New Sign in to your Butchery Account';
         const send_to = email;
@@ -759,34 +758,39 @@ export const loginDetails = async (req, id, email, name) => {
         sendEmail(subject, sanitizedMessage, send_to, sent_from);
       }
 
-      logindetails.device = device;
-      logindetails.location = location;
-      logindetails.ipAddress = ipAddress;
-      await logindetails.save();
-
-      
-    } else {
-      let insert=await LoginDetails.create({
-        cashier: id,
-        details:{
-          ipAddress,
-          device,
-          location,
-        },
-        __v: 1,
-      });
-
-      insert.__v=1
-      await insert.save()
-
     }
-    return
+    
+    let insert = await LoginDetails.create({
+      cashier: id,
+      ipAddress,
+      device,
+      location,
+      __v: 1,
+    });
+
+    insert.__v = 1;
+    await insert.save();
+    return;
 
   } catch (error) {
     console.error(error);
-    return
+    return;
   }
 };
+
+export async function loginStatus(id){
+
+  try {
+    await LoginStatus.findOneAndUpdate(
+      { cashier: id },
+      { __v: 1 },
+      { upsert: true, new: true },
+    );
+  } catch (error) {
+    console.log(error);
+  }
+  
+}
 
   // LOGIN DETAILS - EXTENSION OF loginUser() FUNCTION
   
@@ -876,7 +880,7 @@ export const loginDetails = async (req, id, email, name) => {
   // };
 
 
-  export async function verifyEmail(token){
+export async function verifyEmail(token){
 
     let responseData={
       message:'',

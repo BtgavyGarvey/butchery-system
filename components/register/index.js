@@ -248,7 +248,7 @@ export default function RegisterPage() {
                         <div class="p-1">
 
                             <div className="logo text-center mb-md-5 mt-md-4 pb-3">
-                                <h1 className="logo-caption fw-bold"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
+                                <h1 className="logo-caption fw-bold text-primary"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
                             </div>
                             
                             <div class="text-center">
