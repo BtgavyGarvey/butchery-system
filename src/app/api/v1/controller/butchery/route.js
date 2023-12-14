@@ -919,6 +919,10 @@ export async function deleteProducts(branch,id,session,val){
 
     if (product) {
 
+      if (product.linked[0].status) {
+        return false
+      }
+
       product.__v=val || product.__v
       product.updatedBy=user.id || product.updatedBy
 

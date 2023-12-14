@@ -35,7 +35,14 @@ export default function NewProductPage({session}) {
     }
 
     const getProdacts=async()=>{
-        let response=await getProducts(session,1)
+        let data={
+            page:0,
+            pageLimit:100,
+            branch:session.user.branch,
+            searchParams:'all',
+            value:1
+        }
+        let response=await getProducts(data)
         setProducts(response.products)
     }
 
@@ -61,8 +68,6 @@ export default function NewProductPage({session}) {
         }
         setFormData({ ...formData, [name]: value });
     };
-
-    console.log(formData);
 
     const validate=async()=>{
 
@@ -103,7 +108,7 @@ export default function NewProductPage({session}) {
         for (let i = 0; i < Products.length; i++) {
         
             result1.push(
-                <option key={'a'+i} value={Products[i].id}>{Products[i].name}</option>
+                <option key={'a'+i} value={Products[i].documents.id}>{Products[i].documents.name}</option>
 
             )
             

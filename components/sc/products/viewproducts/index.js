@@ -119,7 +119,7 @@ export default function ViewProductsPage({session}) {
                 getProductData(temp)
             }
             else{
-                toast.error('Failed')
+                toast.error('Failed, check if the product is a parent product')
             }
         }
         
