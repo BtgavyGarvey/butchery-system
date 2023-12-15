@@ -145,9 +145,15 @@
     cursor: pointer;
   }
 
+  .pricing_container{
+    display: flex;
+  }
   @media(max-width: 40em) {
     .cardDiv > .card{
       width: 100%;
+    }
+    .pricing_container{
+      display: block;
     }
     
   }

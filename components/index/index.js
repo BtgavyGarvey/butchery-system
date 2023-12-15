@@ -23,8 +23,13 @@ export default function LandingPage() {
                 <div className="container">
                     <div className="hero-inner">
 						<div className="hero-copy">
-	                        <h1 className="hero-title mt-0 fw-bold"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
-	                        <p className="hero-paragraph">Our landing page template works on all devices, so you only have to set it up once, and get beautiful results forever.</p>
+	                        <h1 className="hero-title mt-0 fw-bold"><span className="tweak text-danger">B</span>utchery <span className="tweak text-danger">S</span>ystem</h1>
+	                        <p className="hero-paragraph">
+                                Our mission is to revolutionize the butcher shop industry by providing a comprehensive POS system that optimizes sales, 
+                                empowers precise stock management, leverages data-driven predictions, ensures a seamless user experience, 
+                                and offers unwavering 24/7 support. We are committed to empowering businesses with the tools they need to thrive in an ever-evolving market, 
+                                fostering efficiency, and maximizing success.
+                            </p>
 	                        <div className="hero-cta"><a className="button button-primary" href="/register">Register</a><a className="button" href="/login">Login</a></div>
 						</div>
 						<div className="hero-figure anime-element">
@@ -83,46 +88,14 @@ export default function LandingPage() {
                             <div className="feature text-center is-revealing">
                                 <div className="feature-inner">
                                     <div className="feature-icon">
-										<img src="/systemFiles/images/feature-icon-01.svg" alt="Feature 01" />
-                                    </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
-                                </div>
-                            </div>
-							<div className="feature text-center is-revealing">
-                                <div className="feature-inner">
-                                    <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-02.svg" alt="Feature 02" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
-                                </div>
-                            </div>
-                            <div className="feature text-center is-revealing">
-                                <div className="feature-inner">
-                                    <div className="feature-icon">
-										<img src="/systemFiles/images/feature-icon-03.svg" alt="Feature 03" />
-                                    </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
-                                </div>
-                            </div>
-                            <div className="feature text-center is-revealing">
-                                <div className="feature-inner">
-                                    <div className="feature-icon">
-										<img src="/systemFiles/images/feature-icon-04.svg" alt="Feature 04" />
-                                    </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
-                                </div>
-                            </div>
-							<div className="feature text-center is-revealing">
-                                <div className="feature-inner">
-                                    <div className="feature-icon">
-										<img src="/systemFiles/images/feature-icon-05.svg" alt="Feature 05" />
-                                    </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
+                                    <h4 className="feature-title mt-24">Optimize Sales Efficiency</h4>
+                                    <p className="text-sm mb-0">
+                                        Streamline your butcher shop's sales process with our cutting-edge Point of Sale (POS) system, 
+                                        designed to enhance efficiency and elevate your customer experience.
+                                        
+                                    </p>
                                 </div>
                             </div>
                             <div className="feature text-center is-revealing">
@@ -130,8 +103,62 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-06.svg" alt="Feature 06" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Be Productive</h4>
-                                    <p className="text-sm mb-0">Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis. Mauris rhoncus aenean vel elit scelerisque mauris.</p>
+                                    <h4 className="feature-title mt-24">Sale Reversal</h4>
+                                    <p className="text-sm mb-0">
+                                        Correct mistakes easily by rolling back or reversing sales transactions that were mistakenly entered or processed.
+                                        This helps maintain accurate inventory levels and ensures that stock records accurately reflect the actual quantity of products available.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="feature text-center is-revealing">
+                                <div className="feature-inner">
+                                    <div className="feature-icon">
+										<img src="/systemFiles/images/feature-icon-01.svg" alt="Feature 01" />
+                                    </div>
+                                    <h4 className="feature-title mt-24">Data-Driven Predictions</h4>
+                                    <p className="text-sm mb-0">
+                                        Harness the power of data to predict future sales trends. Our system utilizes advanced analytics to provide valuable insights, 
+                                        empowering you to make informed business decisions.
+                                        
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="feature text-center is-revealing">
+                                <div className="feature-inner">
+                                    <div className="feature-icon">
+										<img src="/systemFiles/images/feature-icon-03.svg" alt="Feature 03" />
+                                    </div>
+                                    <h4 className="feature-title mt-24">Precision Stock Management</h4>
+                                    <p className="text-sm mb-0">
+                                        Take control of your inventory like never before. Our butchery system ensures precise stock management, 
+                                        minimizing waste and maximizing profitability.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="feature text-center is-revealing">
+                                <div className="feature-inner">
+                                    <div className="feature-icon">
+										<img src="/systemFiles/images/feature-icon-04.svg" alt="Feature 04" />
+                                    </div>
+                                    <h4 className="feature-title mt-24">Seamless User Experience</h4>
+                                    <p className="text-sm mb-0">
+                                        Enjoy a user-friendly interface that simplifies complex tasks. Our POS system is designed for ease of use, 
+                                        ensuring that both staff and customers have a seamless experience.
+
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="feature text-center is-revealing">
+                                <div className="feature-inner">
+                                    <div className="feature-icon">
+										<img src="/systemFiles/images/feature-icon-05.svg" alt="Feature 05" />
+                                    </div>
+                                    <h4 className="feature-title mt-24">24/7 Support and Updates</h4>
+                                    <p className="text-sm mb-0">
+                                        Stay ahead with continuous support and regular updates. Our team is committed to providing 
+                                        assistance around the clock, ensuring your butchery system is always up-to-date and performing at its best.
+                                        
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -141,12 +168,14 @@ export default function LandingPage() {
 
             <div className="d-flex justify-content-center h1 fw-bold text-warning">Pricing</div>
 
-            <section className="pricing section">
-                <div className="container-sm justify-content-between">
-                    <div className="pricing-inner section-inner">
+            <section className="pricing section ">
+                <div className="pricing_container container justify-content-between">
+                    <div className="pricing-inner section-inner col-md-6">
                         <div className="pricing-header text-center">
                             <h2 className="section-title mt-0 fw-bold"><span>Basic Package</span></h2>
-                            <p className="section-paragraph mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ad quis nostrud.</p>
+                            <p className="section-paragraph mb-0">
+                                By subscribing to our Basic Package plan, you'll gain access to essential features ensuring smooth sales and inventory management.
+                            </p>
                         </div>
 						<div className="pricing-tables-wrap">
                             <div className="pricing-table">
@@ -156,19 +185,28 @@ export default function LandingPage() {
                                             <div className="pricing-table-price"><span className="pricing-table-price-currency h2">KSh. </span><span className="pricing-table-price-amount h1 text-warning">1,200</span><span className="text-xs">/month</span></div>
                                             <div className="pricing-table-price m-1 d-flex justify-content-center">per Branch</div>
                                         </div>
-										<div className="pricing-table-features-title text-xs pt-24 pb-24">What you will get</div>
+										<div className="pricing-table-features-title text-xs pt-24 pb-24">What you will get.</div>
                                         <ul className="pricing-table-features list-reset text-xs">
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>Streamlined and efficient sales processing.</span>
                                             </li>
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>Precise stock management to minimize waste and maximize profitability.</span>
                                             </li>
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>Seamless and intuitive user experience for easy navigation.</span>
                                             </li>
 											<li>
-												<span>Lorem ipsum dolor sit nisi</span>
+												<span>24/7 customer support and regular system updates.</span>
+											</li>
+                                            <li>
+												<span>Expense Monitoring and Tracking.</span>
+											</li>
+                                            <li>
+												<span>Efficient management of employees, including tracking payment activities.</span>
+											</li>
+                                            <li>
+												<span>View total revenue and expenses for the last 6 month.</span>
 											</li>
                                         </ul>
                                     </div>
@@ -182,7 +220,10 @@ export default function LandingPage() {
                     <div className="pricing-inner section-inner">
                         <div className="pricing-header text-center">
                             <h2 className="section-title mt-0 fw-bold">Premium Package</h2>
-                            <p className="section-paragraph mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ad quis nostrud.</p>
+                            <p className="section-paragraph mb-0">
+                                Upgrade to our Premium Package plan for an advanced experience, including future sales prediction, 
+                                cashier oversight, powerful analytics tools, and many more to propel your butcher shop to new heights.
+                            </p>
                         </div>
 						<div className="pricing-tables-wrap">
                             <div className="pricing-table">
@@ -195,21 +236,30 @@ export default function LandingPage() {
 										<div className="pricing-table-features-title text-xs pt-24 pb-24">What you will get</div>
                                         <ul className="pricing-table-features list-reset text-xs">
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>All in Basic Package</span>
                                             </li>
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>Access to data analytics dashboard for in-depth business insights.</span>
                                             </li>
                                             <li>
-                                                <span>Lorem ipsum dolor sit nisi</span>
+                                                <span>Predict future sales trends based on historical sales data.</span>
                                             </li>
 											<li>
-												<span>Lorem ipsum dolor sit nisi</span>
+												<span>Shop regulation - Owner's ability to mark the shop as open or closed, regulating cashier access.</span>
+											</li>
+                                            <li>
+												<span>Tracking cashier login activities</span>
+											</li>
+                                            <li>
+												<span>View total revenue and expenses for the past 5 years.</span>
+											</li>
+                                            <li>
+												<span>Tracking cashier login activities</span>
 											</li>
                                         </ul>
                                     </div>
                                     <div className="pricing-table-cta mb-8">
-                                        <a className="button button-primary button-shadow button-block" href="#">Pre order now</a>
+                                        <a className="button button-primary button-shadow button-block" href="#">Subscribe Now</a>
                                     </div>
                                 </div>
                             </div>
@@ -224,7 +274,7 @@ export default function LandingPage() {
 					<div className="cta-inner section-inner">
 						<h3 className="section-title mt-0">Still not convinced on subscribing?</h3>
 						<div className="cta-cta">
-							<a className="button button-primary button-wide-mobile" href="#">Get in touch</a>
+							<a className="button button-primary button-wide-mobile" href="mailto:mylegiomariae.systems@gmail.com">Get in touch</a>
 						</div>
 					</div>
 				</div>
@@ -279,7 +329,7 @@ export default function LandingPage() {
                             </a>
                         </li>
                     </ul>
-                    <div className="footer-copyright">&copy; 2019 Solid, all rights reserved</div>
+                    <div className="footer-copyright">&copy; {new Date().getFullYear()} Butchery System, All Rights Reserved. Developed By: <a className="text-decoration-noe" href="#"> MyLegio Mariae Systems</a></div>
                 </div>
             </div>
         </footer>
