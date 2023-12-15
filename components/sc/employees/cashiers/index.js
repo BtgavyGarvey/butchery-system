@@ -236,7 +236,7 @@ export default function CashiersPage({session}) {
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/employees/cashiers/logins">Login Activities</a>
+                                    <a class="dropdown-item" href="#">Login Activities</a>
                                 </div>
                                     
                             </div>

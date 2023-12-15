@@ -23,14 +23,19 @@ export default function LandingPage() {
                 <div className="container">
                     <div className="hero-inner">
 						<div className="hero-copy">
-	                        <h1 className="hero-title mt-0 fw-bold"><span className="tweak text-danger">B</span>utchery <span className="tweak text-danger">S</span>ystem</h1>
+	                        <h1 className="hero-title display-6 mt-0 fw-bold"><span className="tweak text-danger">B</span>utchery <span className="tweak text-danger">S</span>ystem</h1>
 	                        <p className="hero-paragraph">
                                 Our mission is to revolutionize the butcher shop industry by providing a comprehensive POS system that optimizes sales, 
                                 empowers precise stock management, leverages data-driven predictions, ensures a seamless user experience, 
                                 and offers unwavering 24/7 support. We are committed to empowering businesses with the tools they need to thrive in an ever-evolving market, 
                                 fostering efficiency, and maximizing success.
                             </p>
-	                        <div className="hero-cta"><a className="button button-primary" href="/register">Register</a><a className="button" href="/login">Login</a></div>
+                            
+	                        <div className="hero-cta">
+                                <p>
+                                    <a className="button button-primary" href="/register">Register</a><a className="button" href="/login">Login</a>
+                                </p>
+                            </div>
 						</div>
 						<div className="hero-figure anime-element">
 							<svg className="placeholder" width="528" height="396" viewBox="0 0 528 396">
@@ -90,7 +95,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-02.svg" alt="Feature 02" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Optimize Sales Efficiency</h4>
+                                    <h4 className="feature-title mt-24 text-warning">Optimize Sales Efficiency</h4>
                                     <p className="text-sm mb-0">
                                         Streamline your butcher shop's sales process with our cutting-edge Point of Sale (POS) system, 
                                         designed to enhance efficiency and elevate your customer experience.
@@ -103,7 +108,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-06.svg" alt="Feature 06" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Sale Reversal</h4>
+                                    <h4 className="feature-title mt-24 text-warning">Sale Reversal</h4>
                                     <p className="text-sm mb-0">
                                         Correct mistakes easily by rolling back or reversing sales transactions that were mistakenly entered or processed.
                                         This helps maintain accurate inventory levels and ensures that stock records accurately reflect the actual quantity of products available.
@@ -115,7 +120,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-01.svg" alt="Feature 01" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Data-Driven Predictions</h4>
+                                    <h4 className="feature-title mt-24 text-warning">Data-Driven Predictions</h4>
                                     <p className="text-sm mb-0">
                                         Harness the power of data to predict future sales trends. Our system utilizes advanced analytics to provide valuable insights, 
                                         empowering you to make informed business decisions.
@@ -128,7 +133,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-03.svg" alt="Feature 03" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Precision Stock Management</h4>
+                                    <h4 className="feature-title mt-24 text-warning">Precision Stock Management</h4>
                                     <p className="text-sm mb-0">
                                         Take control of your inventory like never before. Our butchery system ensures precise stock management, 
                                         minimizing waste and maximizing profitability.
@@ -140,7 +145,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-04.svg" alt="Feature 04" />
                                     </div>
-                                    <h4 className="feature-title mt-24">Seamless User Experience</h4>
+                                    <h4 className="feature-title mt-24 text-warning">Seamless User Experience</h4>
                                     <p className="text-sm mb-0">
                                         Enjoy a user-friendly interface that simplifies complex tasks. Our POS system is designed for ease of use, 
                                         ensuring that both staff and customers have a seamless experience.
@@ -153,7 +158,7 @@ export default function LandingPage() {
                                     <div className="feature-icon">
 										<img src="/systemFiles/images/feature-icon-05.svg" alt="Feature 05" />
                                     </div>
-                                    <h4 className="feature-title mt-24">24/7 Support and Updates</h4>
+                                    <h4 className="feature-title mt-24 text-warning">24/7 Support and Updates</h4>
                                     <p className="text-sm mb-0">
                                         Stay ahead with continuous support and regular updates. Our team is committed to providing 
                                         assistance around the clock, ensuring your butchery system is always up-to-date and performing at its best.
@@ -253,9 +258,7 @@ export default function LandingPage() {
                                             <li>
 												<span>View total revenue and expenses for the past 5 years.</span>
 											</li>
-                                            <li>
-												<span>Tracking cashier login activities</span>
-											</li>
+                                            
                                         </ul>
                                     </div>
                                     <div className="pricing-table-cta mb-8">
@@ -329,7 +332,7 @@ export default function LandingPage() {
                             </a>
                         </li>
                     </ul>
-                    <div className="footer-copyright">&copy; {new Date().getFullYear()} Butchery System, All Rights Reserved. Developed By: <a className="text-decoration-noe" href="#"> MyLegio Mariae Systems</a></div>
+                    <div>&copy; {new Date().getFullYear()} Butchery System, All Rights Reserved. Developed By: <a className="text-warning" href="#"> MyLegio Mariae Systems</a></div>
                 </div>
             </div>
         </footer>

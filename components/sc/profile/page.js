@@ -228,7 +228,7 @@ export default function ProfilePage({session}) {
                                                 class="btn btn-primary font-monospace text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder text-center text-dark border rounded-pill border-2 border-success shadow focus-ring focus-ring-danger rubberBand animated"
                                                 type="submit" style={{margin: "8px"}}><strong>SAVE</strong></button><a
                                                 class="btn btn-danger font-monospace text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder text-center border rounded-pill border-2 border-info shadow focus-ring focus-ring-danger rubberBand animated"
-                                                role="button" style={{margin: "8px"}} href="/forgot-password.html"
+                                                role="button" style={{margin: "8px"}} href="#"
                                                 target="_top"><strong>Change password</strong></a></div>
                                     </div>
                                 </form>

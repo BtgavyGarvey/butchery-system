@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
-import InvoicePage from "../../../../components/sc/invoice/view/index";
-import authOptions from "../../api/auth/[...nextauth]/options";
+import InvoicePageById from "../../../../../components/sc/invoice/view/byId";
+import authOptions from "../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
+import { NextRequest } from "next/server";
 
 export const metadata = {
   title: 'Butchery System - Invoices',
@@ -15,11 +16,16 @@ export default async function Profile() {
     redirect('/')
   }
 
+  const {searchParams}=new URL(NextRequest.url)
+
+  console.log(searchParams);
+
+
   return (
     <>
     {
-      session ? (
-        <InvoicePage session={session}/>
+      session?.user ? (
+        <InvoicePageById session={session} param={searchParams}/>
       ):(
         logOut()
       )

@@ -17,6 +17,9 @@ import Dataset from "../../model/dataset";
 import Sales from "../../model/sales";
 import Expenses from "../../model/expenses";
 import RollBackSales from "../../model/rollBackSales";
+import Invoices from "../../model/invoices";
+import Invoice from "../../model/invoiceDetails";
+import lodash from "lodash";
 import mongoose from "mongoose";
 import { format } from "date-fns";
 
@@ -786,6 +789,50 @@ export async function getProducts(data) {
           _id: 0,
           documents: 1,
           pageCount: 1,
+        },
+      },
+    ];
+
+    const groupedDocuments = await Product.aggregate(pipeline);
+
+    let products = JSON.stringify(groupedDocuments);
+
+    products = JSON.parse(products);
+
+    responseData.success = true;
+    responseData.products = products;
+    return responseData;
+  } catch (error) {
+    console.log(error);
+    responseData.message = 'Server error has occurred.';
+    return responseData;
+  }
+}
+
+export async function getAllProducts(data){
+  const branch = data.branch;
+
+  let responseData = {
+    message: '',
+    success: false,
+    products: '',
+  };
+
+  try {
+
+    const pipeline = [
+      {
+        $match: {
+          $and: [
+            { branch: new mongoose.Types.ObjectId(branch) },
+            { __v: 1 },
+          ],
+        },
+      },
+      {
+        $project: {
+          code: 1,
+          name: 1,
         },
       },
     ];
@@ -1954,3 +2001,294 @@ export const getReportData = async (branch,Today,val) => {
       return responseData
   }
 };
+
+export async function newInvoice(data){
+  let responseData={
+    message:'',
+    success:false,
+  }
+
+  try {
+
+    // await Invoices.deleteMany()
+
+    let invoiceNumber=1
+    
+    let invoiceData=await Invoices.findOne({branch:data.branch})
+
+      const setDetails=async(data)=>{
+
+          await Invoices.updateOne(
+            {
+            branch:data.branch,
+            },
+            {
+              $push: {
+                'details':{
+                  invoiceNumber:String(invoiceNumber),
+                  date:data.date,
+                  addedBy:data.addedBy,
+                }
+              },
+            }
+            
+          )
+          
+      }
+
+      if (!invoiceData) {
+        invoiceData=await Invoices.create({
+          branch:data.branch,
+          details:[]
+        })
+
+      }
+      else{
+
+        let lastInvoice=lodash.last(invoiceData.details)
+
+        if (lastInvoice?.date===data.date) {
+          responseData.message='There can only be one invoice per day.'      
+          return responseData
+        }
+
+        invoiceNumber=parseInt(lastInvoice?.invoiceNumber + 1)
+
+      }
+
+      await setDetails(data)
+
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}
+
+export async function getInvoices(data){
+  let responseData={
+    message:'',
+    success:false,
+    invoices:''
+  }
+console.log(data);
+  try {
+
+    const matchQuery =
+      data.searchParams === 'all'
+        ? {}
+        : {
+            $or: [
+              { 'details.invoiceNumber': { $regex: data.searchParams, $options: 'i' } },
+              { 'details.date': { $regex: data.searchParams, $options: 'i' } },
+            ],
+          };
+    // let invoiceData=await Invoices.find({branch:data.branch}).skip(parseInt(data.page * data.pageLimit)).limit(parseInt(data.pageLimit))
+
+    let pipeline=[
+      {
+        $match: {
+          $and: [
+            { branch: new mongoose.Types.ObjectId(data.branch) },
+            matchQuery,
+          ],
+        },
+      },
+      {
+        $unwind: "$details",
+      },
+      // {
+      //   $match: {
+      //     "details.date": data.date,
+      //   },
+      // },
+      // {
+      //   $sort: {
+      //     "details.date": -1,
+      //   },
+      // },
+      // {
+      //   $group: {
+      //     _id: null,
+      //     pageCount: { $sum: 1 },
+      //     documents: {
+      //       $push: '$$ROOT',
+      //     },
+      //   },
+      // },
+      // {
+      //   $unwind: '$documents',
+      // },
+      // {
+      //   $skip:data.page * data.pageLimit
+      // },
+      // {
+      //   $limit:data.pageLimit
+      // },
+      // {
+      //   $project: {
+      //     _id: 0,
+      //     documents: 1,
+      //     pageCount: 1,
+      //   },
+      // },
+    ]
+
+    let invoiceData=await Invoices.aggregate(pipeline)
+
+    console.log(invoiceData);
+
+    let users=[]
+
+    await Promise.all(
+      invoiceData?.map(async(result)=>{
+        let element=await User.findOne({id:result.addedBy})
+        users.push(element)
+      })
+    )
+
+    users=JSON.stringify(users) 
+    let invoices=JSON.stringify(invoiceData) 
+      
+    let myData={
+      users:JSON.parse(users),
+      invoices:JSON.parse(invoices),
+    }
+
+    responseData.success=true
+    responseData.invoices=myData
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}
+
+export async function newInvoiceDetails(data){
+  let responseData={
+    message:'',
+    success:false,
+    invoices:''
+  }
+
+  try {
+
+    if (data.value===1) {
+
+      let invoiceData=await Invoices.findOne({branch:data.branch,'details.invoiceNumber':data.invoiceNumber})
+      let invoiceDetail=await Invoice.findOne({invoiceNumber:data.invoiceNumber,'details.code':data.code})
+
+      if (invoiceData) {
+
+        if (invoiceDetail) {
+          responseData.message='The product has been invoiced already.'      
+          return responseData
+        }
+
+        await Invoice.updateOne(
+          {
+            invoiceNumber:data.invoiceNumber,
+            'details.code':data.code,
+          },
+          {
+            $addToSet:{
+              'details':{
+                code:data.code,
+                name:data.name,
+                date:data.date.fullDate,
+                quantity:data.quantity,
+                cost:data.cost,
+                addedBy:data.id
+              }
+            }
+          },
+          {
+            $upsert:true
+          }
+        )
+        
+      } else {
+        responseData.message='Invalid data'      
+      }
+      
+    }
+    else{
+
+      await Invoice.updateOne(
+        {
+          invoiceNumber:data.invoiceNumber,
+          'details.code':data.code,
+        },
+        {
+          $addToSet:{
+            'details':{
+              code:data.code,
+              name:data.name,
+              date:data.date.fullDate,
+              quantity:data.quantity,
+              cost:data.cost,
+              addedBy:data.id
+            }
+          }
+        },
+        {
+          $upsert:true
+        }
+      )
+    }
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}
+
+export async function getInvoiceDetails(data){
+  let responseData={
+    message:'',
+    success:false,
+    invoices:''
+  }
+
+  try {
+
+    let invoiceData=await Invoice.findOne({invoiceNumber:data.invoiceNumber})
+
+    let users=[]
+
+    await Promise.all(
+      invoiceData?.details.map(async(result)=>{
+        let element=await User.findOne({id:result.addedBy})
+
+        users.push(element)
+      })
+    )
+
+    users=JSON.stringify(users) 
+    let invoices=JSON.stringify(invoiceData) 
+      
+    let dataDetails={
+      users:JSON.parse(users),
+      invoices:JSON.parse(invoices),
+    }
+
+    responseData.success=true
+    responseData.invoices=dataDetails
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+}

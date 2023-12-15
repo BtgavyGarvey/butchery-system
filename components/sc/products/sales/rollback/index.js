@@ -213,7 +213,7 @@ export default function ViewSalesPage({session}) {
                     <div class="card shadow">
                     <div class="card-header d-flex justify-content-between py-3">
                             <p class="text-primary m-0 fw-bold">Roll Back Info</p>
-                            <div class="dropdown border rounded-pill">
+                            {/* <div class="dropdown border rounded-pill">
                                 <button onClick={()=>{setDropDownManu(!dropDownManu)}}
                                     class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
                                     aria-expanded="false" data-bs-toggle="dropdown"
@@ -224,7 +224,7 @@ export default function ViewSalesPage({session}) {
                                     <a class="dropdown-item" href="#">Roll Back Dashboard</a>
                                 </div>
                                     
-                            </div>
+                            </div> */}
                         </div>
                         
                         <div class="card-body bg-dark">

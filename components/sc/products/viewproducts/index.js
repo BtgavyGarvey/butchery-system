@@ -352,7 +352,7 @@ export default function ViewProductsPage({session}) {
                                             </>
                                         )
                                     }
-                                    <a class="dropdown-item" href="/sc/invoice"  >Invoices</a>
+                                    <a class="dropdown-item" href="#"  >Invoices</a>
 
                                 </div>
                                     
