@@ -8,10 +8,10 @@ import { faArchive, faArrowAltCircleUp, faTrashAlt } from "@fortawesome/free-sol
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
 import { DayTime } from "../../../layout/utils"
-import { deleteProducts, editProducts, getProducts, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
+import { deleteProducts, editProducts, getBranches, getProducts, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 
-let Branches=[]
+// let Branches=[]
 export default function ViewProductsPage({session}) {
 
     let toastId
@@ -27,7 +27,7 @@ export default function ViewProductsPage({session}) {
     const [dropDownManu, setDropDownManu]=React.useState(false)
     const [achivedProducts, setAchivedProducts]=React.useState(false)
     const [ProductData, setProductDataData]=React.useState([])
-    // const [Branches, setBranches]=React.useState([])
+    const [Branches, setBranches]=React.useState([])
     // const [AddedBy, setAddedBy]=React.useState([])
     const [oneProductDataData, setOneProductDataData]=React.useState()
     const [productInfo, setproductInfo]=React.useState('Available Products')
@@ -47,7 +47,13 @@ export default function ViewProductsPage({session}) {
         page.current=1
         achievedVal.current=1
         getProductData()
+        getBrunches()
     },[])
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setBranches(response.branches)
+    }
 
     const showModal=(val)=>{
 
@@ -78,6 +84,11 @@ export default function ViewProductsPage({session}) {
 
     const handlePageLimitClick=(e)=>{
         pageLimit.current=parseInt(e.target.value)
+        getProductData()
+    }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
         getProductData()
     }
 
@@ -129,11 +140,7 @@ export default function ViewProductsPage({session}) {
 
         const result1=[]
 
-        let tempBranch=[]
-
         for (let i = 0; i < ProductData.length; i++) {
-
-            tempBranch.push(ProductData[i]?.documents.branches)
 
             result1.push(
                 <>
@@ -180,20 +187,20 @@ export default function ViewProductsPage({session}) {
     
         }
 
-        let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
+        // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 
 
-        for (let i = 0; i < tempBranch.length; i++) {
+        // for (let i = 0; i < tempBranch.length; i++) {
 
-            let id=tempBranch[i].id
+        //     let id=tempBranch[i].id
             
-            if (!isObjectInArray(Branches, id)) {
+        //     if (!isObjectInArray(Branches, id)) {
 
-                Branches.push(tempBranch[i])
+        //         Branches.push(tempBranch[i])
                 
-            }
+        //     }
             
-        }
+        // }
 
         return result1
             
@@ -352,7 +359,7 @@ export default function ViewProductsPage({session}) {
                                             </>
                                         )
                                     }
-                                    <a class="dropdown-item" href="#"  >Invoices</a>
+                                    <a class="dropdown-item" href="/sc/invoice"  >Invoices</a>
 
                                 </div>
                                     
@@ -378,7 +385,7 @@ export default function ViewProductsPage({session}) {
 
                                 <div class="col-md-4">
                                     <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handlePageLimitClick}
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
                                             class="d-inline-block form-select form-select-sm">
                                             {
                                                 Branches.map((result)=>{

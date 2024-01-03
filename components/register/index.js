@@ -23,7 +23,7 @@ let initialState = {
     mobile:"",
     terms:false,
     role:'Employer',
-    subscription:0,
+    subscription:2,
     name:''
 };
  

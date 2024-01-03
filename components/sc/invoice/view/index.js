@@ -7,7 +7,7 @@ import NavBar from "../../../layout/navbar"
 import { faArchive, faArrowAltCircleUp, faEye, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { DayTime, Today } from "../../../layout/utils"
+import { DayTime, Today, formatDate } from "../../../layout/utils"
 import { deleteProducts, editProducts, getAllProducts, getBranches, getInvoices, getProducts, newInvoice, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 import { useRouter } from "next/navigation"
@@ -31,6 +31,7 @@ export default function ViewProductsPage({session}) {
     const [dropDownManu, setDropDownManu]=React.useState(false)
     const [ProductData, setProductDataData]=React.useState([])
     const [Invoices, setInvoices]=React.useState([])
+    const [Users, setUsers]=React.useState([])
     const [AllBranches, setAllBranches]=React.useState([])
     const [pageCount,setPageCount]=React.useState(0)
     const [outOfPage,setOutOfPage]=React.useState(0)
@@ -38,7 +39,7 @@ export default function ViewProductsPage({session}) {
     React.useEffect(()=>{
         modalRef1.current.style.display='none'
         branch.current=session.user.branch
-        DateRef.current=date.date
+        DateRef.current='all'
         searchParams.current='all'
         pageLimit.current=25
         page.current=1
@@ -63,7 +64,7 @@ export default function ViewProductsPage({session}) {
     }
 
     const handleBranchClick=(e)=>{
-        branch.current=e.selected
+        branch.current=e.target.value
         getInvoiceData()
     }
 
@@ -73,7 +74,7 @@ export default function ViewProductsPage({session}) {
     }
 
     const handleDateClick=(e)=>{
-        DateRef.current=formatDate(e.target.value)
+        DateRef.current=e.target.value ? formatDate(e.target?.value) : 'all'
         getInvoiceData()
     }
 
@@ -86,7 +87,7 @@ export default function ViewProductsPage({session}) {
     }
 
     const toOneInvoice=async(invoiceNumber)=>{
-        router.push(`/sc/invoice/details?num=${invoiceNumber}`)
+        router.push(`/sc/invoice/details?branch=${branch.current}&num=${invoiceNumber}`)
     }
 
     const getTableData=()=>{
@@ -98,13 +99,12 @@ export default function ViewProductsPage({session}) {
             result1.push(
                 <>
                 <tr>
-                <td>{i+1}</td>
                 <td>{Invoices[i]?.documents.details.invoiceNumber}</td>
                 <td>{Invoices[i]?.documents.details.date}</td>
                 <td>{Invoices[i]?.documents.branches.name}</td>
-                <td title={Invoices[i]?.documents.details.addedBy.firstName+' '+Invoices[i]?.documents.details.addedBy.lastName} onClick={()=>{
-                    toast(Invoices[i]?.documents.details.addedBy.firstName+' '+Invoices[i]?.documents.details.addedBy.lastName)}
-                    }>{Invoices[i]?.documents.details.addedBy.username}</td>
+                <td title={Users[i]?.firstName+' '+Users[i]?.lastName} onClick={()=>{
+                    toast(Users[i]?.firstName+' '+Users[i]?.lastName)}
+                    }>{Users[i]?.username}</td>
                 <td title="Restore"><FontAwesomeIcon icon={faEye} className="text-primary faEdit" onClick={()=>{
                             toOneInvoice(Invoices[i]?.documents.details.invoiceNumber)
                 }}/></td>
@@ -158,15 +158,17 @@ export default function ViewProductsPage({session}) {
             page:page.current-1,
             pageLimit:pageLimit.current,
             branch:branch.current,
+            date:DateRef.current,
             searchParams:searchParams.current,
         }
         let response=await getInvoices(data)
         console.log(response);
-        let pages=Math.ceil(response.invoices[0]?.pageCount / pageLimit.current)
+        let pages=Math.ceil(response.invoices.invoices[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
-        setOutOfPage(response.invoices[0]?.pageCount)
+        setOutOfPage(response.invoices.invoices[0]?.pageCount)
 
-        setInvoices(response.invoices)
+        setInvoices(response.invoices.invoices)
+        setUsers(response.invoices.users)
 
         toast.dismiss(toastId)
         
@@ -316,11 +318,10 @@ export default function ViewProductsPage({session}) {
                                 <table class="table table-striped  table-hover table-bordered" id="dataTable">
                                     <thead>
                                         <tr>
-                                            <th>No.</th>
                                             <th>Invoice Number</th>
                                             <th>Date</th>
-                                            <th>Added By</th>
                                             <th>Branch</th>
+                                            <th>Added By</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -331,11 +332,10 @@ export default function ViewProductsPage({session}) {
                                     </tbody>
                                     <tfoot >
                                         <tr>
-                                            <td><strong>No.</strong></td>
                                             <th className="fw-bold">Invoice Number</th>
                                             <th className="fw-bold">Date</th>
-                                            <th className="fw-bold">Added By</th>
                                             <th className="fw-bold">Branch</th>
+                                            <th className="fw-bold">Added By</th>
                                             <td className="fw-bold"><strong>Action</strong></td>
                                         </tr>
                                     </tfoot>

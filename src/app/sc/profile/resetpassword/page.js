@@ -1,29 +1,26 @@
 import { getServerSession } from "next-auth";
-import InvoicePageById from "../../../../../components/sc/invoice/view/byId";
+import ResetPasswordPage from "../../../../../components/sc/profile/resetpassword";
 import authOptions from "../../../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
-import { NextRequest } from "next/server";
 
 export const metadata = {
-  title: 'Butchery System - Invoices',
+  title: 'Butchery System - Reset Password',
 }
 
-export default async function Profile(request) {
+export default async function ResetPassword(request) {
 
   const session=await getServerSession(authOptions)
 
   const logOut=()=>{
     redirect('/')
-
   }
-
-  const {num}=request.searchParams
+  const {username}=request.searchParams
 
   return (
     <>
     {
-      session?.user ? (
-        <InvoicePageById session={session} param={request.searchParams}/>
+      session ? (
+        <ResetPasswordPage session={session} param={request.searchParams}/>
       ):(
         logOut()
       )

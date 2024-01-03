@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../layout/footer"
 import Header from "../../layout/header"
 import NavBar from "../../layout/navbar"
-import { getBranchById, getExpense, newExpense, rollBackExpense } from "../../../src/app/api/v1/controller/butchery/route"
+import { getBranchById, getBranches, getExpense, newExpense, rollBackExpense } from "../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
@@ -25,6 +25,7 @@ export default function ViewExpensePage({session}) {
     const page=React.useRef()
     const DateRef=React.useRef()
     const cashier=React.useRef()
+    const branch=React.useRef()
     const pageLimit=React.useRef()
     const product=React.useRef()
     const [pageCount,setPageCount]=React.useState(0)
@@ -35,11 +36,11 @@ export default function ViewExpensePage({session}) {
         amount:'',
         name:'',
         cashier:session.user.id,
-        date,
-        branch:session.user.branch
+        date
     })
     const modalRef2=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
+    const [Branches, setBranches]=React.useState([])
 
     let toastId
 
@@ -47,13 +48,24 @@ export default function ViewExpensePage({session}) {
         newExpenseDiv.current.style.display='none'
         modalRef2.current.style.display='none'
         DateRef.current=date.date
+        branch.current=session.user.branch
         pageLimit.current=25
         page.current=1
         product.current='all'
         cashier.current='all'
         getExpenseData()
-
+        getBrunches()
     },[])
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setBranches(response.branches)
+    }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
+        getExpenseData()
+    }
 
     const showModal=()=>{
         modalRef2.current.style.display='block'
@@ -62,6 +74,7 @@ export default function ViewExpensePage({session}) {
     }
 
     const hideModal=()=>{
+        setDropDownManu(false)
         modalRef2.current.style.display='none'
         newExpenseDiv.current.style.display='none'
         selectRef.current.style.display='block'
@@ -106,7 +119,7 @@ export default function ViewExpensePage({session}) {
             date:DateRef.current,
             page:page.current-1,
             limit:pageLimit.current,
-            session,
+            branch:branch.current,
             expense:product.current
         }
         let response=await getExpense(data)
@@ -170,6 +183,7 @@ export default function ViewExpensePage({session}) {
     const new_Expense=async(e)=>{
 
         e.preventDefault()
+        NewExpense['branch']=branch.current
 
         if (!NewExpense.amount || !NewExpense.name) {
             toast.error('Fill in all fields')
@@ -249,7 +263,7 @@ export default function ViewExpensePage({session}) {
                         
                         <div class="card-body bg-dark">
                             <div class="row">
-                                <div class="col-md-3 text-wrap">
+                                <div class="col-md-1 text-wrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Show&nbsp;<select onChange={handlePageLimitClick}
                                                 class="d-inline-block form-select form-select-sm">
@@ -295,11 +309,26 @@ export default function ViewExpensePage({session}) {
                                                 }
                                             </select>&nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3 text-wrap">
+                                <div class="col-md-2 text-wrap">
                                     <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Date&nbsp;<input type="date" ref={DateRef} onChange={handleDateClick}
                                                 class="d-inline-block form-control form-control-sm" />
                                             &nbsp;</label></div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                            class="d-inline-block form-select form-select-sm">
+                                            {
+                                                Branches.map((result)=>{
+                                                    return (
+                                                        <>
+                                                        <option value={result.id}>{result.name}</option>
+                                                        </>
+                                                    )
+                                                })
+                                            }    
+                                        </select>&nbsp;</label></div>
                                 </div>
                             </div>
                             

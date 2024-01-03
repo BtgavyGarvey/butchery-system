@@ -16,6 +16,7 @@ let paymentType={
 }
 
 let sellData=[]
+let branch
 
 export default function MakeSalesPage({session,data}) {
 
@@ -23,6 +24,7 @@ export default function MakeSalesPage({session,data}) {
     const modalRef1=React.useRef()
 
     const [ProductData, setProductDataData]=React.useState(data.products)
+    branch=data.products[0].documents.branches.name
 
     const getProductData=async()=>{
 
@@ -39,6 +41,7 @@ export default function MakeSalesPage({session,data}) {
         let response=await getProducts(data)
 
         setProductDataData(response.products)
+
         toast.dismiss(toastId)
         
     }
@@ -429,8 +432,9 @@ export default function MakeSalesPage({session,data}) {
                         class=" font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">
                         sell Products</h1>
                     <div class="card shadow">
-                        <div class="card-header py-3">
+                        <div class="card-header py-3 d-flex justify-content-between">
                             <p class="text-primary m-0 fw-bold">Product Info</p>
+                            <p class="text-success m-0 fw-bold">{branch} Branch</p>
                         </div>
                         <div class="card-body bg-dark">
 

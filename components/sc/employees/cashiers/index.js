@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import { deleteCashiers, deleteUser, editUser, getCashiers, getUsers, newCashier, updateCashier } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
+import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
 
 export default function CashiersPage({session}) {
 
@@ -34,6 +35,7 @@ export default function CashiersPage({session}) {
         pageLimit.current=25
         page.current=1
         getCashiersData()
+        getBrunches()
     },[])
 
     const showModal=()=>{
@@ -46,6 +48,11 @@ export default function CashiersPage({session}) {
         //     modalRef2.current.style.display='block'
         //     setDropDownManu(false)
         // }
+    }
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setAllBranches(response.branches)
     }
 
     const hideModal=()=>{
@@ -109,22 +116,22 @@ export default function CashiersPage({session}) {
             setPageCount(pages)
             setOutOfPage(response.cashiers?.cashiers[0]?.pageCount)
 
-            let brunches=response.cashiers?.cashiers
+            // let brunches=response.cashiers?.cashiers
 
-            let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
+            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 
 
-            for (let i = 0; i < brunches.length; i++) {
+            // for (let i = 0; i < brunches.length; i++) {
 
-                let id=brunches[i].documents.branchInfo.id
+            //     let id=brunches[i].documents.branchInfo.id
                 
-                if (!isObjectInArray(AllBranches, id)) {
+            //     if (!isObjectInArray(AllBranches, id)) {
 
-                    AllBranches.push(brunches[i].documents.branchInfo)
+            //         AllBranches.push(brunches[i].documents.branchInfo)
                     
-                }
+            //     }
                 
-            }
+            // }
         }
         else{
             toast.error(response.message)
@@ -187,6 +194,11 @@ export default function CashiersPage({session}) {
 
     const handlePageClick=(e)=>{
         page.current=e.selected+1
+        getCashiersData()
+    }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
         getCashiersData()
     }
 
@@ -256,7 +268,7 @@ export default function CashiersPage({session}) {
                                 
                                 <div class="col-md-4">
                                     <div class="dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handlePageLimitClick}
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
                                             class="d-inline-block form-select form-select-sm">
                                             {
                                                 AllBranches.map((result)=>{

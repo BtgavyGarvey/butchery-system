@@ -119,7 +119,7 @@ export async function newBranchValidation (data){
         butchery: Joi.string().trim().required(),
         region: Joi.string().trim().required(),
         package: Joi.number().required(),
-        expiryDate: Joi.date().required().required(),
+        expiryDate: Joi.date().required(),
         mobile: Joi.number().required()
     });
 
@@ -220,10 +220,10 @@ export const DayTime=async()=>{
     return dayTime
 }
 
-export const AddDate=async(value)=>{
+export const AddDate=async(from,value)=>{
 
-    const today = new Date();
-    const plusDate = addMonths(today, 2);
-    return plusDate.toDateString()
+    const today = new Date(from);
+    const plusDate = addMonths(today, value);
+    return plusDate
 }
 

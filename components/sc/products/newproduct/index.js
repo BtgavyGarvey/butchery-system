@@ -34,11 +34,11 @@ export default function NewProductPage({session}) {
         setBranches(response.branches)
     }
 
-    const getProdacts=async()=>{
+    const getProdacts=async(branch)=>{
         let data={
             page:0,
             pageLimit:100,
-            branch:session.user.branch,
+            branch,
             searchParams:'all',
             value:1
         }
@@ -48,7 +48,7 @@ export default function NewProductPage({session}) {
 
     React.useEffect(()=>{
         getBrunches()
-        getProdacts()
+        getProdacts(session.user.branch)
     },[])
 
     const handleInputChange = (e) => {
@@ -66,6 +66,11 @@ export default function NewProductPage({session}) {
                 productRef.current.style.display='block'
             }
         }
+
+        if(name==='branch'){
+            getProdacts(value)
+        }
+        
         setFormData({ ...formData, [name]: value });
     };
 

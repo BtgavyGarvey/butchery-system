@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import { deleteUser, editUser, getUsers, newCashier } from "../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
+import { getBranches } from "../../../src/app/api/v1/controller/butchery/route"
 
 export default function EmployeesPage({session}) {
 
@@ -25,7 +26,7 @@ export default function EmployeesPage({session}) {
     const [EmployeesData, setEmployeesData]=React.useState([])
     const [Branches, setBranches]=React.useState([])
     const [AllBranches, setAllBranches]=React.useState([])
-    const [AddedBy, setAddedBy]=React.useState([])
+    const [OneBranch, setOneBranch]=React.useState([])
     const [oneEmployeesData, setOneEmployeesData]=React.useState()
 
     
@@ -36,6 +37,7 @@ export default function EmployeesPage({session}) {
         pageLimit.current=25
         page.current=1
         getEmployeesData()
+        getBrunches()
     },[])
 
     const showModal=()=>{
@@ -52,6 +54,11 @@ export default function EmployeesPage({session}) {
 
     const hideModal=()=>{
         modalRef1.current.style.display='none'
+    }
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setAllBranches(response.branches)
     }
 
     const getTableData=()=>{
@@ -71,6 +78,7 @@ export default function EmployeesPage({session}) {
                 <td>{EmployeesData[i]?.documents.nationalId}</td>
                 <td title="Edit"><FontAwesomeIcon icon={faEdit} className="text-warning faEdit" onClick={()=>{
                     setOneEmployeesData(EmployeesData[i]?.documents)
+                    setOneBranch(Branches[i])
                     showModal()
                 }}/></td>
                 <td title="Delete"><FontAwesomeIcon icon={faTrashAlt} className="text-danger faEdit" onClick={()=>{
@@ -116,22 +124,22 @@ export default function EmployeesPage({session}) {
             setPageCount(pages)
             setOutOfPage(response.users?.users[0]?.pageCount)
 
-            let brunches=response.users?.branches
+            // let brunches=response.users?.branches
 
-            let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
+            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 
 
-            for (let i = 0; i < brunches.length; i++) {
+            // for (let i = 0; i < brunches.length; i++) {
 
-                let id=brunches[i].id
+            //     let id=brunches[i].id
                 
-                if (!isObjectInArray(AllBranches, id)) {
+            //     if (!isObjectInArray(AllBranches, id)) {
 
-                    AllBranches.push(brunches[i])
+            //         AllBranches.push(brunches[i])
                     
-                }
+            //     }
                 
-            }
+            // }
         }
         else{
             toast.error(response.message)
@@ -162,6 +170,8 @@ export default function EmployeesPage({session}) {
     }
 
     const makeCashier=async()=>{
+
+        oneEmployeesData['password']='#65£.@'
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
@@ -212,6 +222,13 @@ export default function EmployeesPage({session}) {
         const { name, value } = e.target;
         setOneEmployeesData({ ...oneEmployeesData, [name]: value });
     }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
+        getEmployeesData()
+    }
+
+
 
     const handleInputChangeSearch = (e) => {
       
@@ -299,7 +316,7 @@ export default function EmployeesPage({session}) {
                                 </div>
                                 <div class="col-md-4">
                                     <div class="dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handlePageLimitClick}
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
                                             class="d-inline-block form-select form-select-sm">
                                             {
                                                 AllBranches.map((result)=>{
@@ -381,7 +398,7 @@ export default function EmployeesPage({session}) {
                     </div>
                     <div ref={modalRef1} class="modal font-monospace text-center border rounded" role="dialog" tabindex="-1"
                         id="modal-1">
-                        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable"
+                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
                             role="document">
                             <div class="modal-content bg-dark">
                                 <div class="modal-header text-center">
@@ -430,6 +447,7 @@ export default function EmployeesPage({session}) {
                                                     <div class="col-xl-12 d-grid"><label class="form-label">Branch</label><select onChange={handleInputChangeEdit}
                                                             class="border rounded-pill border-2 border-success shadow-sm form-control-lg"
                                                             name="branch" required>
+                                                            <option value={OneBranch.id}>{OneBranch.name}</option>
                                                             {
                                                                 AllBranches.map((result)=>{
                                                                     return (

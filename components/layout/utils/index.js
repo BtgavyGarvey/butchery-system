@@ -1,5 +1,6 @@
 'use client'
 
+import { addMonths } from "date-fns"
 import dayjs from "dayjs"
 import moment from "moment"
 
@@ -56,7 +57,21 @@ export const DateTime=(date)=>{
     return dateTime
 }
 
+export const DateOnly=(date)=>{
+
+    let dateTime=new Date(date).toDateString()
+
+    return dateTime
+}
+
 export const TimeSeconds=()=>{
 
     return moment().format('LTS')
+}
+
+export const AddDate=(from,value)=>{
+
+    const today = new Date(from);
+    const plusDate = addMonths(today, value);
+    return plusDate
 }

@@ -15,12 +15,11 @@ import { useRouter } from "next/navigation"
 let Branches=[]
 
 export default function ViewProductsPage({session, param}) {
-
+    const {num,branch}=param
     let toastId
     let date=Today()
 
     const page=React.useRef()
-    const branch=React.useRef()
     const searchParams=React.useRef()
     const pageLimit=React.useRef()
     const modalRef2=React.useRef()
@@ -34,11 +33,13 @@ export default function ViewProductsPage({session, param}) {
     const [pageCount,setPageCount]=React.useState(0)
     const [outOfPage,setOutOfPage]=React.useState(0)
     const [InvoiceDetails,setInvoiceDetails]=React.useState({
-        invoiceNumber:param,
+        invoiceNumber:num,
         date:date.fullDate,
         cost:'',
+        branch,
         product:'',
         quantity:'',
+        value:'',
         addedBy:session.user.id,
     })
     
@@ -61,21 +62,25 @@ export default function ViewProductsPage({session, param}) {
 
         const result1=[]
 
-        for (let i = 0; i < Invoices.length; i++) {
+        let Details=Invoices?.invoices?.details || []
+
+
+        for (let i = 0; i < Details.length; i++) {
+            console.log(i,Details);
 
             result1.push(
                 <>
                 <tr>
                 <td>{i+1}</td>
-                <td>{Invoices[i]?.details.code}</td>
-                <td>{Invoices[i]?.details.name}</td>
-                <td>{Invoices[i]?.details.date}</td>
-                <td>{Invoices[i]?.details.quantity}</td>
-                <td>{Invoices[i]?.details.cost}</td>
-                <td>{parseFloat(Invoices[i]?.details.quantity * Invoices[i]?.details.cost)}</td>
-                <td title={Invoices[i]?.details.addedBy.firstName+' '+Invoices[i].details.addedBy.lastName} onClick={()=>{
-                    toast(Invoices[i]?.details.addedBy.firstName+' '+Invoices[i]?.details.addedBy.lastName)}
-                    }>{Invoices[i]?.details.addedBy.username}</td>
+                <td>{Invoices?.products[i]?.code}</td>
+                <td>{Invoices?.products[i]?.name}</td>
+                <td>{Invoices?.invoices.details[i]?.date}</td>
+                <td>{(Invoices?.invoices.details[i]?.quantity).toLocaleString()}</td>
+                <td>{(Invoices?.invoices.details[i]?.cost).toLocaleString()}</td>
+                <td>{(parseFloat(Invoices?.invoices.details[i]?.quantity) * parseFloat(Invoices?.invoices.details[i]?.cost)).toLocaleString()}</td>
+                <td title={Invoices?.users[i]?.firstName+' '+Invoices?.users[i]?.lastName} onClick={()=>{
+                    toast(Invoices?.users[i]?.firstName+' '+Invoices?.users[i]?.lastName)}
+                    }>{Invoices?.users[i]?.username}</td>
                 </tr>
     
                 </>
@@ -92,11 +97,11 @@ export default function ViewProductsPage({session, param}) {
             id:toastId
         })
         let data={
-            branch:branch.current,
+            branch,
         }
         toast()
         let response=await getAllProducts(data)
-        console.log(response);
+        // console.log(response);
         setProductDataData(response.products)
 
         toast.dismiss(toastId)
@@ -108,16 +113,14 @@ export default function ViewProductsPage({session, param}) {
             id:toastId
         })
         let data={
-            page:page.current-1,
-            pageLimit:pageLimit.current,
-            branch:branch.current,
-            searchParams:searchParams.current,
+            branch,
+            invoiceNumber:num,
         }
         let response=await getInvoiceDetails(data)
-        console.log(response);
-        let pages=Math.ceil(response.invoices[0]?.pageCount / pageLimit.current)
-        setPageCount(pages)
-        setOutOfPage(response.invoices[0]?.pageCount)
+        // console.log(response.invoices);
+        // let pages=Math.ceil(response.invoices[0]?.pageCount / pageLimit.current)
+        // setPageCount(pages)
+        // setOutOfPage(response.invoices[0]?.pageCount)
 
         setInvoices(response.invoices)
 
@@ -128,6 +131,8 @@ export default function ViewProductsPage({session, param}) {
     const newInvoices=async(e)=>{
 
         e.preventDefault()
+
+        InvoiceDetails.value=1
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
@@ -189,21 +194,21 @@ export default function ViewProductsPage({session, param}) {
                 <div class="container-fluid">
                     <h1
                         class=" font-monospace text-uppercase fw-bolder text-center text-light bg-success bg-gradient border-2 border-secondary shadow-sm mb-4">
-                        Invoices Number {param}</h1>
+                        Invoice Details</h1>
                     <div class="card shadow">
                         <div class="card-header d-flex justify-content-between py-3">
-                            <p class="text-primary m-0 fw-bold">Invoices Details</p>
+                            <p class="text-primary m-0 fw-bold">Details Info</p>
                             <div class="dropdown border rounded-pill">
                                 <button onClick={()=>{setDropDownManu(!dropDownManu)}}
                                     class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
                                     aria-expanded="false" data-bs-toggle="dropdown"
-                                    type="button"><strong>No. {param}&nbsp;</strong>
+                                    type="button"><strong>No. {num}&nbsp;</strong>
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item"  onClick={()=>{
 
-                                        session.user.role==='Employer' ? (
+                                        session.user.access ? (
                                             showModal()
                                         ):(
                                             newInvoices
@@ -224,9 +229,11 @@ export default function ViewProductsPage({session, param}) {
                                             <th>No.</th>
                                             <th>Code</th>
                                             <th>Name</th>
+                                            <th>Date</th>
                                             <th>Quantity</th>
                                             <th>Cost</th>
                                             <th>Total Cost</th>
+                                            <th>Added By</th>
                                         </tr>
                                     </thead>
                                     <tbody style={{maxHeight:'100vh', overflow:'scroll'}}>
@@ -239,9 +246,11 @@ export default function ViewProductsPage({session, param}) {
                                             <td className="fw-bold">No.</td>
                                             <th className="fw-bold">Code</th>
                                             <th className="fw-bold">Name</th>
+                                            <th className="fw-bold">Date</th>
                                             <th className="fw-bold">Quantity</th>
                                             <th className="fw-bold">Cost</th>
                                             <td className="fw-bold">Total Cost</td>
+                                            <td className="fw-bold">Added By</td>
                                         </tr>
                                     </tfoot>
                                     

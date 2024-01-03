@@ -11,6 +11,7 @@ import { editUser, getEmployeePayments, getUsers, newEmployeePayment, resetEmplo
 import ReactPaginate from "react-paginate"
 import moment from "moment"
 import { DateTime, TimeSeconds, Today } from "../../../layout/utils"
+import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
 
 export default function EmployeesPaymentPage({session}) {
 
@@ -48,7 +49,13 @@ export default function EmployeesPaymentPage({session}) {
         pageLimit.current=25
         page.current=1
         getEmployeesData()
+        getBrunches()
     },[])
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setAllBranches(response.branches)
+    }
 
     const showModal=(val)=>{
 
@@ -159,9 +166,6 @@ export default function EmployeesPaymentPage({session}) {
         let response=await getUsers(data)
 
         toast.dismiss(toastId)
-        
-        // setAddedBy(response.addedBy)
-        console.log(response);
 
         if (response.success) {
             let pages=Math.ceil(response.users?.users[0]?.pageCount / pageLimit.current)
@@ -172,27 +176,32 @@ export default function EmployeesPaymentPage({session}) {
             setPageCount(pages)
             setOutOfPage(response.users?.users[0]?.pageCount)
 
-            let brunches=response.users?.branches
+            // let brunches=response.users?.branches
 
-            let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
+            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
 
 
-            for (let i = 0; i < brunches.length; i++) {
+            // for (let i = 0; i < brunches.length; i++) {
 
-                let id=brunches[i].id
+            //     let id=brunches[i].id
                 
-                if (!isObjectInArray(AllBranches, id)) {
+            //     if (!isObjectInArray(AllBranches, id)) {
 
-                    AllBranches.push(brunches[i])
+            //         AllBranches.push(brunches[i])
                     
-                }
+            //     }
                 
-            }
+            // }
         }
         else{
             toast.error(response.message)
         }
         
+    }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
+        getEmployeesData()
     }
 
     const resetPayments=async(value)=>{
@@ -383,7 +392,7 @@ export default function EmployeesPaymentPage({session}) {
                                 </div>
                                 <div class="col-md-4">
                                     <div class="dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handlePageLimitClick}
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
                                             class="d-inline-block form-select form-select-sm">
                                             {
                                                 AllBranches.map((result)=>{

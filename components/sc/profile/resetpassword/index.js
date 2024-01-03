@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation"
 import React from "react"
 import toast, {Toaster} from 'react-hot-toast'
-import axios from 'axios';
-import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../src/app/api/v1/controller/user/route";
+import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../../../src/app/api/v1/controller/user/route";
+import NavBar from "../../../layout/navbar";
+import Header from "../../../layout/header";
+import Footer from "../../../layout/footer";
 
 let initialState = {
     password: "",
@@ -13,7 +15,12 @@ let initialState = {
     code:"",
 };
 
-export default function ForgotPasswordPage(){
+export default function ForgotPasswordPage({param, session}){
+
+    const {username}=param
+
+    initialState.username=username
+
 
     const router=useRouter()
     let toastId
@@ -189,15 +196,17 @@ export default function ForgotPasswordPage(){
 
         >
         </Toaster>
-        <section className="gradient-custom">
+        <div className="bg-light">
+         <div id="wrapper">
+        <NavBar session={session.user}/>
+        <div class="d-flex flex-column" id="content-wrapper">
+        <div id="content">
+        <Header session={session.user}/>
+        <section className="">
             <div className="container py-3 ">
                 <div className="row d-flex justify-content-center align-items-center">
                 <div className="col-12 col-md-8 col-lg-6 col-xl-6">
                     <div className="card bg-dark text-white" style={{borderRadius: "1rem"}}>
-                    <div><a href="/"><button
-                        class="btn-close text-center border rounded-circle border-2 border-light shadow-sm bounce animated"
-                        type="button" aria-label="Close"></button></a>
-                    </div>
                     <div className="card-body p-2 text-center">
 
                         <div className="mb-md-5 mt-md-4 pb-3">
@@ -207,15 +216,7 @@ export default function ForgotPasswordPage(){
                         </div>
 
                         <h2 className="fw-bold mb-3 text-uppercase text-warning">Reset Password</h2>
-                        <p className="text-white-50 mb-5">Please enter your username to proceed!</p>
-
-                        <div ref={emailDiv} className="form-outline form-white mb-4">
-                            <input type="text" name="username" className="form-control form-control-lg" 
-                            onChange={handleInputChange}
-                            required
-                            />
-                            <label className="form-label" >Username</label>
-                        </div>
+                        <p className="text-white-50 mb-5">Please request code to proceed!</p>
 
                         <div ref={codeDiv} className="form-outline form-white mb-4 dblock">
                             <input type="text" name="code" className="form-control form-control-lg" 
@@ -258,17 +259,18 @@ export default function ForgotPasswordPage(){
 
                         </div>
 
-                        <div>
-                        <p className="mb-0"><a href="/login" className="text-white-50 fw-bold">Sign In</a>
-                        </p>
-                        </div>
-
                     </div>
                     </div>
                 </div>
                 </div>
             </div>
         </section>
+        </div>
+        <Footer />
+        </div>
+        </div>
+        </div>
+
 
         </>
     )

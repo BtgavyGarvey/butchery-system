@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranchById, getRollBackSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranchById, getBranches, getRollBackSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
@@ -29,10 +29,11 @@ export default function ViewSalesPage({session}) {
     const [OneCashier,setOneCashier]=React.useState([])
     const [ManyCashiers,setManyCashiers]=React.useState([])
     // const [Date,setDate]=React.useState()
-    const modalRef1=React.useRef()
+    const branch=React.useRef()
     const modalRef2=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
     const [OneRollData, setOneRollData]=React.useState()
+    const [Branches, setBranches]=React.useState([])
 
     let toastId
 
@@ -41,10 +42,13 @@ export default function ViewSalesPage({session}) {
         let date=Today()
         Date.current=date.date
         pageLimit.current=25
+        branch.current=session.user.branch
         page.current=1
         product.current='all'
         cashier.current='all'
         getRollBackSalesData()
+        getBrunches()
+
 
     },[])
 
@@ -82,7 +86,7 @@ export default function ViewSalesPage({session}) {
             date:Date.current,
             page:page.current-1,
             limit:pageLimit.current,
-            session,
+            branch:branch.current,
             product:product.current
         }
         let response=await getRollBackSales(data)
@@ -133,6 +137,7 @@ export default function ViewSalesPage({session}) {
     const getTableData=()=>{
 
         const result1=[]
+        soldProducts=[]
 
         for (let i = 0; i < SalesData.length; i++) {
 
@@ -176,6 +181,16 @@ export default function ViewSalesPage({session}) {
         if(val===3) name='Cash & M-Pesa';
         
         return name
+    }
+
+    const getBrunches=async()=>{
+        let response=await getBranches(session)
+        setBranches(response.branches)
+    }
+
+    const handleBranchClick=(e)=>{
+        branch.current=e.target.value
+        getRollBackSalesData()
     }
 
 
@@ -229,7 +244,7 @@ export default function ViewSalesPage({session}) {
                         
                         <div class="card-body bg-dark">
                             <div class="row">
-                                <div class="col-md-3 text-wrap">
+                                <div class="col-md-1 text-wrap">
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Show&nbsp;<select onChange={handlePageLimitClick}
                                                 class="d-inline-block form-select form-select-sm">
@@ -275,11 +290,26 @@ export default function ViewSalesPage({session}) {
                                                 }
                                             </select>&nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3 text-wrap">
+                                <div class="col-md-2 text-wrap">
                                     <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Date&nbsp;<input type="date" ref={Date} onChange={handleDateClick}
                                                 class="d-inline-block form-control form-control-sm" />
                                             &nbsp;</label></div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                            class="d-inline-block form-select form-select-sm">
+                                            {
+                                                Branches.map((result)=>{
+                                                    return (
+                                                        <>
+                                                        <option value={result.id}>{result.name}</option>
+                                                        </>
+                                                    )
+                                                })
+                                            }    
+                                        </select>&nbsp;</label></div>
                                 </div>
                             </div>
                             

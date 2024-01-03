@@ -258,6 +258,9 @@ export default function LandingPage() {
                                             <li>
 												<span>View total revenue and expenses for the past 5 years.</span>
 											</li>
+                                            <li>
+												<span>+ More...</span>
+											</li>
                                             
                                         </ul>
                                     </div>

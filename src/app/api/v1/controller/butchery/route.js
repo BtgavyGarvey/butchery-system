@@ -162,7 +162,7 @@ async function generateUniqueBranchCode(prefix) {
   return code;
 }
 
-async function generateUniqueBranchId(prefix) {
+export async function generateUniqueBranchId(prefix) {
   let id;
   do {
     id = await generateId(prefix);
@@ -224,6 +224,7 @@ export async function newButchery(value){
       message:'',
       success:false
   }
+  const today = new Date();
 
   try {    
 
@@ -244,7 +245,7 @@ export async function newButchery(value){
       generateUniqueButcheryCode('B'),
       generateUniqueButcheryId(1),
       generateUniqueBranchId(2),
-      AddDate(1),
+      AddDate(today,2),
       Butchery.findOne(),
       NationalID(),
 
@@ -335,6 +336,8 @@ export async function newButchery(value){
 
     const verifyUrl = `${process.env.WEB_URL}/verifyemail?token=${verifyToken}`;
 
+    console.log(verifyUrl)
+
     const message=`
     <h3>Registration of ${insertButchery.name} Butchery,</h3>
     <p>Thank you for registering in Butchery Management System, Point Of Sale solution for your business.</p>
@@ -379,7 +382,7 @@ export async function newBranch(value){
     message:'',
     success:false
   }
-
+console.log(value);
   try {
 
     const validate=await newBranchValidation(value)
@@ -397,7 +400,8 @@ export async function newBranch(value){
       generateUniqueBranchId(2),
       generateUniqueBranchCode('R'),
       Branch.findOne({butchery:body.butchery,name:body.name}),
-      Branch.findOne({region:body.region,name:body.name})
+      Branch.findOne({region:body.region,name:body.name}),
+      Branch.findOne({mobile:body.mobile})
   ]
 
   const promise=await Promise.allSettled(promises)
@@ -414,6 +418,7 @@ export async function newBranch(value){
 
     let nameExist=data[2]
     let nameRegionExist=data[3]
+    let mobileExist=data[4]
 
     if (nameExist) {
       responseData.message='Your butchery has a branch with the same name'
@@ -422,6 +427,11 @@ export async function newBranch(value){
 
     if (nameRegionExist) {
       responseData.message='Your butchery has a branch of the same name in the selected region'
+      return responseData
+    }
+
+    if (mobileExist) {
+      responseData.message='Phone number is already registered'
       return responseData
     }
 
@@ -502,7 +512,7 @@ export async function getButcheryProfile(session){
     userData=data[1]
 
     if (branch) {
-      butchery=await Butchery.findOne()
+      butchery=await Butchery.findOne({id:branch.butchery})
 
       if (butchery) {
         branches=await Branch.find({butchery:butchery.id})
@@ -533,6 +543,87 @@ export async function getButcheryProfile(session){
 
 }
 
+export async function editButcheryProfile(data,val){
+  let responseData={
+    message:'',
+    success:false
+  }
+
+  try {
+
+    if (val===1) {
+
+      await User.updateOne(
+        {
+          id:data.id
+        },
+        {
+          $set:data
+        }
+      )
+      
+    }else if (val===2) {
+
+      let butcheryData=await Butchery.findOne({id:data.id})
+
+      if (String(butcheryData.mobile) !== String(data.mobile)) {
+        let mobileExist=await Butchery.findOne({mobile:data.mobile})
+
+        if (mobileExist) {
+          responseData.message='Phone number exist.'
+
+          return responseData
+        }
+      }
+
+      await Butchery.updateOne(
+        {
+          id:data.id
+        },
+        {
+          $set:data
+        }
+      )
+      
+    }else if (val===3) {
+
+      let butcheryData=await Branch.findOne({id:data.id})
+
+      if (String(butcheryData.mobile) !== String(data.mobile)) {
+        let mobileExist=await Branch.findOne({mobile:data.mobile})
+
+        if (mobileExist) {
+          responseData.message='Phone number exist.'
+
+          return responseData
+        }
+      }
+
+      await Branch.updateOne(
+        {
+          id:data.id
+        },
+        {
+          $set:data
+        }
+      )
+      
+    }
+
+    responseData.success=true
+
+    return responseData
+
+    
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+
+    return responseData
+  }
+
+}
+
 export async function getBranches(session){
   const user=session.user
 
@@ -541,10 +632,10 @@ export async function getBranches(session){
 
   try {
 
-    let branch=Branch.findOne({id:user.branch})
+    let branch=await Branch.findOne({id:user.branch})
 
     if (branch) {
-      let butchery=await Butchery.findOne()
+      let butchery=await Butchery.findOne({id:branch.butchery})
 
       if (butchery) {
         branches=await Branch.find({butchery:butchery.id})
@@ -617,7 +708,7 @@ export async function newProduct(value,session){
   const promises=[
     generateUniqueProductId(3),
     generateUniqueProductCode('P'),
-    Product.findOne({branch:user.branch,name:body.name}),
+    Product.findOne({branch:body.branch,name:body.name}),
   ]
 
   const promise=await Promise.allSettled(promises)
@@ -664,7 +755,7 @@ export async function newProduct(value,session){
       id,
       code:data[1],
       name:body.name,
-      branch:user.branch,
+      branch:body.branch,
       quantity,
       price:body.price,
       linked:{
@@ -811,7 +902,7 @@ export async function getProducts(data) {
 
 export async function getAllProducts(data){
   const branch = data.branch;
-
+  // console.log(data);
   let responseData = {
     message: '',
     success: false,
@@ -825,20 +916,19 @@ export async function getAllProducts(data){
         $match: {
           $and: [
             { branch: new mongoose.Types.ObjectId(branch) },
-            { __v: 1 },
           ],
         },
       },
       {
         $project: {
-          code: 1,
+          id: 1,
           name: 1,
         },
       },
     ];
 
     const groupedDocuments = await Product.aggregate(pipeline);
-
+  console.log(groupedDocuments);
     let products = JSON.stringify(groupedDocuments);
 
     products = JSON.parse(products);
@@ -852,7 +942,6 @@ export async function getAllProducts(data){
     return responseData;
   }
 }
-
 
 export async function editProducts(body,session){
 
@@ -1291,14 +1380,10 @@ export async function newSale(value,session){
 
 export async function getSales(data){
 
-  const session=data.session
+  const branch=data.branch
   const date=data.date
   const page=data.page
   const limit=data.limit
-
-  // console.log(data);
-
-  const user=session.user
 
   let responseData={
     message:'',
@@ -1307,15 +1392,6 @@ export async function getSales(data){
   }
 
   try {
-
-  // let dateHour= Today()
-
-  // const today = new Date();
-  // const weekStart = new Date(today);
-  // weekStart.setDate(today.getDate() - today.getDay());
-  // const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  // const yearsAgo = new Date();
-  // yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
 
   let productMatchQuery
   let cashierMatchQuery
@@ -1331,7 +1407,7 @@ export async function getSales(data){
   
     const salesPipeline = [
       {
-        $match: { branch: new mongoose.Types.ObjectId(user.branch) },
+        $match: { branch: new mongoose.Types.ObjectId(branch) },
       },
       {
         $unwind: "$details",
@@ -1502,13 +1578,10 @@ export async function rollBackSales(data){
 
 export async function getRollBackSales(data){
 
-  const session=data.session
+  const branch=data.branch
   const date=data.date
   const page=data.page
   const limit=data.limit
-
-
-  const user=session.user
 
   let responseData={
     message:'',
@@ -1542,7 +1615,7 @@ export async function getRollBackSales(data){
     const salesPipeline = [
       {
           
-        $match: { branch: new mongoose.Types.ObjectId(user.branch), date },
+        $match: { branch: new mongoose.Types.ObjectId(branch), date },
       },
       
       {
@@ -1637,12 +1710,10 @@ export async function getRollBackSales(data){
 
 export async function getExpense(data){
 
-  const session=data.session
+  const branch=data.branch
   const date=data.date
   const page=data.page
   const limit=data.limit
-
-  const user=session.user
 
   let responseData={
     message:'',
@@ -1667,7 +1738,7 @@ export async function getExpense(data){
   
     const expensePipeline = [
       {
-        $match: { branch: new mongoose.Types.ObjectId(user.branch) },
+        $match: { branch: new mongoose.Types.ObjectId(branch) },
       },
       {
         $unwind: "$details",
@@ -2052,7 +2123,7 @@ export async function newInvoice(data){
           return responseData
         }
 
-        invoiceNumber=parseInt(lastInvoice?.invoiceNumber + 1)
+        invoiceNumber=parseInt(lastInvoice?.invoiceNumber) + 1
 
       }
 
@@ -2074,7 +2145,7 @@ export async function getInvoices(data){
     success:false,
     invoices:''
   }
-console.log(data);
+  // console.log(data);
   try {
 
     const matchQuery =
@@ -2086,6 +2157,12 @@ console.log(data);
               { 'details.date': { $regex: data.searchParams, $options: 'i' } },
             ],
           };
+    const dateQuery =
+    data.date === 'all'
+      ? {}
+      : {
+        "details.date": data.date,
+      };
     // let invoiceData=await Invoices.find({branch:data.branch}).skip(parseInt(data.page * data.pageLimit)).limit(parseInt(data.pageLimit))
 
     let pipeline=[
@@ -2100,52 +2177,61 @@ console.log(data);
       {
         $unwind: "$details",
       },
-      // {
-      //   $match: {
-      //     "details.date": data.date,
-      //   },
-      // },
-      // {
-      //   $sort: {
-      //     "details.date": -1,
-      //   },
-      // },
-      // {
-      //   $group: {
-      //     _id: null,
-      //     pageCount: { $sum: 1 },
-      //     documents: {
-      //       $push: '$$ROOT',
-      //     },
-      //   },
-      // },
-      // {
-      //   $unwind: '$documents',
-      // },
-      // {
-      //   $skip:data.page * data.pageLimit
-      // },
-      // {
-      //   $limit:data.pageLimit
-      // },
-      // {
-      //   $project: {
-      //     _id: 0,
-      //     documents: 1,
-      //     pageCount: 1,
-      //   },
-      // },
+      {
+        $match: {
+          ...dateQuery
+        },
+      },
+      {
+        $sort: {
+          "details.date": -1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'brunchees',
+          localField: 'branch',
+          foreignField: 'id',
+          as: 'branches',
+        },
+      },
+      {
+        $unwind: { path: '$branches', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: null,
+          pageCount: { $sum: 1 },
+          documents: {
+            $push: '$$ROOT',
+          },
+        },
+      },
+      {
+        $unwind: '$documents',
+      },
+      {
+        $skip:data.page * data.pageLimit
+      },
+      {
+        $limit:data.pageLimit
+      },
+      {
+        $project: {
+          _id: 0,
+          documents: 1,
+          pageCount: 1,
+        },
+      },
     ]
 
     let invoiceData=await Invoices.aggregate(pipeline)
-
-    console.log(invoiceData);
 
     let users=[]
 
     await Promise.all(
       invoiceData?.map(async(result)=>{
-        let element=await User.findOne({id:result.addedBy})
+        let element=await User.findOne({id:result.documents.details.addedBy})
         users.push(element)
       })
     )
@@ -2176,13 +2262,22 @@ export async function newInvoiceDetails(data){
     success:false,
     invoices:''
   }
-
+  // console.log(data);
   try {
 
     if (data.value===1) {
 
-      let invoiceData=await Invoices.findOne({branch:data.branch,'details.invoiceNumber':data.invoiceNumber})
-      let invoiceDetail=await Invoice.findOne({invoiceNumber:data.invoiceNumber,'details.code':data.code})
+      let promises=[
+        Invoices.findOne({branch:data.branch,'details.invoiceNumber':data.invoiceNumber}),
+        Invoice.findOne({branch:data.branch,invoiceNumber:data.invoiceNumber,'details.product':data.product}),
+        Invoice.findOne({branch:data.branch,invoiceNumber:data.invoiceNumber})
+      ]
+
+      let result=await Promise.allSettled(promises)
+
+      let invoiceData=result[0].value
+      let invoiceDetail=result[1].value
+      let invoiceDetails=result[2].value
 
       if (invoiceData) {
 
@@ -2191,27 +2286,42 @@ export async function newInvoiceDetails(data){
           return responseData
         }
 
-        await Invoice.updateOne(
-          {
-            invoiceNumber:data.invoiceNumber,
-            'details.code':data.code,
-          },
-          {
-            $addToSet:{
-              'details':{
-                code:data.code,
-                name:data.name,
-                date:data.date.fullDate,
+        if (invoiceDetails) {
+          await Invoice.updateOne(
+            {
+              invoiceNumber:data.invoiceNumber,
+              branch:data.branch,
+            },
+            {
+              invoiceNumber:data.invoiceNumber,
+              $addToSet:{
+                'details':{
+                  product:data.product,
+                  date:data.date,
+                  quantity:data.quantity,
+                  cost:data.cost,
+                  addedBy:data.addedBy
+                }
+              }
+            },
+            {
+              $upsert:true
+            }
+          )
+        }
+        else{
+          await Invoice.create({
+              invoiceNumber:data.invoiceNumber,
+              branch:data.branch,
+              details:{
+                product:data.product,
+                date:data.date,
                 quantity:data.quantity,
                 cost:data.cost,
-                addedBy:data.id
+                addedBy:data.addedBy
               }
-            }
-          },
-          {
-            $upsert:true
-          }
-        )
+          })
+        }
         
       } else {
         responseData.message='Invalid data'      
@@ -2223,17 +2333,17 @@ export async function newInvoiceDetails(data){
       await Invoice.updateOne(
         {
           invoiceNumber:data.invoiceNumber,
-          'details.code':data.code,
+          branch:data.branch,
+          'details.product':data.product,
         },
         {
           $addToSet:{
             'details':{
-              code:data.code,
-              name:data.name,
-              date:data.date.fullDate,
+              product:data.product,
+              date:data.date,
               quantity:data.quantity,
               cost:data.cost,
-              addedBy:data.id
+              addedBy:data.addedBy
             }
           }
         },
@@ -2242,6 +2352,12 @@ export async function newInvoiceDetails(data){
         }
       )
     }
+
+    let product=await Product.findOne({branch:data.branch,id:data.product})
+
+    product.quantity=parseFloat(product.quantity) + parseFloat(data.quantity) ||  product.quantity
+
+    await product.save()
 
     responseData.success=true
     return responseData
@@ -2261,27 +2377,36 @@ export async function getInvoiceDetails(data){
 
   try {
 
-    let invoiceData=await Invoice.findOne({invoiceNumber:data.invoiceNumber})
-
+    let invoiceData=await Invoice.findOne({branch:data.branch,invoiceNumber:data.invoiceNumber})
+    // let invoiceData=await Invoice.findOne({invoiceNumber:data.invoiceNumber})
     let users=[]
+    let products=[]
 
     await Promise.all(
       invoiceData?.details.map(async(result)=>{
-        let element=await User.findOne({id:result.addedBy})
 
-        users.push(element)
+        let element=await Promise.allSettled([
+          User.findOne({id:result.addedBy}),
+          Product.findOne({id:result.product})
+        ])
+
+        // console.log(element);
+        
+
+        users.push(element[0].value)
+        products.push(element[1].value)
       })
     )
-
     users=JSON.stringify(users) 
+    products=JSON.stringify(products) 
     let invoices=JSON.stringify(invoiceData) 
       
     let dataDetails={
       users:JSON.parse(users),
+      products:JSON.parse(products),
       invoices:JSON.parse(invoices),
     }
 
-    responseData.success=true
     responseData.invoices=dataDetails
 
     responseData.success=true
@@ -2291,4 +2416,35 @@ export async function getInvoiceDetails(data){
     responseData.message='Server error has ocurred.'      
     return responseData
   }
+}
+
+export async function openCloseShop(data){
+
+  let responseData={
+    message:'',
+    success:false,
+    invoices:''
+  }
+
+  try {
+
+    await Butchery.updateOne(
+      {
+        id:data.id,
+      },
+      {
+        $set:{
+          __v:data.value
+        }
+      }
+    )
+
+    responseData.success=true
+    return responseData
+  } catch (error) {
+    console.log(error);
+    responseData.message='Server error has ocurred.'      
+    return responseData
+  }
+
 }
