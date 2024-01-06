@@ -27,7 +27,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/api/v1/controller/butchery/route.js", "src/app/api/v1/controller/user/route.js", "src/app/api/v1/model/branches.js", "src/app/api/v1/model/butchery.js", "src/app/api/v1/model/product.js", "src/app/api/v1/model/sales.js", "src/app/api/v1/model/token.js", "src/app/api/v1/model/users.js", "src/app/api/v1/utils/index.js", "components/middlewareAuths/nextAuthProvider.tsx"  ],
+, "src/app/api/v1/controller/butchery/route.js", "src/app/api/v1/controller/user/route.js", "src/app/api/v1/model/branches.js", "src/app/api/v1/model/butchery.js", "src/app/api/v1/model/product.js", "src/app/api/v1/model/sales.js", "src/app/api/v1/model/token.js", "src/app/api/v1/model/users.js", "src/app/api/v1/utils/index.js", "components/middlewareAuths/nextAuthProvider.tsx", "components/layout/utils/chartjs/barChart.js", "components/layout/utils/chartjs/lineChart.js", "components/layout/utils/chartjs/pieChart.js", "components/layout/utils/chartjs/bubleChart.js", "components/layout/utils/chartjs/polarArea.js", "components/layout/utils/chartjs/doughnutChart.js"  ],
   "exclude": [
     "node_modules"
   ]

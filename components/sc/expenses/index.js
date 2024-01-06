@@ -13,6 +13,7 @@ import ReactPaginate from "react-paginate"
 import { getCashierById } from "../../../src/app/api/v1/controller/user/route"
 
 let soldProducts=[]
+let fetchedExpenses=[]
 
 export default function ViewExpensePage({session}) {
 
@@ -132,7 +133,7 @@ export default function ViewExpensePage({session}) {
         setExpenseData(response.expense?.expenses)
         setManyCashiers(response.expense?.cashierInfo)
         setCashiers(response.expense?.cashiers)
-        soldProducts=response.expense?.expenses[0]?.documents.expenseName
+        soldProducts=response.expense?.expenseNames
         toast.dismiss(toastId)
         
     }
@@ -140,12 +141,13 @@ export default function ViewExpensePage({session}) {
     const getTableData=()=>{
 
         const result1=[]
+        fetchedExpenses=[]
 
         for (let i = 0; i < ExpenseData.length; i++) {
 
-            // if (!soldProducts.includes(ExpenseData[i].documents.details.moreDateDetails.name)) {
-            //     soldProducts.push(ExpenseData[i].documents.details.moreDateDetails.moreHourDetails.name)
-            // }
+            if (!fetchedExpenses.includes(ExpenseData[i]?.documents.details.moreDateDetails.name)) {
+                fetchedExpenses.push(ExpenseData[i]?.documents.details.moreDateDetails.name)
+            }
 
             result1.push(
                 <>
@@ -256,6 +258,7 @@ export default function ViewExpensePage({session}) {
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" onClick={showModal}>New Expense</a>
+                                    <a class="dropdown-item" href="/sc/expenses/reports">Expense Report Dashboard</a>
                                 </div>
                                     
                             </div>
@@ -279,7 +282,7 @@ export default function ViewExpensePage({session}) {
                                                 class="d-inline-block form-select form-select-sm">
                                                 <option value="all">All</option>
                                                 {
-                                                    soldProducts?.map((result)=>{
+                                                    fetchedExpenses?.map((result)=>{
                                                         return (
                                                             <>
                                                             <option value={result} >{result}</option>

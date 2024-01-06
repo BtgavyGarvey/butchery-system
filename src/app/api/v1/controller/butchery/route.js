@@ -1131,7 +1131,7 @@ export async function newSale(value,session){
                       amountSold: parseInt(result.totalPrice),
                       date: result.sellingTime.fullDate,
                       weekDayName,
-                      quantity: parseFloat(result.quantitySold).toFixed(4),
+                      quantity: result.quantitySold,
                       amountProvided:parseInt(result.paymentType.cash) + parseInt(result.paymentType.m_pesa),
                       change:(parseInt(result.paymentType.cash) + parseInt(result.paymentType.m_pesa)) - parseInt(result.totalPrice),
                       cashier:user.id,
@@ -1725,6 +1725,13 @@ export async function getExpense(data){
 
   let cashierMatchQuery
   let expenseMatchQuery
+  let expenseNames=[]
+
+  let ExpenseNames=await Expenses.findOne({branch})
+
+  if (ExpenseNames) {
+    expenseNames=ExpenseNames.expenseName
+  }
 
     cashierMatchQuery =
     data.cashier === 'all'
@@ -1812,11 +1819,13 @@ export async function getExpense(data){
   let expenses=JSON.stringify(groupedDocuments) 
   cashierInfo=JSON.stringify(cashierInfo) 
   cashiers=JSON.stringify(cashiers) 
+  expenseNames=JSON.stringify(expenseNames) 
 
   let productData={
     expenses:JSON.parse(expenses),
     cashierInfo:JSON.parse(cashierInfo),
     cashiers:JSON.parse(cashiers),
+    expenseNames:JSON.parse(expenseNames)
   }
 
   responseData.success=true
@@ -1949,6 +1958,8 @@ export const getReportData = async (branch,Today,val) => {
 
   let dateHour= Today
 
+  console.log(dateHour,val);
+
   const today = new Date();
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay());
@@ -1956,7 +1967,7 @@ export const getReportData = async (branch,Today,val) => {
   const yearsAgo = new Date();
   yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
   
-  const salesPipelineRevenue = [
+  const salesPipelineRevenue1 = [
     {
       $match: { branch: new mongoose.Types.ObjectId(branch) },
     },
@@ -1976,9 +1987,7 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $group: {
-        _id: {
-          date: "$details.date",
-        },
+        _id: "$details.date",
         totalAmount: { $sum: "$details.moreDateDetails.moreHourDetails.amountSold" },
         documents: {
           $push: "$$ROOT", // Store the original documents
@@ -1987,14 +1996,99 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $project: {
-        _id: 0,
-        date: "$_id.date",
+        _id: 1,
         totalAmount: 1,
         // documents: 1,
       },
     },
     {
       $sort: { date: 1 },
+    },
+  ];
+
+  const salesPipelineRevenue2 = [
+    {
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $unwind: "$details.moreDateDetails.moreHourDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.dynamicDate },
+      },
+    },
+    {
+      $group: {
+        _id: ["$details.date","$details.moreDateDetails.hour"],
+        totalAmount: { $sum: "$details.moreDateDetails.moreHourDetails.amountSold" },
+        totalQuantity: { $sum: "$details.moreDateDetails.moreHourDetails.quantity" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    // {
+    //   $unwind: "$documents",
+    // },
+    {
+      $project: {
+        _id: 1,
+        totalAmount: 1,
+        totalQuantity: 1,
+        // documents: 1
+        
+      },
+    },
+    {
+      $sort: { date: 1 },
+    },
+  ];
+
+  const salesPipelineProduct= [
+    {
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $unwind: "$details.moreDateDetails.moreHourDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.dynamicDate },
+      },
+    },
+    {
+      $group: {
+        _id: "$details.moreDateDetails.moreHourDetails.name",
+        totalAmount: { $sum: "$details.moreDateDetails.moreHourDetails.amountSold" },
+        totalQuantity: { $sum: "$details.moreDateDetails.moreHourDetails.quantity" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        totalAmount: 1,
+        totalQuantity: 1,
+        // documents: 1,
+      },
+    },
+    {
+      $sort: { totalAmount: -1 },
     },
   ];
 
@@ -2010,14 +2104,12 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $match: {
-        "details.date": { $gte: dateHour.yearsAgo },
+        "details.date": { $gte: dateHour.dynamicDate },
       },
     },
     {
       $group: {
-        _id: {
-          date: "$details.date",
-        },
+        _id: "$details.date",
         totalAmount: { $sum: "$details.moreDateDetails.amount" },
         documents: {
           $push: "$$ROOT", // Store the original documents
@@ -2026,26 +2118,63 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $project: {
-        _id: 0,
-        date: "$_id.date",
+        _id: 1,
         totalAmount: 1,
         // documents: 1,
       },
     },
+    // {
+    //   $sort: { _id: -1},
+    // },
+  ];
+
+  const salesPipelineExpense1 = [
     {
-      $sort: { date: 1},
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.dynamicDate },
+      },
+    },
+    {
+      $group: {
+        _id: "$details.date",
+        totalAmount: { $sum: "$details.moreDateDetails.amount" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    {
+      $unwind: "$documents",
+    },
+    {
+      $project: {
+        _id: 1,
+        totalAmount: 1,
+        documents: {'details.moreDateDetails.date':1},
+      },
+    },
+    {
+      $sort: { totalAmount: 1},
     },
   ];
 
   let revenue
   let expense
-  let report
 
 
   if (val===1) {
 
     let promise=[
-      Sales.aggregate(salesPipelineRevenue),
+      Sales.aggregate(salesPipelineRevenue1),
       Expenses.aggregate(salesPipelineExpense)
     ]
 
@@ -2054,12 +2183,37 @@ export const getReportData = async (branch,Today,val) => {
     revenue=response[0].value
     expense=response[1].value
     
-  } else {
-    
+  } 
+  else if(val===2) {
+    let promise=[
+      Sales.aggregate(salesPipelineRevenue2),
+    ]
+
+    let response=await Promise.allSettled(promise)
+
+    revenue=response[0].value
+  }
+  else if(val===3) {
+    let promise=[
+      Sales.aggregate(salesPipelineProduct),
+    ]
+
+    let response=await Promise.allSettled(promise)
+
+    revenue=response[0].value
+  }
+  else if(val===4) {
+    let promise=[
+      Expenses.aggregate(salesPipelineExpense1)
+    ]
+
+    let response=await Promise.allSettled(promise)
+
+    expense=response[0].value
   }
 
   let data={
-    revenue,expense,report
+    revenue,expense
   }
   
   responseData.success = true;

@@ -35,11 +35,11 @@ export default function DashboardPage({session}) {
     
     const getReport=async()=>{
 
+        dateDetails['dynamicDate']=dateDetails.yearsAgo
 
         toastId=toast.loading('Loading data. Please wait...',{id:toastId})
 
         let response=await getReportData(branch.current,dateDetails,1)
-        // console.log(response);
 
         let todayRevenue=0
         let thisWeekRevenue=0
@@ -50,23 +50,23 @@ export default function DashboardPage({session}) {
 
         response?.reports?.revenue?.map((result)=>{
 
-            if (result.date === dateDetails.date) {
+            if (result._id === dateDetails.date) {
                 todayRevenue +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisWeek) {
+            if (result._id >= dateDetails.thisWeek) {
                 thisWeekRevenue +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisMonth) {
+            if (result._id >= dateDetails.thisMonth) {
                 thisMonthRevenue +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisYear) {
+            if (result._id >= dateDetails.thisYear) {
                 thisYearRevenue +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.yearsAgo) {
+            if (result._id >= dateDetails.yearsAgo) {
                 yearsAgoRevenue +=parseFloat(result.totalAmount)
             }
 
@@ -87,23 +87,23 @@ export default function DashboardPage({session}) {
 
         response?.reports?.expense?.map((result)=>{
 
-            if (result.date === dateDetails.date) {
+            if (result._id === dateDetails.date) {
                 todayExpense +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisWeek) {
+            if (result._id >= dateDetails.thisWeek) {
                 thisWeekExpense +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisMonth) {
+            if (result._id >= dateDetails.thisMonth) {
                 thisMonthExpense +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.thisYear) {
+            if (result._id >= dateDetails.thisYear) {
                 thisYearExpense +=parseFloat(result.totalAmount)
             }
 
-            if (result.date >= dateDetails.yearsAgo) {
+            if (result._id >= dateDetails.yearsAgo) {
                 yearsAgoExpense +=parseFloat(result.totalAmount)
             }
 

@@ -451,7 +451,7 @@ export default function ProfilePage({session}) {
                         </div>
                     </div>
                     <div class="card-body shadow d-flex justify-content-between">
-                        <span><span className="text-info fw-bold">NB: </span> Changes will be effective on next login.</span>
+                        <span className="text-dark"><span className="text-info fw-bold">NB: </span> Changes will be effective on next login.</span>
                         <span>
                             {
                                 Butchery && (

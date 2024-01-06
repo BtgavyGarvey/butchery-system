@@ -273,7 +273,7 @@ export default function ViewSalesPage({session}) {
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
                                     <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
-                                    <a class="dropdown-item" href="#"  >Sales Reports</a>
+                                    <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
                                 </div>
                                     
                             </div>

@@ -148,6 +148,32 @@
   .pricing_container{
     display: flex;
   }
+
+  .chart-js {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    /* overflow-y: hidden; */
+    justify-content: space-between;
+
+
+  }
+  .chartjs {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    width: 50%;
+    
+  }
+
+  .chartjs-div, .polar{
+    display: block;
+  }
+
+  .Dflex{
+    display: flex;
+  }
+
   @media(max-width: 40em) {
     .cardDiv > .card{
       width: 100%;
@@ -155,7 +181,39 @@
     .pricing_container{
       display: block;
     }
-    
+
+    .chart-js{
+      display: block;
+      overflow-y: scroll;
+
+    }
+    .chartjs {
+      display: block;
+      flex-direction: column;
+      width: 100%;
+
+      justify-content: center;
+      
+    }
+
+    .chartjs-div{
+      display: flex;
+      flex-wrap: nowrap;
+      height: 50vh; 
+      overflow-y: scroll;
+      overflow-x: scroll;
+
+    }
+
+    .polar{
+      display: none;
+    }
+    .chart-container{
+      height: auto;
+    }
+    .Dflex{
+      display: block;
+    }
   }
   
   

@@ -75,3 +75,26 @@ export const AddDate=(from,value)=>{
     const plusDate = addMonths(today, value);
     return plusDate
 }
+
+export const DateWeek=(day)=>{
+
+    let date=new Date(day)
+    const year=date.getFullYear()
+    const month=date.getMonth()
+  
+    const firstDay = new Date(year, month, 1);
+    const daysOffset = firstDay.getDay();
+    const dayOfMonth = date.getDate();
+  
+    let weekNumber=Math.ceil((dayOfMonth + daysOffset) / 7);
+    
+  
+    let data={
+      weekNumber,
+      year,
+      month: month + 1
+    }
+    
+    return data
+  
+  }
