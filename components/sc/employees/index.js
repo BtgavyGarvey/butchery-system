@@ -4,7 +4,6 @@ import React from "react";
 import Footer from "../../layout/footer";
 import Header from "../../layout/header";
 import NavBar from "../../layout/navbar";
-import { Country, City } from "country-state-city";
 import toast, { Toaster } from "react-hot-toast";
 import { newUser } from "../../../src/app/api/v1/controller/user/route";
 import { getBranches } from "../../../src/app/api/v1/controller/butchery/route";

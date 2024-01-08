@@ -14,6 +14,9 @@ import { getCashierById } from "../../../../../src/app/api/v1/controller/user/ro
 
 let soldProducts=[]
 let cashierData=[]
+let totalSales=0
+let m_pesaSales=0
+let cashSales=0
 
 export default function ViewSalesPage({session}) {
 
@@ -29,7 +32,6 @@ export default function ViewSalesPage({session}) {
     const [outOfPage,setOutOfPage]=React.useState(0)
     const [OneCashier,setOneCashier]=React.useState(0)
     const [ManyCashiers,setManyCashiers]=React.useState([])
-    // const [Date,setDate]=React.useState()
     const [Branches, setBranches]=React.useState([])
     const branch=React.useRef()
     const modalRef2=React.useRef()
@@ -100,7 +102,6 @@ export default function ViewSalesPage({session}) {
         setOutOfPage(response.sales?.products[0]?.pageCount)
         setSalesData(response.sales?.products)
         setManyCashiers(response.sales?.cashierInfo)
-        console.log(response.sales);
         toast.dismiss(toastId)
         
     }
@@ -136,7 +137,6 @@ export default function ViewSalesPage({session}) {
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
-// console.log(data);
         let promises=[]
 
         promises.push(
@@ -153,9 +153,6 @@ export default function ViewSalesPage({session}) {
             response[1].value.branch,
         )
 
-        console.log(cashiers);
-        console.log(data);
-
         toast.dismiss(toastId)
 
         setOneCashier(cashiers)
@@ -167,13 +164,34 @@ export default function ViewSalesPage({session}) {
     const getTableData=()=>{
 
         const result1=[]
+        const sale=[]
         soldProducts=[]
+
+        totalSales=0
+        cashSales=0
+        m_pesaSales=0
 
         for (let i = 0; i < SalesData.length; i++) {
 
             if (!soldProducts.includes(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name)) {
                 soldProducts.push(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name)
             }
+
+            let indexOfObjectDay=sale.findIndex((item)=>(item.date === SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.date))
+
+            let result={
+                date:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.date
+            }
+            if (indexOfObjectDay < 0) {
+                sale.push(
+                    result
+                )
+                m_pesaSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                cashSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+            }
+
+            totalSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold)
+            
 
             result1.push(
                 <>
@@ -280,8 +298,10 @@ export default function ViewSalesPage({session}) {
                         </div>
                         
                         <div class="card-body bg-dark">
+
                             <div class="row">
                                 <div class="col-md-1 text-wrap">
+                                    
                                     <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Show&nbsp;<select onChange={handlePageLimitClick}
                                                 class="d-inline-block form-select form-select-sm">
@@ -347,6 +367,13 @@ export default function ViewSalesPage({session}) {
                                                 })
                                             }    
                                         </select>&nbsp;</label></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="Dflex col-md-12 bg-light justify-content-between">
+                                        <p className="text-primary fw-bold">Total Sales: <span className="text-dark">KSh. {totalSales.toLocaleString()}</span></p>
+                                        <p className="text-success fw-bold">M-Pesa Sales: <span className="text-dark">KSh. {m_pesaSales.toLocaleString()}</span></p>
+                                        <p className="text-danger fw-bold">Cash Sales: <span className="text-dark">KSh. {cashSales.toLocaleString()}</span></p>
                                 </div>
                             </div>
                             

@@ -1,16 +1,12 @@
 'use client'
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Footer from "../../../layout/footer"
 import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
-import { faArchive, faArrowAltCircleUp, faEye, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { DayTime, Today } from "../../../layout/utils"
-import { deleteProducts, editProducts, getAllProducts, getBranches, getInvoiceDetails, getInvoices, getProducts, newInvoice, newInvoiceDetails, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
-import ReactPaginate from "react-paginate"
-import { useRouter } from "next/navigation"
+import { Today } from "../../../layout/utils"
+import { getAllProducts, getInvoiceDetails, newInvoiceDetails } from "../../../../src/app/api/v1/controller/butchery/route"
 
 let Branches=[]
 
@@ -66,7 +62,6 @@ export default function ViewProductsPage({session, param}) {
 
 
         for (let i = 0; i < Details.length; i++) {
-            console.log(i,Details);
 
             result1.push(
                 <>
@@ -101,7 +96,6 @@ export default function ViewProductsPage({session, param}) {
         }
         toast()
         let response=await getAllProducts(data)
-        // console.log(response);
         setProductDataData(response.products)
 
         toast.dismiss(toastId)
@@ -117,10 +111,6 @@ export default function ViewProductsPage({session, param}) {
             invoiceNumber:num,
         }
         let response=await getInvoiceDetails(data)
-        // console.log(response.invoices);
-        // let pages=Math.ceil(response.invoices[0]?.pageCount / pageLimit.current)
-        // setPageCount(pages)
-        // setOutOfPage(response.invoices[0]?.pageCount)
 
         setInvoices(response.invoices)
 

@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Footer from "../../../layout/footer"
 import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
-import { faArchive, faArrowAltCircleUp, faEye, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
+import { faEye } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { DayTime, Today, formatDate } from "../../../layout/utils"
-import { deleteProducts, editProducts, getAllProducts, getBranches, getInvoices, getProducts, newInvoice, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
+import { Today, formatDate } from "../../../layout/utils"
+import { getAllProducts, getBranches, getInvoices, newInvoice } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 import { useRouter } from "next/navigation"
 
@@ -130,7 +130,6 @@ export default function ViewProductsPage({session}) {
         }
         toast()
         let response=await getAllProducts(data)
-        console.log(response);
         setProductDataData(response.products)
 
         toast.dismiss(toastId)
@@ -143,7 +142,6 @@ export default function ViewProductsPage({session}) {
         })
 
         let response=await getBranches(session)
-        console.log(response);
         setAllBranches(response.branches)
 
         toast.dismiss(toastId)
@@ -162,7 +160,6 @@ export default function ViewProductsPage({session}) {
             searchParams:searchParams.current,
         }
         let response=await getInvoices(data)
-        console.log(response);
         let pages=Math.ceil(response.invoices.invoices[0]?.pageCount / pageLimit.current)
         setPageCount(pages)
         setOutOfPage(response.invoices.invoices[0]?.pageCount)
@@ -204,8 +201,6 @@ export default function ViewProductsPage({session}) {
     }
 
     const newInvoicesTemp=async()=>{
-
-        // console.log(session.user);
 
         if(session.user.access){
             showModal()

@@ -4,13 +4,10 @@ import React from "react"
 import Footer from "../../layout/footer"
 import Header from "../../layout/header"
 import NavBar from "../../layout/navbar"
-import { getBranchById, getBranches, getExpense, newExpense, rollBackExpense } from "../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getExpense, newExpense } from "../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
 import { DateTime, Today, formatDate } from "../../layout/utils"
 import ReactPaginate from "react-paginate"
-import { getCashierById } from "../../../src/app/api/v1/controller/user/route"
 
 let soldProducts=[]
 let fetchedExpenses=[]
@@ -124,8 +121,6 @@ export default function ViewExpensePage({session}) {
             expense:product.current
         }
         let response=await getExpense(data)
-
-        console.log(response);
 
         let pages=Math.ceil(response.expense?.expenses[0]?.pageCount / pageLimit.current)
         setPageCount(pages)

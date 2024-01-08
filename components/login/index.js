@@ -4,8 +4,6 @@ import React from "react";
 import {signIn} from 'next-auth/react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faClose } from "@fortawesome/free-solid-svg-icons"
 
 
 let initialState = {
@@ -108,7 +106,6 @@ export default function LoginPage(){
                 <div className="col-12 col-md-8 col-lg-6 col-xl-6">
                     <div className="card bg-dark text-white" style={{borderRadius: "1rem"}}>
 
-                    {/* <a href="/" className="btn btn-default text-white" title="Close"><FontAwesomeIcon icon={faClose}/></a> */}
                     <div><a href="/"><button
                         class="btn-close text-center border rounded-circle border-2 border-light shadow-sm bounce animated"
                         type="button" aria-label="Close"></button></a>
@@ -149,11 +146,6 @@ export default function LoginPage(){
 
                         <button className="btn btn-outline-light btn-lg px-5" type="submit">Login</button>
 
-                        {/* <div className="d-flex justify-content-center text-center mt-4 pt-1">
-                            <a href="#!" className="text-white"><i className="fab fa-facebook-f fa-lg"></i></a>
-                            <a href="#!" className="text-white"><i className="fab fa-twitter fa-lg mx-4 px-2"></i></a>
-                            <a href="#!" className="text-white"><i className="fab fa-google fa-lg"></i></a>
-                        </div> */}
                         </form>
 
                         </div>

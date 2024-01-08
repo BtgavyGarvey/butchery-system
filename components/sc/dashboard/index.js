@@ -1,10 +1,9 @@
 'use client'
 
-import { signOut } from "next-auth/react"
 import NavBar from "../../layout/navbar"
 import Header from "../../layout/header"
 import Footer from "../../layout/footer"
-import MonthYear, { Today } from '../../layout/utils/index'
+import MonthYear, { DateWeek, Today, formatDate } from '../../layout/utils/index'
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
 import { getReportData } from "../../../src/app/api/v1/controller/butchery/route"
@@ -21,6 +20,9 @@ export default function DashboardPage({session}) {
     const [YearRevenue,setYearRevenue]=React.useState('0')
     const [YearsAgoRevenue,setYearsAgoRevenue]=React.useState('0')
 
+    const [Cash,setCash]=React.useState()
+    const [M_Pesa,setM_Pesa]=React.useState()
+    
     const [DayExpense,setDayExpense]=React.useState('0')
     const [WeekExpense,setWeekExpense]=React.useState('0')
     const [MonthExpense,setMonthExpense]=React.useState('0')
@@ -31,7 +33,7 @@ export default function DashboardPage({session}) {
     React.useEffect(()=>{
         branch.current=session.user.branch
         getReport()
-    })
+    },[])
     
     const getReport=async()=>{
 
@@ -41,43 +43,198 @@ export default function DashboardPage({session}) {
 
         let response=await getReportData(branch.current,dateDetails,1)
 
-        let todayRevenue=0
-        let thisWeekRevenue=0
-        let thisMonthRevenue=0
-        let thisYearRevenue=0
-        let yearsAgoRevenue=0
+        let todayRevenue=[]
+        let thisWeekRevenue=[]
+        let thisMonthRevenue=[]
+        let thisYearRevenue=[]
+        let yearsAgoRevenue=[]
 
+        let todayPaymentType=[]
+        let thisWeekPaymentType=[]
+        let thisMonthPaymentType=[]
+        let thisYearPaymentType=[]
+        let yearsAgoPaymentType=[]
+
+        let revenue={
+            day:0,
+            week:0,
+            month:0,
+            year:0,
+            yearsAgo:0,
+        }
+
+        let m_pesa={
+            day:0,
+            week:0,
+            month:0,
+            year:0,
+            yearsAgo:0,
+        }
+
+        let cash={
+            day:0,
+            week:0,
+            month:0,
+            year:0,
+            yearsAgo:0,
+        }
 
         response?.reports?.revenue?.map((result)=>{
 
-            if (result._id === dateDetails.date) {
-                todayRevenue +=parseFloat(result.totalAmount)
+        let weekNo=DateWeek(result._id)
+
+        let date=formatDate(result._id)
+
+          result['date']=result._id
+          result['weekNumber']=weekNo.weekNumber
+          result['year']=weekNo.year
+          result['month']=weekNo.month
+
+            if (date === dateDetails.date) {
+
+                let indexOfObjectDay=todayRevenue.findIndex((item)=>(item.date === result.date))
+
+                if (indexOfObjectDay < 0) {
+                    todayRevenue.push(
+                        result
+                    )
+                    revenue.day +=parseFloat(result.totalAmount)
+                } 
+
             }
 
             if (result._id >= dateDetails.thisWeek) {
-                thisWeekRevenue +=parseFloat(result.totalAmount)
+                let indexOfObjectDay=thisWeekRevenue.findIndex((item)=>(dateDetails.thisWeek <= result.date && item.date === result.date))
+
+                if (indexOfObjectDay < 0) {
+                    thisWeekRevenue.push(
+                        result
+                    )
+                    revenue.week +=parseFloat(result.totalAmount)
+                } 
+                
             }
 
             if (result._id >= dateDetails.thisMonth) {
-                thisMonthRevenue +=parseFloat(result.totalAmount)
+
+                let indexOfObjectDay=thisMonthRevenue.findIndex((item)=>( item.date === result.date && item.month === weekNo.month && item.year === weekNo.year))
+                
+                if (indexOfObjectDay < 0) {
+                    thisMonthRevenue.push(
+                        result
+                    )
+                    revenue.month +=parseFloat(result.totalAmount)
+                } 
+                
             }
 
             if (result._id >= dateDetails.thisYear) {
-                thisYearRevenue +=parseFloat(result.totalAmount)
+                let indexOfObjectDay=thisYearRevenue.findIndex((item)=>(item.date === result.date && item.year === weekNo.year))
+
+                if (indexOfObjectDay < 0) {
+                    thisYearRevenue.push(
+                        result
+                    )
+                    revenue.year +=parseFloat(result.totalAmount)
+                } 
+                
             }
 
             if (result._id >= dateDetails.yearsAgo) {
-                yearsAgoRevenue +=parseFloat(result.totalAmount)
+                let indexOfObjectDay=yearsAgoRevenue.findIndex((item)=>(item.date === result.date && item.date >= dateDetails.yearsAgo))
+
+                if (indexOfObjectDay < 0) {
+                    yearsAgoRevenue.push(
+                        result
+                    )
+                    revenue.yearsAgo +=parseFloat(result.totalAmount)
+                } 
+                
+            }
+
+            if (date === dateDetails.date) {
+
+                let indexOfObjectDay=todayPaymentType.findIndex((item)=>(item.date === result.date))
+                if (indexOfObjectDay < 0) {
+                    todayPaymentType.push(
+                        result
+                    )
+                    
+                    cash.day +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                    m_pesa.day +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                }
+                
+
+            }
+
+            if (result._id >= dateDetails.thisWeek) {
+                let indexOfObjectDay=thisWeekPaymentType.findIndex((item)=>(dateDetails.thisWeek <= result.date && item.date === result.date))
+
+                if (indexOfObjectDay < 0) {
+
+                    thisWeekPaymentType.push(
+                        result
+                    )
+                    cash.week +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                    m_pesa.week +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                } 
+                
+            }
+
+            if (result._id >= dateDetails.thisMonth) {
+
+                let indexOfObjectDay=thisMonthPaymentType.findIndex((item)=>( item.date === result.date && item.month === weekNo.month && item.year === weekNo.year))
+                
+                if (indexOfObjectDay < 0) {
+
+                    thisMonthPaymentType.push(
+                        result
+                    )
+                    cash.month +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                    m_pesa.month +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                }
+                
+            }
+
+            if (result._id >= dateDetails.thisYear) {
+                let indexOfObjectDay=thisYearPaymentType.findIndex((item)=>(item.date === result.date && item.year === weekNo.year))
+
+                if (indexOfObjectDay < 0) {
+
+                    thisYearPaymentType.push(
+                        result
+                    )
+                    cash.year +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                    m_pesa.year +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                } 
+                
+            }
+
+            if (result._id >= dateDetails.yearsAgo) {
+                let indexOfObjectDay=yearsAgoPaymentType.findIndex((item)=>(item.date === result.date && item.date >= dateDetails.yearsAgo))
+
+                if (indexOfObjectDay < 0) {
+
+                    yearsAgoPaymentType.push(
+                        result
+                    )
+                    cash.yearsAgo +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                    m_pesa.yearsAgo +=parseInt(result.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                }
+                
             }
 
         })
 
-        setDayRevenue(todayRevenue)
-        setWeekRevenue(thisWeekRevenue)
-        setMonthRevenue(thisMonthRevenue)
-        setYearRevenue(thisYearRevenue)
-        setYearsAgoRevenue(yearsAgoRevenue)
+        setDayRevenue(revenue.day)
+        setWeekRevenue(revenue.week)
+        setMonthRevenue(revenue.month)
+        setYearRevenue(revenue.year)
+        setYearsAgoRevenue(revenue.yearsAgo)
 
+
+        setCash(cash)
+        setM_Pesa(m_pesa)
 
         let todayExpense=0
         let thisWeekExpense=0
@@ -118,7 +275,6 @@ export default function DashboardPage({session}) {
 
         toast.dismiss(toastId)
 
-        // console.log(response);
     }
 
   let now=MonthYear()
@@ -151,16 +307,16 @@ export default function DashboardPage({session}) {
             <div id="content">
                 <Header session={session.user}/>
                 <div class="container-fluid">
-                    <div class="d-flex d-sm-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex d-sm-flex justify-content-center align-items-center mb-4">
                         <h4 class="text-dark mb-0 text-align-center"><strong><span
                                     className="text-danger">Revenue &amp; Expense Dashboard</span></strong></h4>
-                                    <a
+                                    {/* <a
                             class="btn btn-primary btn-sm d-block d-sm-inline-block" role="button" href="#"><i
-                                class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report</a>
+                                class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report</a> */}
                     </div>
                     <div>
                         <div class="cardDiv font-monospace flex-wrap">
-                            <div class="card d-flex card-dashboard"
+                            <div class="card d-flex card-dashboard text-dark"
                                 >
                                 <div class="card-body d-grid">
                                     <div class="row">
@@ -170,7 +326,9 @@ export default function DashboardPage({session}) {
                                                     <p><strong><span
                                                                 className="text-danger">Revenue</span></strong>
                                                         (<span className="text-primary">Today</span>)</p>
-                                                    <p class="fw-bolder">KSh. {DayRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Total KSh. {DayRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.day.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Cash. {Cash?.day.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -184,8 +342,23 @@ export default function DashboardPage({session}) {
                                                 <div class="col d-grid flex-wrap">
                                                     <p><strong><span
                                                                 className="text-success">Expense</span></strong>
-                                                        (<span className="text-info">Today</span>)</p>
-                                                    <p class="fw-bolder">KSh. {DayExpense.toLocaleString()}</p>
+                                                        (<span className="text-danger">Today</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {DayExpense.toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="card-body d-grid flex-wrap">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <div class="row">
+                                                <div class="col d-grid flex-wrap">
+                                                    <p><strong><span
+                                                                className="text-primary">Net Income</span></strong>
+                                                        (<span className="text-success">Today</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {(DayRevenue-DayExpense).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -193,7 +366,7 @@ export default function DashboardPage({session}) {
                                 </div>
                             </div>
 
-                            <div class="card d-flex card-dashboard"
+                            <div class="card d-flex card-dashboard text-dark"
                                 >
                                 <div class="card-body d-grid">
                                     <div class="row">
@@ -203,7 +376,9 @@ export default function DashboardPage({session}) {
                                                     <p><strong><span
                                                                 className="text-danger">Revenue</span></strong>
                                                         (<span className="text-primary">This Week</span>)</p>
-                                                    <p class="fw-bolder">KSh. {WeekRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Total KSh. {WeekRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.week.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Cash. {Cash?.week.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -217,8 +392,23 @@ export default function DashboardPage({session}) {
                                                 <div class="col d-grid flex-wrap">
                                                     <p><strong><span
                                                                 className="text-success">Expense</span></strong>
-                                                        (<span className="text-info">This Week</span>)</p>
-                                                    <p class="fw-bolder">KSh. {WeekExpense.toLocaleString()}</p>
+                                                        (<span className="text-danger">This Week</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {WeekExpense.toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="card-body d-grid flex-wrap">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <div class="row">
+                                                <div class="col d-grid flex-wrap">
+                                                    <p><strong><span
+                                                                className="text-primary">Net Income</span></strong>
+                                                        (<span className="text-success">This Week</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {(WeekRevenue-WeekExpense).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -226,7 +416,7 @@ export default function DashboardPage({session}) {
                                 </div>
                             </div>
 
-                            <div class="card d-flex card-dashboard"
+                            <div class="card d-flex card-dashboard text-dark"
                                 >
                                 <div class="card-body d-grid">
                                     <div class="row">
@@ -236,7 +426,9 @@ export default function DashboardPage({session}) {
                                                     <p><strong><span
                                                                 className="text-danger">Revenue</span></strong>
                                                         (<span className="text-primary">{now.month}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {MonthRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Total KSh. {MonthRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.month.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Cash. {Cash?.month.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -250,8 +442,23 @@ export default function DashboardPage({session}) {
                                                 <div class="col d-grid flex-wrap">
                                                     <p><strong><span
                                                                 className="text-success">Expense</span></strong>
-                                                        (<span className="text-info">{now.month}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {MonthExpense.toLocaleString()}</p>
+                                                        (<span className="text-primary">{now.month}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {MonthExpense.toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="card-body d-grid flex-wrap">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <div class="row">
+                                                <div class="col d-grid flex-wrap">
+                                                    <p><strong><span
+                                                                className="text-primary">Net Income</span></strong>
+                                                        (<span className="text-success">{now.month}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {(MonthRevenue-MonthExpense).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -259,7 +466,7 @@ export default function DashboardPage({session}) {
                                 </div>
                             </div>
 
-                            <div class="card d-flex card-dashboard"
+                            <div class="card d-flex card-dashboard text-dark"
                                 >
                                 <div class="card-body d-grid">
                                     <div class="row">
@@ -269,7 +476,9 @@ export default function DashboardPage({session}) {
                                                     <p><strong><span
                                                                 className="text-danger">Revenue</span></strong>
                                                         (<span className="text-primary">{now.year}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {YearRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Total KSh. {YearRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.year.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Cash. {Cash?.year.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -283,8 +492,23 @@ export default function DashboardPage({session}) {
                                                 <div class="col d-grid flex-wrap">
                                                     <p><strong><span
                                                                 className="text-success">Expense</span></strong>
-                                                        (<span className="text-info">{now.year}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {YearExpense.toLocaleString()}</p>
+                                                        (<span className="text-primary">{now.year}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {YearExpense.toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="card-body d-grid flex-wrap">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <div class="row">
+                                                <div class="col d-grid flex-wrap">
+                                                    <p><strong><span
+                                                                className="text-primary">Net Income</span></strong>
+                                                        (<span className="text-success">{now.year}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {(YearRevenue-YearExpense).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -292,7 +516,7 @@ export default function DashboardPage({session}) {
                                 </div>
                             </div>
 
-                            <div class="card d-flex card-dashboard"
+                            <div class="card d-flex card-dashboard text-dark"
                                 >
                                 <div class="card-body d-grid flex-wrap">
                                     <div class="row">
@@ -302,7 +526,9 @@ export default function DashboardPage({session}) {
                                                     <p><strong><span
                                                                 className="text-danger">Revenue</span></strong>
                                                         (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {YearsAgoRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Total KSh. {YearsAgoRevenue.toLocaleString()}</p>
+                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.yearsAgo.toLocaleString()}</p>
+                                                    <p class="fw-bolder">Cash. {Cash?.yearsAgo.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -316,8 +542,23 @@ export default function DashboardPage({session}) {
                                                 <div class="col d-grid flex-wrap">
                                                     <p><strong><span
                                                                 className="text-success">Expense</span></strong>
-                                                        (<span className="text-info">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
-                                                    <p class="fw-bolder">KSh. {YearsAgoExpense.toLocaleString()}</p>
+                                                        (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {YearsAgoExpense.toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="card-body d-grid flex-wrap">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <div class="row">
+                                                <div class="col d-grid flex-wrap">
+                                                    <p><strong><span
+                                                                className="text-primary">Net Income</span></strong>
+                                                        (<span className="text-success">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
+                                                    <p class="fw-bolder">Total KSh. {(YearsAgoRevenue-YearsAgoExpense).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>

@@ -4,16 +4,13 @@ import React from "react"
 import Footer from "../../../layout/footer"
 import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
-import { getBranchById, getBranches, getReportData, getSales } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getReportData } from "../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
-import MonthYear, { DateTime, DateWeek, Today, formatDate } from "../../../layout/utils"
-import ReactPaginate from "react-paginate"
+import { DateWeek, Today } from "../../../layout/utils"
 import BarChart from "../../../layout/utils/chartjs/barChart";
 import DoughnutChart from "../../../layout/utils/chartjs/doughnutChart";
 import PieChart from "../../../layout/utils/chartjs/pieChart";
-import LineChart, {LineChartTimeFrame} from "../../../layout/utils/chartjs/lineChart";
+import LineChart from "../../../layout/utils/chartjs/lineChart";
 import PolarAreaChart from "../../../layout/utils/chartjs/polarArea";
 import BubbleChart from "../../../layout/utils/chartjs/bubleChart"
 
@@ -24,18 +21,6 @@ let DataQuantity=[]
 
 export default function ViewSalesPage({session}) {
 
-    const customColors = [
-        "rgba(255, 99, 132, 0.6)",
-        "rgba(54, 162, 235, 0.6)",
-        "rgba(255, 206, 86, 0.6)",
-        "rgba(75, 192, 192, 0.6)",
-        "rgba(153, 102, 255, 0.6)",
-        "rgba(255, 159, 64, 0.6)",
-        "rgba(255, 0, 0, 0.6)",
-        "rgba(0, 255, 0, 0.6)",
-        "rgba(0, 0, 255, 0.6)",
-        "rgba(255, 255, 0, 0.6)",
-      ];
 
     const [SalesData, setSalesData]=React.useState([])
     const [OneSalesData, setOneSalesData]=React.useState()
@@ -53,7 +38,6 @@ export default function ViewSalesPage({session}) {
     const [outOfPage,setOutOfPage]=React.useState(0)
     const [OneCashier,setOneCashier]=React.useState(0)
     const [ManyCashiers,setManyCashiers]=React.useState([])
-    // const [Date,setDate]=React.useState()
     const [Branches, setBranches]=React.useState([])
     const branch=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
@@ -61,7 +45,6 @@ export default function ViewSalesPage({session}) {
     let toastId
     let data
     let dateDetails=Today()
-    let now=MonthYear()
 
     React.useEffect(()=>{
         let date=Today()
@@ -69,13 +52,12 @@ export default function ViewSalesPage({session}) {
         branch.current=session.user.branch
         product.current='all'
         cashier.current='all'
-        getReport()
-        getBrunches()
 
     },[])
 
 
     const Expense=React.useRef([])
+    const PerExpense=React.useRef([])
    
     const getReport=async()=>{
 
@@ -83,6 +65,8 @@ export default function ViewSalesPage({session}) {
         let response
 
         let expense=[]
+        let perExpense=[]
+
 
         if (refDay.current==='Expenses In The Past 5 Years') {
           dateDetails['dynamicDate']=dateDetails.yearsAgo
@@ -99,103 +83,143 @@ export default function ViewSalesPage({session}) {
           dateDetails['dynamicDate']=dateDetails.thisYear
         }
 
-        response=await getReportData(branch.current,dateDetails,4)
-          
-        console.log(response?.reports?.expense);
         
-
-        response?.reports?.expense?.map((result)=>{
-
-          let weekNo=DateWeek(result._id)
-          const hour=new Date(result.documents.details.moreDateDetails.date).getHours()
-
-          result['date']=result._id
-          result['hour']=hour
-          result['weekNumber']=weekNo.weekNumber
-          result['year']=weekNo.year
-          result['month']=weekNo.month
-
-          if (refDay.current ==='Expenses Today') {
-            
-            expense.push(
-              result
-            )
-            
-          }
-          else if (refDay.current ==='Expenses This Week') {
-            let indexOfObjectDay=expense.findIndex((item)=>(dateDetails.thisWeek <= result.date && item.date === result.date))
-
-            if (indexOfObjectDay >-1) {
-              expense[indexOfObjectDay].totalAmount +=result.totalAmount
-            } else {
-              expense.push(
-                result
-              )
-            }
-            
-          }
-          else if (refDay.current ==='Expenses This Month') {
-            let indexOfObjectDay=expense.findIndex((item)=>(item.weekNumber === result.weekNumber && item.month === weekNo.month && item.year === weekNo.year))
-
-            if (indexOfObjectDay >-1) {
-              expense[indexOfObjectDay].totalAmount +=result.totalAmount
-            } else {
-              expense.push(
-                result
-              )
-            }
-            
-          }
-          else if (refDay.current ==='Expenses This Year') {
-            let indexOfObjectDay=expense.findIndex((item)=>(item.month === weekNo.month && item.year === weekNo.year))
-
-            if (indexOfObjectDay >-1) {
-              expense[indexOfObjectDay].totalAmount +=result.totalAmount
-            } else {
-              expense.push(
-                result
-              )
-            }
-            
-          }
-          else if (refDay.current ==='Expenses In The Past 5 Years') {
-            let indexOfObjectDay=expense.findIndex((item)=>(item.year === weekNo.year))
-
-            if (indexOfObjectDay >-1) {
-              expense[indexOfObjectDay].totalAmount +=result.totalAmount
-            } else {
-              expense.push(
-                result
-              )
-            }
-            
-          }
+        if (radio.current===1) {
+          response=await getReportData(branch.current,dateDetails,4)
           
-        })
+          response?.reports?.expense?.map((result)=>{
+
+            let weekNo=DateWeek(result._id)
+            const hour=new Date(result.documents.details.moreDateDetails.date).getHours()
+
+            result['date']=result._id
+            result['hour']=hour
+            result['weekNumber']=weekNo.weekNumber
+            result['year']=weekNo.year
+            result['month']=weekNo.month
+
+            if (refDay.current ==='Expenses Today') {
+              
+              expense.push(
+                result
+              )
+              
+            }
+            else if (refDay.current ==='Expenses This Week') {
+              let indexOfObjectDay=expense.findIndex((item)=>(dateDetails.thisWeek <= result.date && item.date === result.date))
+
+              if (indexOfObjectDay >-1) {
+                expense[indexOfObjectDay].totalAmount +=result.totalAmount
+              } else {
+                expense.push(
+                  result
+                )
+              }
+              
+            }
+            else if (refDay.current ==='Expenses This Month') {
+              let indexOfObjectDay=expense.findIndex((item)=>(item.weekNumber === result.weekNumber && item.month === weekNo.month && item.year === weekNo.year))
+
+              if (indexOfObjectDay >-1) {
+                expense[indexOfObjectDay].totalAmount +=result.totalAmount
+              } else {
+                expense.push(
+                  result
+                )
+              }
+              
+            }
+            else if (refDay.current ==='Expenses This Year') {
+              let indexOfObjectDay=expense.findIndex((item)=>(item.month === weekNo.month && item.year === weekNo.year))
+
+              if (indexOfObjectDay >-1) {
+                expense[indexOfObjectDay].totalAmount +=result.totalAmount
+              } else {
+                expense.push(
+                  result
+                )
+              }
+              
+            }
+            else if (refDay.current ==='Expenses In The Past 5 Years') {
+              let indexOfObjectDay=expense.findIndex((item)=>(item.year === weekNo.year))
+
+              if (indexOfObjectDay >-1) {
+                expense[indexOfObjectDay].totalAmount +=result.totalAmount
+              } else {
+                expense.push(
+                  result
+                )
+              }
+              
+            }
+            
+          })
+
+        } 
+        else {
+          let response=await getReportData(branch.current,dateDetails,5)
           
+          response?.reports?.expense?.map((result)=>{
+            result['expense']=result._id
+
+            let indexOfObjectDay=perExpense.findIndex((item)=>(item.expense === result.expense))
+
+            if (indexOfObjectDay >-1) {
+              perExpense[indexOfObjectDay].totalAmount +=result.totalAmount
+            } else {
+              perExpense.push(
+                result
+              )
+            }
+            
+
+          })
+
+        }
 
         Expense.current=expense
+        PerExpense.current=perExpense
 
         toast.dismiss(toastId)
 
-        // if (radio.current===1) {
+        if (radio.current===1) {
         loopDataDate()
           
-        // } else {
+        } else {
+        loopDataExpense()
           
-        // }
-
-        // loopDataProduct()
-
+        }
 
     }
 
     const handleChangeInput=(e)=>{
-      const { name, value } = e.target;
+      const { value } = e.target;
     
       refDay.current=value
 
       getReport()
+    }
+
+    const handleChangeProduct=(e)=>{
+      const { name } = e.target;
+
+      if (Branches.length < 1) {
+        getBrunches()
+        
+      }
+
+      if (name==='1') {
+      radio.current=1
+      getReport()
+      radio2.current.checked=false
+        
+      } else {
+        radio.current=2
+        getReport()
+      radio1.current.checked=false
+      }
+    
     }
 
 
@@ -258,20 +282,19 @@ export default function ViewSalesPage({session}) {
     
     }
 
-    const loopDataProduct=()=>{
+    const loopDataExpense=()=>{
 
-        data=RevenuePerProduct.current
+        data=PerExpense.current
     
-        text.current='Products'
-        label=data?.map((item) => item.product)
+        text.current='Expenses'
+        label=data?.map((item) => item.expense)
         DataSales=data?.map((item) => item.totalAmount)
-        DataQuantity=data?.map((item) => item.totalQuantity)
         
         let CData={
           labels: label,
           datasets: [
             {
-              label: `Total Sales`,
+              label: `All Expenses`,
               data: DataSales,
               backgroundColor: [
                 "rgba(75,192,192,1)",
@@ -283,19 +306,7 @@ export default function ViewSalesPage({session}) {
               borderColor: "black",
               borderWidth: 2,
             },
-            {
-              label: `Total Quantity`,
-              data: DataQuantity,
-              backgroundColor: [
-                "rgba(255, 99, 132, 0.6)",
-                "rgba(54, 162, 235, 0.6)",
-                "rgba(255, 206, 86, 0.6)",
-                "rgba(75, 192, 192, 0.6)",
-                "rgba(153, 102, 255, 0.6)",
-              ],
-              borderColor: "black",
-              borderWidth: 2,
-            },
+            
           ],
         }
     
@@ -303,7 +314,6 @@ export default function ViewSalesPage({session}) {
     
     }
 
-    const dateOption = [...new Set(data?.map((item) => item.hour))];
 
 
     const options2 = {
@@ -375,25 +385,32 @@ export default function ViewSalesPage({session}) {
                     <div class="card shadow">
                     <div class="card-header d-flex justify-content-between py-3">
                             <p class="text-dark m-0 fw-bold">{refDay.current}</p>
-                            {/* <div class="dropdown border rounded-pill">
-                                <button onClick={()=>{setDropDownManu(!dropDownManu)}}
-                                    class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
-                                    aria-expanded="false" data-bs-toggle="dropdown"
-                                    type="button"><strong>Sales&nbsp;</strong>
-                                </button>
-                               
-                                <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
-                                </div>
-                                    
-                            </div> */}
+                            
                       </div>
                         
                         <div class="card-body">
                         <div className="Dflex justify-content-between col-md-12 p-1 m-1">
-                        
+                        <div className="col-md-3 p-1 d-flex justify-content-between">
+                          <div className="d-grid">
+                          <label className="fw-bold">Per Time Frame</label>
+                          <input ref={radio1}
+                          type="radio"
+                          onChange={handleChangeProduct}
+                          name="1"
+                          />
+                          </div>
+
+                          <div className="d-grid">
+                          <label className="fw-bold">Per Expense</label>
+                          <input ref={radio2}
+                          type="radio"
+                          onChange={handleChangeProduct}
+                          name="2"
+                          />
+                          </div>
+                          
+                         
+                        </div>
                         <div className="col-md-2 p-1">
                           <label className="fw-bold">Select Time Frame</label>
                           <select
@@ -402,11 +419,11 @@ export default function ViewSalesPage({session}) {
                           name="timeFrame"
                         >
                           <option value={'Expenses In The Past 5 Years'}></option>
-                          <option value={'Expenses Today'}>Sales Today</option>
+                          <option value={'Expenses Today'}>Expenses Today</option>
                           <option value={'Expenses This Week'}>This Week</option>
-                          <option value={'Expenses This Month'}>Sales This Month</option>
-                          <option value={'Expenses This Year'}>Sales This Year</option>
-                          <option value={'Expenses In The Past 5 Years'}>Sales In The Past 5 Years</option>
+                          <option value={'Expenses This Month'}>Expenses This Month</option>
+                          <option value={'Expenses This Year'}>Expenses This Year</option>
+                          <option value={'Expenses In The Past 5 Years'}>Expenses In The Past 5 Years</option>
                         </select>
                         </div>
                         <div className="col-md-2 p-1">
@@ -427,114 +444,44 @@ export default function ViewSalesPage({session}) {
                           }    
                         </select>
                         </div>
-                        {/* <div className="col-md-2 p-1">
-                          <label className="fw-bold">Choose Product</label>
-                          <select
-                          className="form-control"
-                          onChange={handleChangeProduct}
-                          name="timeFrame"
-                        >
-                         <option></option>
-                         <option value={'2'}>Report Per Product</option>
-                        </select>
-                        </div> */}
+                        
                         </div>
-                            {/* <div class="row">
-                            
-                                <div class="col-md-3 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Products&nbsp;<select onChange={handleProductClick}
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="all">All</option>
-                                                {
-                                                    soldProducts.map((result)=>{
-                                                        return (
-                                                            <>
-                                                            <option value={result} >{result}</option>
-                                                            
-                                                            </>
-                                                        )
 
-                                                    })
-                                                }
-                                            </select>&nbsp;</label></div>
+                          {
+                              chartData && (
+                                <>
+
+                                
+                                <div className="chart-js">
+                                <div className="chartjs">
+                                  <div className="chartjs-div">
+                                  <BarChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
+                                  <div className='chartjs-div polar'>
+                                  <PolarAreaChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
+                                  <div className='chartjs-div polar'>
+                                  <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
+
                                 </div>
-                                <div class="col-md-3 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Cashier&nbsp;<select onChange={handleCashierClick}
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="all">All</option>
-                                                {
-                                                    ManyCashiers.map((result)=>{
-                                                        return (
-                                                            <>
-                                                            <option value={result.id} >{result.firstName} {result.lastName}</option>
-                                                            
-                                                            </>
-                                                        )
-
-                                                    })
-                                                }
-                                            </select>&nbsp;</label></div>
+                                <div className="chartjs">
+                                  <div className="chartjs-div polar">
+                                  <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
+                                  <div className='chartjs-div'>
+                                  <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
+                                  <div className='chartjs-div polar'>
+                                  <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  </div>
                                 </div>
-                                <div class="col-md-2 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Date&nbsp;<input type="date" ref={DateRef} onChange={handleDateClick}
-                                                class="d-inline-block form-control form-control-sm" />
-                                            &nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                Branches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
-                                </div>
-                            </div> */}
 
-        {
-            chartData && (
-              <>
-
-              
-              <div className="chart-js">
-              <div className="chartjs">
-                <div className="chartjs-div">
-                <BarChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <PolarAreaChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-
-              </div>
-              <div className="chartjs">
-                <div className="chartjs-div polar">
-                <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div'>
-                <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-              </div>
-              </div>
-
-              </>
-              )
-        }
-                            
+                                </>
+                                )
+                          }
+                                              
                             
                         </div>
                     </div>

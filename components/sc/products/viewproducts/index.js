@@ -7,7 +7,6 @@ import NavBar from "../../../layout/navbar"
 import { faArchive, faArrowAltCircleUp, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { DayTime } from "../../../layout/utils"
 import { deleteProducts, editProducts, getBranches, getProducts, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 
@@ -28,7 +27,6 @@ export default function ViewProductsPage({session}) {
     const [achivedProducts, setAchivedProducts]=React.useState(false)
     const [ProductData, setProductDataData]=React.useState([])
     const [Branches, setBranches]=React.useState([])
-    // const [AddedBy, setAddedBy]=React.useState([])
     const [oneProductDataData, setOneProductDataData]=React.useState()
     const [productInfo, setproductInfo]=React.useState('Available Products')
     const [ProductIssue, setProductIssue]=React.useState({
@@ -498,16 +496,6 @@ export default function ViewProductsPage({session}) {
                                                 </div>
                                             </div>
 
-                                            {/* <div class="col">
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Product
-                                                            Quantity</label><input onChange={handleInputChangeEdit}
-                                                            class="border rounded-pill border-2 border-primary shadow-sm form-control-lg"
-                                                            type="text" style={{textAlign: "center"}} required name="productQuantity"/></div>
-                                                </div>
-                                            </div> */}
-                                            
-                                        
                                     </div>
                                 </div>
                                 <div class="modal-footer"><button class="btn btn-light" type="button"
@@ -529,8 +517,6 @@ export default function ViewProductsPage({session}) {
                                 <div class="modal-body">
                                     <div
                                         class="font-monospace text-capitalize fw-bolder d-flex justify-content-between">
-                                        {/* <p class="fs-5 text-warning">Product 1</p>
-                                        <p className="text-light">290180</p> */}
                                         
                                     </div>
                                     <hr />

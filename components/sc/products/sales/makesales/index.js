@@ -62,7 +62,6 @@ export default function MakeSalesPage({session,data}) {
 
     }
     
-// console.log(ProductData);
     const promptM_Pesa=React.useRef()
     const saveBtn=React.useRef()
     const totalPrice=React.useRef(0)
@@ -72,7 +71,6 @@ export default function MakeSalesPage({session,data}) {
     const [total, setTotal]=React.useState(totalState)
     const [change, setChange]=React.useState()
     const [display, setDisplay]=React.useState(false)
-    // const [total_Price, setTotal_Price]=React.useState(totalPrice.current)
 
     if (ProductData.length>0) {
 
@@ -108,7 +106,6 @@ export default function MakeSalesPage({session,data}) {
                 ProductData[i].documents['quantitySold']=0
                 ProductData[i].documents['totalPrice']=0
                 ProductData[i].documents['sellingTime']=Today()
-                // paidAmount.current.value=''
                 setTotal((prev)=>({
                     ...prev,
                     [`total${i}`]:''
@@ -233,12 +230,6 @@ export default function MakeSalesPage({session,data}) {
 
     }
 
-    // const insertItem=(arr: any,index: any,newItem: any)=>{
-    //     ...array.slice(0,index),
-    //     newItem,
-    //     ...array.slice(index)
-    // }
-
     const checkChange=(val,arr)=>{
 
 
@@ -320,7 +311,6 @@ export default function MakeSalesPage({session,data}) {
 
         let response=await newSale(sellData,session)
 
-        // let response=await axios.post('/api/v1/controller/medicine?action=newSale',sellData)            
         toast.dismiss(toastId)
         if (response.success===true) {
           toast.success(`Successful!`,{id:toastId})
@@ -519,7 +509,6 @@ export default function MakeSalesPage({session,data}) {
                                                 style={{fontStyle: "italic",marginTop: "3px", display: display ? 'block' : 'none'}}>Cash
                                                 Amount</span><input ref={paidAmountCash} onChange={(e)=>{
                                                     handleInputChange1(e);
-                                                    // totalChange(total_Price)
                                                 }}
                                                 class="border rounded-pill  text-center fw-bold text-success border-2 border-danger shadow form-control"
                                                 type="text" name="cash"
@@ -530,7 +519,6 @@ export default function MakeSalesPage({session,data}) {
                                                     style={{fontStyle: "italic",marginTop: "3px", display: display ? 'block' : 'none'}}>M-Pesa
                                                     Amount</span><input ref={paidAmountMpesa} onChange={(e)=>{
                                                         handleInputChange1(e);
-                                                        // totalChange(total_Price)
                                                     }}
                                                     class="border col-md-12  text-center rounded-pill fw-bold text-success border-2 border-success shadow form-control"
                                                     type="text" name="m_pesa"

@@ -1,9 +1,7 @@
 'use server'
 
-import { NextRequest, NextResponse } from "next/server";
-import DbConnect, { MiddleWare, generateCode, generateId, newUserValidation, sanitizeMessage, sendEmail } from "../../utils";
-import NewMedicine from "../../model/product";
-import Sales from "../../model/sales";
+import { NextResponse } from "next/server";
+import DbConnect, { MiddleWare, generateId, newUserValidation, sanitizeMessage, sendEmail } from "../../utils";
 import Token from "../../model/token";
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
@@ -508,10 +506,6 @@ export async function newEmployeePayment(data){
   }
   try {
 
-    // let a=await EmployeesPayments.deleteMany({})
-
-    // console.log(a);
-
     let user= await User.findOne({id:data.employee})
     let pipeline=[
       {
@@ -532,8 +526,6 @@ export async function newEmployeePayment(data){
 
     let payments=await EmployeesPayments.aggregate(pipeline)
 
-    console.log(payments);
-
     if (payments.length>0) {
       if (parseFloat(user.salary) <= parseFloat(payments[0]) || (parseFloat(payments) + parseFloat(data.amount)) > parseFloat(user.salary)) {
 
@@ -551,8 +543,6 @@ export async function newEmployeePayment(data){
     insertPayment.__v=1
 
     await insertPayment.save()
-
-    console.log(insertPayment);
 
     responseData.success=true
     return responseData
@@ -949,7 +939,6 @@ export async function forgotPassword(body) {
     const resetToken = crypto.randomBytes(8).toString("hex").toUpperCase();
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest('hex');
 
-    // console.log(resetToken);
     // Save the new token to DB
     await Token.create({
       id: user.id,
@@ -1042,7 +1031,6 @@ export async function resetPassword (body) {
 
     const { password, username } = body;
 
-    // Find user by memberNumber
     const user = await User.findOne({ username }).select("-password");
 
     if (!user) {
@@ -1156,16 +1144,12 @@ export async function getCashierById (id) {
     
   
     let dbCashiers=await User.findOne({id}).select('-password -_id -__v -verified')
-    // cashierInfo=cashierInfo.concat(dbCashier)
-    // console.log(cashierInfo);
 
     cashiers=JSON.stringify(dbCashiers) 
 
   let cashierData={
     cashiers:JSON.parse(cashiers),
   }
-
-  // console.log(groupedDocuments);
 
   responseData.success=true
   responseData.cashierInfo=cashierData
@@ -1252,8 +1236,6 @@ export async function getCashiers(data){
 
     let cashiers = await Cashier.aggregate(pipeline);
 
-    console.log(cashiers);
-      
     if (cashiers.length>0) {
       cashiers=JSON.stringify(cashiers) 
       

@@ -4,17 +4,13 @@ import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranchById, getBranches, getReportData, getSales } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getReportData } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
-import MonthYear, { DateTime, DateWeek, Today, formatDate } from "../../../../layout/utils"
-import ReactPaginate from "react-paginate"
-import { getCashierById } from "../../../../../src/app/api/v1/controller/user/route"
+import { DateWeek, Today } from "../../../../layout/utils"
 import BarChart from "../../../../layout/utils/chartjs/barChart";
 import DoughnutChart from "../../../../layout/utils/chartjs/doughnutChart";
 import PieChart from "../../../../layout/utils/chartjs/pieChart";
-import LineChart, {LineChartTimeFrame} from "../../../../layout/utils/chartjs/lineChart";
+import LineChart from "../../../../layout/utils/chartjs/lineChart";
 import PolarAreaChart from "../../../../layout/utils/chartjs/polarArea";
 import BubbleChart from "../../../../layout/utils/chartjs/bubleChart"
 
@@ -25,18 +21,6 @@ let DataQuantity=[]
 
 export default function ViewSalesPage({session}) {
 
-    const customColors = [
-        "rgba(255, 99, 132, 0.6)",
-        "rgba(54, 162, 235, 0.6)",
-        "rgba(255, 206, 86, 0.6)",
-        "rgba(75, 192, 192, 0.6)",
-        "rgba(153, 102, 255, 0.6)",
-        "rgba(255, 159, 64, 0.6)",
-        "rgba(255, 0, 0, 0.6)",
-        "rgba(0, 255, 0, 0.6)",
-        "rgba(0, 0, 255, 0.6)",
-        "rgba(255, 255, 0, 0.6)",
-      ];
 
     const [SalesData, setSalesData]=React.useState([])
     const [OneSalesData, setOneSalesData]=React.useState()
@@ -54,7 +38,6 @@ export default function ViewSalesPage({session}) {
     const [outOfPage,setOutOfPage]=React.useState(0)
     const [OneCashier,setOneCashier]=React.useState(0)
     const [ManyCashiers,setManyCashiers]=React.useState([])
-    // const [Date,setDate]=React.useState()
     const [Branches, setBranches]=React.useState([])
     const branch=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
@@ -62,7 +45,6 @@ export default function ViewSalesPage({session}) {
     let toastId
     let data
     let dateDetails=Today()
-    let now=MonthYear()
 
     React.useEffect(()=>{
         let date=Today()
@@ -70,25 +52,14 @@ export default function ViewSalesPage({session}) {
         branch.current=session.user.branch
         product.current='all'
         cashier.current='all'
-        // getSalesData()
 
     },[])
 
 
     const Revenue=React.useRef([])
-    // const WeekRevenue=React.useRef([])
-    // const MonthRevenue=React.useRef([])
-    // const YearRevenue=React.useRef([])
-    // const YearsAgoRevenue=React.useRef([])
 
     const RevenuePerProduct=React.useRef([])
 
-    const [DayExpense,setDayExpense]=React.useState('0')
-    const [WeekExpense,setWeekExpense]=React.useState('0')
-    const [MonthExpense,setMonthExpense]=React.useState('0')
-    const [YearExpense,setYearExpense]=React.useState('0')
-    const [YearsAgoExpense,setYearsAgoExpense]=React.useState('0')
-    
     
     const getReport=async()=>{
 
@@ -116,9 +87,6 @@ export default function ViewSalesPage({session}) {
         if (radio.current===1) {
         response=await getReportData(branch.current,dateDetails,2)
           
-        // console.log(response?.reports?.revenue);
-        
-
         response?.reports?.revenue?.map((result)=>{
 
           let weekNo=DateWeek(result._id[0])
@@ -130,16 +98,7 @@ export default function ViewSalesPage({session}) {
           result['month']=weekNo.month
 
           if (refDay.current ==='Sales Today') {
-            // let indexOfObjectDay=revenue.findIndex((item)=>(item.date === result.date))
-
-            // if (indexOfObjectDay >-1) {
-            //   revenue[indexOfObjectDay].totalAmount +=result.totalAmount
-            //   revenue[indexOfObjectDay].totalQuantity +=result.totalQuantity
-            // } else {
-            //   revenue.push(
-            //     result
-            //   )
-            // }
+            
             revenue.push(
                 result
               )
@@ -204,75 +163,30 @@ export default function ViewSalesPage({session}) {
 
           let response=await getReportData(branch.current,dateDetails,3)
           
-          console.log(response?.reports?.revenue);
-          
-
           response?.reports?.revenue?.map((result)=>{
             result['product']=result._id
             revenuePerProduct.push(
               result
             )
-        
-
-        })
-
+          })
         
         }
-
 
         Revenue.current=revenue
         RevenuePerProduct.current=revenuePerProduct
         
-        let todayExpense=0
-        let thisWeekExpense=0
-        let thisMonthExpense=0
-        let thisYearExpense=0
-        let yearsAgoExpense=0
-
-        response?.reports?.expense?.map((result)=>{
-
-            if (result.date === dateDetails.date) {
-                todayExpense +=parseFloat(result.totalAmount)
-            }
-
-            if (result.date >= dateDetails.thisWeek) {
-                thisWeekExpense +=parseFloat(result.totalAmount)
-            }
-
-            if (result.date >= dateDetails.thisMonth) {
-                thisMonthExpense +=parseFloat(result.totalAmount)
-            }
-
-            if (result.date >= dateDetails.thisYear) {
-                thisYearExpense +=parseFloat(result.totalAmount)
-            }
-
-            if (result.date >= dateDetails.yearsAgo) {
-                yearsAgoExpense +=parseFloat(result.totalAmount)
-            }
-
-        })
-
-        setDayExpense(todayExpense)
-        setWeekExpense(thisWeekExpense)
-        setMonthExpense(thisMonthExpense)
-        setYearExpense(thisYearExpense)
-        setYearsAgoExpense(yearsAgoExpense)
-
         toast.dismiss(toastId)
 
         if (radio.current===1) {
         loopDataDate()
-          
         } else {
         loopDataProduct()
-          
         }
 
     }
 
     const handleChangeInput=(e)=>{
-      const { name, value } = e.target;
+      const { value } = e.target;
     
       refDay.current=value
 
@@ -280,7 +194,7 @@ export default function ViewSalesPage({session}) {
     }
 
     const handleChangeProduct=(e)=>{
-      const { name, value } = e.target;
+      const { name } = e.target;
 
       if (Branches.length < 1) {
         getBrunches()
@@ -417,7 +331,6 @@ export default function ViewSalesPage({session}) {
     
     }
 
-    const dateOption = [...new Set(data?.map((item) => item.hour))];
 
 
     const options2 = {
@@ -668,11 +581,11 @@ export default function ViewSalesPage({session}) {
 
               </div>
               <div className="chartjs">
-                <div className="chartjs-div polar">
-                <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
                 <div className='chartjs-div'>
                 <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                </div>
+                <div className="chartjs-div polar">
+                <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                 </div>
                 <div className='chartjs-div polar'>
                 <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>

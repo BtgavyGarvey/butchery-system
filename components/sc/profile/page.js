@@ -5,8 +5,8 @@ import Header from "../../layout/header"
 import Footer from "../../layout/footer"
 import { editButcheryProfile, generateUniqueBranchId, getButcheryProfile, newBranch, openCloseShop } from "../../../src/app/api/v1/controller/butchery/route"
 import React from 'react'
-import { AddDate, DateOnly, DayTime } from "../../layout/utils"
-import { City, Country } from 'country-state-city'
+import { AddDate, DateOnly } from "../../layout/utils"
+import { City } from 'country-state-city'
 import toast, { Toaster } from "react-hot-toast"
 
 let initialState={
@@ -119,9 +119,6 @@ export default function ProfilePage({session}) {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
-
-    // console.log(Branches);
-    // console.log(Butchery);
 
     const renderBranches=()=>{
 

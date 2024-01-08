@@ -42,14 +42,7 @@ export default function EmployeesPage({session}) {
 
     const showModal=()=>{
 
-        // if (val===1) {
         modalRef1.current.style.display='block'
-            
-        // } 
-        // else if(val===2){
-        //     modalRef2.current.style.display='block'
-        //     setDropDownManu(false)
-        // }
     }
 
     const hideModal=()=>{
@@ -112,8 +105,6 @@ export default function EmployeesPage({session}) {
 
         toast.dismiss(toastId)
         
-        // setAddedBy(response.addedBy)
-        console.log(response);
 
         if (response.success) {
             let pages=0
@@ -124,22 +115,6 @@ export default function EmployeesPage({session}) {
             setPageCount(pages)
             setOutOfPage(response.users?.users[0]?.pageCount)
 
-            // let brunches=response.users?.branches
-
-            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
-
-
-            // for (let i = 0; i < brunches.length; i++) {
-
-            //     let id=brunches[i].id
-                
-            //     if (!isObjectInArray(AllBranches, id)) {
-
-            //         AllBranches.push(brunches[i])
-                    
-            //     }
-                
-            // }
         }
         else{
             toast.error(response.message)

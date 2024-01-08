@@ -7,7 +7,7 @@ import NavBar from "../../../layout/navbar"
 import React from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
-import { deleteCashiers, deleteUser, editUser, getCashiers, getUsers, newCashier, updateCashier } from "../../../../src/app/api/v1/controller/user/route"
+import { getCashiers, updateCashier } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
 import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
 
@@ -40,14 +40,8 @@ export default function CashiersPage({session}) {
 
     const showModal=()=>{
 
-        // if (val===1) {
         modalRef1.current.style.display='block'
-            
-        // } 
-        // else if(val===2){
-        //     modalRef2.current.style.display='block'
-        //     setDropDownManu(false)
-        // }
+    
     }
 
     const getBrunches=async()=>{
@@ -106,8 +100,6 @@ export default function CashiersPage({session}) {
 
         toast.dismiss(toastId)
         
-        // setAddedBy(response.addedBy)
-        console.log(response);
 
         if (response.success) {
             let pages=Math.ceil(response.cashiers?.cashiers[0]?.pageCount / pageLimit.current)
@@ -116,22 +108,6 @@ export default function CashiersPage({session}) {
             setPageCount(pages)
             setOutOfPage(response.cashiers?.cashiers[0]?.pageCount)
 
-            // let brunches=response.cashiers?.cashiers
-
-            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
-
-
-            // for (let i = 0; i < brunches.length; i++) {
-
-            //     let id=brunches[i].documents.branchInfo.id
-                
-            //     if (!isObjectInArray(AllBranches, id)) {
-
-            //         AllBranches.push(brunches[i].documents.branchInfo)
-                    
-            //     }
-                
-            // }
         }
         else{
             toast.error(response.message)

@@ -6,11 +6,10 @@ import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
 import React from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowAltCircleUp, faEdit, faEye, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
-import { editUser, getEmployeePayments, getUsers, newEmployeePayment, resetEmployeePayment, reverseEmployeePayment } from "../../../../src/app/api/v1/controller/user/route"
+import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
+import { getUsers, newEmployeePayment, resetEmployeePayment, reverseEmployeePayment } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
-import moment from "moment"
-import { DateTime, TimeSeconds, Today } from "../../../layout/utils"
+import { Today } from "../../../layout/utils"
 import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
 
 export default function EmployeesPaymentPage({session}) {
@@ -38,8 +37,6 @@ export default function EmployeesPaymentPage({session}) {
         date:'',
     })
     const [oneEmployeesData, setOneEmployeesData]=React.useState()
-    // const [timeSeconds, setTimeSeconds]=React.useState(TimeSeconds())
-
     
     React.useEffect(()=>{
         modalRef1.current.style.display='none'
@@ -175,23 +172,7 @@ export default function EmployeesPaymentPage({session}) {
             setPayments(response.users?.payments)
             setPageCount(pages)
             setOutOfPage(response.users?.users[0]?.pageCount)
-
-            // let brunches=response.users?.branches
-
-            // let isObjectInArray=(array,id)=>array.some(obj=>obj.id===id)
-
-
-            // for (let i = 0; i < brunches.length; i++) {
-
-            //     let id=brunches[i].id
-                
-            //     if (!isObjectInArray(AllBranches, id)) {
-
-            //         AllBranches.push(brunches[i])
-                    
-            //     }
-                
-            // }
+            
         }
         else{
             toast.error(response.message)

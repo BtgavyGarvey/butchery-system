@@ -1,19 +1,17 @@
 'use server'
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import DbConnect, { AddDate, MiddleWare, generateCode, generateId, newBranchValidation, newButcheryValidation, newProductValidation, sanitizeMessage, sendEmail } from "../../utils";
 import Butchery from "../../model/butchery";
 import Token from "../../model/token";
 import Branch from "../../model/branches";
 import User from "../../model/users";
-import bcrypt from 'bcryptjs'
 import crypto from 'crypto';
 import Morgan from 'morgan'
 import { newUser } from "../user/route";
 import Product from "../../model/product";
 import LinkedProduct from "../../model/linkedProduct";
 import ProductIssue from "../../model/productIssues";
-import Dataset from "../../model/dataset";
 import Sales from "../../model/sales";
 import Expenses from "../../model/expenses";
 import RollBackSales from "../../model/rollBackSales";
@@ -121,13 +119,11 @@ export async function DELETE(request) {
         success:false
     }
 
-    // const body=await request.json()
     const {searchParams}=new URL(request.url)
     const params=searchParams.get('action')
 
     if (params==='newPharmacy') {
         
-        // await newPharmacy(body)
     }
     return NextResponse.json(responseData)
     
@@ -336,8 +332,6 @@ export async function newButchery(value){
 
     const verifyUrl = `${process.env.WEB_URL}/verifyemail?token=${verifyToken}`;
 
-    console.log(verifyUrl)
-
     const message=`
     <h3>Registration of ${insertButchery.name} Butchery,</h3>
     <p>Thank you for registering in Butchery Management System, Point Of Sale solution for your business.</p>
@@ -382,7 +376,7 @@ export async function newBranch(value){
     message:'',
     success:false
   }
-console.log(value);
+
   try {
 
     const validate=await newBranchValidation(value)
@@ -486,7 +480,6 @@ console.log(value);
 export async function getButcheryProfile(session){
 
   const user=session.user  
-  // console.log(user);
 
   let branch
   let butchery
@@ -528,14 +521,12 @@ export async function getButcheryProfile(session){
         userData:JSON.parse(userData),
       }
       
-    } else {
-      
-    }
-    console.log(profileData);
+    } 
 
     return profileData
     
   } catch (error) {
+    console.log(error);
     
   }
 
@@ -654,6 +645,7 @@ export async function getBranches(session){
     return butcheryData
     
   } catch (error) {
+    console.log(error);
     
   }
 
@@ -666,8 +658,6 @@ export async function getBranchById(id){
 
     let branch=await Branch.findOne({id})
 
-    console.log(branch)
-
     branch=JSON.stringify(branch) 
 
     let butcheryData={
@@ -677,6 +667,7 @@ export async function getBranchById(id){
     return butcheryData
     
   } catch (error) {
+    console.log(error);
     
   }
 
@@ -902,7 +893,6 @@ export async function getProducts(data) {
 
 export async function getAllProducts(data){
   const branch = data.branch;
-  // console.log(data);
   let responseData = {
     message: '',
     success: false,
@@ -928,7 +918,6 @@ export async function getAllProducts(data){
     ];
 
     const groupedDocuments = await Product.aggregate(pipeline);
-  console.log(groupedDocuments);
     let products = JSON.stringify(groupedDocuments);
 
     products = JSON.parse(products);
@@ -965,6 +954,8 @@ export async function editProducts(body,session){
     return true
 
   } catch (error) {
+    console.log(error);
+    return false
     
   }
 }
@@ -978,13 +969,11 @@ export async function productsIssue(body,session){
   try {
 
     let issueDataDB=await ProductIssue.findOne({product:body.id,branch:user.branch,date})
-    // console.log(issueDataDB);
     if (issueDataDB) {
       return false
     }
 
     let product=await Product.findOne({id:body.id})
-    // console.log(product);
 
     if (product) {
 
@@ -1040,6 +1029,8 @@ export async function productsIssue(body,session){
     return true
 
   } catch (error) {
+    console.log(error);
+    return false
     
   }
 
@@ -1063,6 +1054,8 @@ export async function deleteProducts(branch,id,session,val){
     return true
 
   } catch (error) {
+    console.log(error);
+    return false
     
   }
 }
@@ -1078,8 +1071,6 @@ export async function newSale(value,session){
 
   try {
 
-    // console.log(value)
-      
       const body=[]
 
       value.map((result)=>{
@@ -1088,21 +1079,17 @@ export async function newSale(value,session){
           body.push(result)
         }
       })
-      // console.log(body);
 
 
       let processes=[]
 
       processes.push(
         Sales.findOne({branch:user.branch}),
-        // Dataset.findOne({branch:user.branch})
       )
 
       let wait=await Promise.allSettled(processes)
-      // console.log(wait)
 
       let isToday=wait[0].value 
-      // let branchDataset=wait[1].value
 
       let dateObject=new Date(body[0].sellingTime.date)
       
@@ -1194,8 +1181,6 @@ export async function newSale(value,session){
                     
               )
       }
-      // console.log(isToday);
-
 
       if (isToday) {
 
@@ -1231,113 +1216,6 @@ export async function newSale(value,session){
 
       let promises=[]
 
-      // const moreDatasetDetails=async(name,quantity)=>{
-        
-      //   await Dataset.updateOne(
-      //       {
-      //       branch:user.branch,
-      //       'details.name': name,
-      //       'details.moreNameDateDetails.date': date,
-      //       },
-      //       {
-      //           date:body[0].sellingTime.date,
-      //           $addToSet: {
-      //             'details.$[outer].moreNameDateDetails.$[date].totalQuantity': parseFloat(quantity)
-      //           },
-      //         },
-      //         {
-      //           arrayFilters: [
-      //             { 'outer.name': name },
-      //             { 'date.date': date },
-      //           ],
-      //         },
-      //         {
-      //           $upsert:true
-      //         }
-      //   )
-      // }
-
-      // const moreNameDatasetDetails=async(name)=>{
-        
-      //   await Dataset.updateOne(
-      //       {
-      //       branch:user.branch,
-      //       'details.name': name,
-      //       // 'details.moreDateDetails': hour,
-      //       },
-      //       {
-      //           date:body[0].sellingTime.date,
-      //           $addToSet: {
-      //             'details.$[outer].moreNameDateDetails': {
-      //                 date:body[0].sellingTime.date,
-      //                 // moreDateDetails:[]
-      //               }
-      //           },
-      //         },
-      //         {
-      //           arrayFilters: [
-      //             { 'outer.name': name },
-      //           ],
-      //         },
-      //         {
-      //           $upsert:true
-      //         }
-              
-      //   )
-      // }
-
-      // const DatasetDetails=async(name)=>{
-
-      //   let a= []
-
-      //   a.push(
-      //     Dataset.updateOne(
-      //       {
-      //       branch:user.branch,
-      //       },
-      //       {
-      //         date:body[0].sellingTime.date,
-      //         $addToSet: {
-      //           'details':{
-      //             name: name,
-      //             moreNameDateDetails: []
-      //           }
-                
-      //         },
-      //       },
-      //       {
-      //         upsert: true,
-      //       }
-            
-      //     ),
-      //     Dataset.updateOne(
-      //       {
-      //       branch:user.branch,
-      //       },
-      //       {
-      //         $addToSet: {
-      //           'products': name,
-      //         },
-      //       },
-      //       {
-      //         $upsert:true
-      //       }
-      //   )
-      //   )
-
-      //   await Promise.allSettled(a)
-          
-      // }
-
-      // if (!branchDataset) {
-      //   branchDataset=await Dataset.create({
-      //     branch:user.branch,
-      //     date:body[0].sellingTime.date,
-      //     products:[],
-      //     details:[]
-      //   })
-      // }
-
       promises.push(
           body.map(async(result)=>{
 
@@ -1345,18 +1223,7 @@ export async function newSale(value,session){
 
             const newQuantity= (product.quantity-result.quantitySold)
             product.quantity=newQuantity.toFixed(4)
-            // console.log(branchDataset.products);
-
-
-            // if (!branchDataset.products.includes(result.name)) {
-            //   await DatasetDetails(result.name)
-            //   await moreNameDatasetDetails(result.name)
-            // }
-
-            // if (branchDataset.date !== body[0].sellingTime.date) {
-            //   await moreNameDatasetDetails(result.name)
-            // } 
-            // moreDatasetDetails(result.name,result.quantitySold)
+            
             
             product.save()
           })
@@ -1478,8 +1345,6 @@ export async function getSales(data){
     for (let i = 0; i < userArrayTemp.length; i++) {
       let dbCashier=await User.findOne({id:userArrayTemp[i]}).select('-password -_id -__v -verified')
       cashierInfo=cashierInfo.concat(dbCashier)
-      console.log(cashierInfo);
-      
     }
 
   }
@@ -1491,8 +1356,6 @@ export async function getSales(data){
     products:JSON.parse(products),
     cashierInfo:JSON.parse(cashierInfo),
   }
-
-  // console.log(groupedDocuments);
 
   responseData.success=true
   responseData.sales=productData
@@ -1513,9 +1376,6 @@ export async function rollBackSales(data){
   }
   const sale=data.sale
 
-  // console.log(data);
-
-  // return
   let promises=[]
 
   try {
@@ -1571,9 +1431,6 @@ export async function rollBackSales(data){
     return responseData
   }
 
-  
-
-
 }
 
 export async function getRollBackSales(data){
@@ -1590,15 +1447,6 @@ export async function getRollBackSales(data){
   }
 
   try {
-
-  // let dateHour= Today()
-
-  // const today = new Date();
-  // const weekStart = new Date(today);
-  // weekStart.setDate(today.getDate() - today.getDay());
-  // const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  // const yearsAgo = new Date();
-  // yearsAgo.setFullYear(today.getFullYear() - 5); // 5 years ago
 
   let productMatchQuery
   let cashierMatchQuery
@@ -1694,8 +1542,6 @@ export async function getRollBackSales(data){
     products:JSON.parse(products),
     cashierInfo:JSON.parse(cashierInfo),
   }
-
-  // console.log(groupedDocuments);
 
   responseData.success=true
   responseData.sales=productData
@@ -1848,7 +1694,6 @@ export async function newExpense(data){
 
   try {
 
-    // await Expenses.deleteMany({})
     
     let expenseData=await Expenses.findOne({branch:data.branch})
 
@@ -1958,8 +1803,6 @@ export const getReportData = async (branch,Today,val) => {
 
   let dateHour= Today
 
-  console.log(dateHour,val);
-
   const today = new Date();
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay());
@@ -1987,7 +1830,7 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $group: {
-        _id: "$details.date",
+        _id: "$details.moreDateDetails.moreHourDetails.date",
         totalAmount: { $sum: "$details.moreDateDetails.moreHourDetails.amountSold" },
         documents: {
           $push: "$$ROOT", // Store the original documents
@@ -1995,15 +1838,16 @@ export const getReportData = async (branch,Today,val) => {
       },
     },
     {
+      $unwind: "$documents",
+    },
+    {
       $project: {
         _id: 1,
         totalAmount: 1,
-        // documents: 1,
+        documents: {"details.moreDateDetails.moreHourDetails.payedBy":1},
       },
     },
-    {
-      $sort: { date: 1 },
-    },
+    
   ];
 
   const salesPipelineRevenue2 = [
@@ -2034,15 +1878,12 @@ export const getReportData = async (branch,Today,val) => {
         },
       },
     },
-    // {
-    //   $unwind: "$documents",
-    // },
+    
     {
       $project: {
         _id: 1,
         totalAmount: 1,
         totalQuantity: 1,
-        // documents: 1
         
       },
     },
@@ -2084,7 +1925,6 @@ export const getReportData = async (branch,Today,val) => {
         _id: 1,
         totalAmount: 1,
         totalQuantity: 1,
-        // documents: 1,
       },
     },
     {
@@ -2120,12 +1960,9 @@ export const getReportData = async (branch,Today,val) => {
       $project: {
         _id: 1,
         totalAmount: 1,
-        // documents: 1,
       },
     },
-    // {
-    //   $sort: { _id: -1},
-    // },
+    
   ];
 
   const salesPipelineExpense1 = [
@@ -2164,6 +2001,43 @@ export const getReportData = async (branch,Today,val) => {
     },
     {
       $sort: { totalAmount: 1},
+    },
+  ];
+
+  const salesPipelineExpense2 = [
+    {
+      $match: { branch: new mongoose.Types.ObjectId(branch) },
+    },
+    {
+      $unwind: "$details",
+    },
+    {
+      $unwind: "$details.moreDateDetails",
+    },
+    {
+      $match: {
+        "details.date": { $gte: dateHour.dynamicDate },
+      },
+    },
+    {
+      $group: {
+        _id: "$details.moreDateDetails.name",
+        totalAmount: { $sum: "$details.moreDateDetails.amount" },
+        documents: {
+          $push: "$$ROOT", // Store the original documents
+        },
+      },
+    },
+    
+    {
+      $project: {
+        _id: 1,
+        totalAmount: 1,
+        
+      },
+    },
+    {
+      $sort: { totalAmount: -1},
     },
   ];
 
@@ -2211,6 +2085,15 @@ export const getReportData = async (branch,Today,val) => {
 
     expense=response[0].value
   }
+  else if(val===5) {
+    let promise=[
+      Expenses.aggregate(salesPipelineExpense2)
+    ]
+
+    let response=await Promise.allSettled(promise)
+
+    expense=response[0].value
+  }
 
   let data={
     revenue,expense
@@ -2234,8 +2117,6 @@ export async function newInvoice(data){
   }
 
   try {
-
-    // await Invoices.deleteMany()
 
     let invoiceNumber=1
     
@@ -2299,7 +2180,6 @@ export async function getInvoices(data){
     success:false,
     invoices:''
   }
-  // console.log(data);
   try {
 
     const matchQuery =
@@ -2317,7 +2197,6 @@ export async function getInvoices(data){
       : {
         "details.date": data.date,
       };
-    // let invoiceData=await Invoices.find({branch:data.branch}).skip(parseInt(data.page * data.pageLimit)).limit(parseInt(data.pageLimit))
 
     let pipeline=[
       {
@@ -2416,7 +2295,7 @@ export async function newInvoiceDetails(data){
     success:false,
     invoices:''
   }
-  // console.log(data);
+
   try {
 
     if (data.value===1) {
@@ -2532,7 +2411,6 @@ export async function getInvoiceDetails(data){
   try {
 
     let invoiceData=await Invoice.findOne({branch:data.branch,invoiceNumber:data.invoiceNumber})
-    // let invoiceData=await Invoice.findOne({invoiceNumber:data.invoiceNumber})
     let users=[]
     let products=[]
 
@@ -2543,9 +2421,6 @@ export async function getInvoiceDetails(data){
           User.findOne({id:result.addedBy}),
           Product.findOne({id:result.product})
         ])
-
-        // console.log(element);
-        
 
         users.push(element[0].value)
         products.push(element[1].value)

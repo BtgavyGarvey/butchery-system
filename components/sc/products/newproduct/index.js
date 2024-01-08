@@ -4,7 +4,6 @@ import React from "react";
 import NavBar from "../../../layout/navbar";
 import Header from "../../../layout/header";
 import Footer from "../../../layout/footer";
-import { Country, City } from "country-state-city";
 import toast, { Toaster } from "react-hot-toast";
 import { getBranches, getProducts, newProduct } from "../../../../src/app/api/v1/controller/butchery/route";
 
@@ -24,6 +23,8 @@ export default function NewProductPage({session}) {
     const productRef=React.useRef()
     const radioRef1=React.useRef()
     const radioRef2=React.useRef()
+    const branch=React.useRef()
+    
 
     const [formData, setFormData] = React.useState(initialState);
     const [Products, setProducts]=React.useState([])
@@ -47,6 +48,7 @@ export default function NewProductPage({session}) {
     }
 
     React.useEffect(()=>{
+        branch.current=session.user.branch
         getBrunches()
         getProdacts(session.user.branch)
     },[])
@@ -69,6 +71,7 @@ export default function NewProductPage({session}) {
 
         if(name==='branch'){
             getProdacts(value)
+            branch.current=value
         }
         
         setFormData({ ...formData, [name]: value });
@@ -153,11 +156,11 @@ export default function NewProductPage({session}) {
                 toastId=toast.loading('Loading, please wait...')
 
                 response=await newProduct(formData,session)
-                // axios.post('/api/v1/controller/butchery?action=newButchery',formData)
                 toast.dismiss(toastId)
 
                 if (response.success) {
                     toast.success(`Successful!`,{id:toastId})
+                    getProdacts(branch.current)
                 }
                 else{
                     toast.error(`Failed! ${response.message}`,{id:toastId})

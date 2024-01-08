@@ -4,10 +4,10 @@ import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranchById, getBranches, getRollBackSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranchById, getBranches, getRollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
+import { faEye } from "@fortawesome/free-solid-svg-icons"
 import { DateTime, Today, formatDate } from "../../../../layout/utils"
 import ReactPaginate from "react-paginate"
 import { getCashierById } from "../../../../../src/app/api/v1/controller/user/route"
@@ -28,7 +28,6 @@ export default function ViewSalesPage({session}) {
     const [outOfPage,setOutOfPage]=React.useState(0)
     const [OneCashier,setOneCashier]=React.useState([])
     const [ManyCashiers,setManyCashiers]=React.useState([])
-    // const [Date,setDate]=React.useState()
     const branch=React.useRef()
     const modalRef2=React.useRef()
     const [dropDownManu, setDropDownManu]=React.useState(false)
@@ -228,18 +227,7 @@ export default function ViewSalesPage({session}) {
                     <div class="card shadow">
                     <div class="card-header d-flex justify-content-between py-3">
                             <p class="text-primary m-0 fw-bold">Roll Back Info</p>
-                            {/* <div class="dropdown border rounded-pill">
-                                <button onClick={()=>{setDropDownManu(!dropDownManu)}}
-                                    class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
-                                    aria-expanded="false" data-bs-toggle="dropdown"
-                                    type="button"><strong>Roll Back&nbsp;</strong>
-                                </button>
-                               
-                                <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="#">Roll Back Dashboard</a>
-                                </div>
-                                    
-                            </div> */}
+                            
                         </div>
                         
                         <div class="card-body bg-dark">

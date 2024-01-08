@@ -1,10 +1,8 @@
 'use client'
 
 import React from "react";
-import {signIn} from 'next-auth/react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
 import {verifyEmail} from '../../src/app/api/v1/controller/user/route'
 
 
@@ -24,7 +22,6 @@ export default function VerifyEmailPage(){
             toastId=toast.loading('Please wait, Loading...',{id:toastId})
             
             const response= await verifyEmail(token)
-            // await axios.patch(`/api/v1/controller/user?action=verifyemail&token=${token}`)
             toast.dismiss(toastId)
             
             if (response.success) {

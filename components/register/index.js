@@ -1,11 +1,7 @@
 'use client'
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation"
+import React from "react";
 import toast, {Toaster} from 'react-hot-toast'
-import axios from 'axios';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faClose } from "@fortawesome/free-solid-svg-icons"
-import { Country,State,City } from 'country-state-city'
+import { Country,City } from 'country-state-city'
 import { newButchery } from "../../src/app/api/v1/controller/butchery/route";
 
 
@@ -88,8 +84,6 @@ export default function RegisterPage() {
         }
 
     }
-
-    console.log(formData);
 
     const validate=async()=>{
 
@@ -186,7 +180,6 @@ export default function RegisterPage() {
 
                 response=await newButchery(formData)
 
-                // response=await axios.post('/api/v1/controller/butchery?action=newButchery',formData)
                 toast.dismiss(toastId)
 
                 if (response.success) {
@@ -232,18 +225,12 @@ export default function RegisterPage() {
                 class="btn-close fw-bolder text-dark text-center border rounded-circle border-2 border-secondary shadow-sm bounce animated"
                 type="button" aria-label="Close"></button></a>
             </div>
-            {/* <div className="logo mb-md-5 ">
-                <h1 className="logo-caption fw-bold"><span className="tweak">B</span>utchery <span className="tweak">S</span>ystem</h1>
-            </div> */}
+            
             </div>
         
             <div class="card-body p-0">
                 <div class="row">
-                    {/* <div class="col-lg-5 d-none d-lg-flex">
-                        <div class="flex-grow-1 bg-register-image"
-                            style="background-image: url(&quot;/assets/img/dogs/image2.jpeg?h=a0a7d00bcd8e4f84f4d8ce636a8f94d4&quot;);">
-                        </div>
-                    </div> */}
+                    
                     <div class="col-lg-12">
                         <div class="p-1">
 

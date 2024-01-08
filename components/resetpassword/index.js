@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import React from "react"
 import toast, {Toaster} from 'react-hot-toast'
-import axios from 'axios';
 import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../src/app/api/v1/controller/user/route";
 
 let initialState = {
