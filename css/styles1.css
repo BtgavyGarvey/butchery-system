@@ -113,7 +113,7 @@
     display: block;
   }
 
-  .navDiv, .parentProduct{
+  .navDiv, .parentProduct, .view{
     display: none;
   }
   
@@ -152,14 +152,14 @@
   .chart-js {
     display: flex;
     width: 100%;
-    height: 100vh;
+    height: auto;
     /* overflow-y: hidden; */
-    justify-content: space-between;
+    /* justify-content: space-between; */
 
 
   }
   .chartjs {
-    display: flex;
+    display: block;
     flex-direction: column;
     overflow-y: scroll;
     width: 50%;
@@ -211,7 +211,7 @@
     .chart-container{
       height: auto;
     }
-    .Dflex{
+    .Dflex,view{
       display: block;
     }
   }

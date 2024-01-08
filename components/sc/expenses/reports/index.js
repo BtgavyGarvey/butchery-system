@@ -22,8 +22,6 @@ let DataQuantity=[]
 export default function ViewSalesPage({session}) {
 
 
-    const [SalesData, setSalesData]=React.useState([])
-    const [OneSalesData, setOneSalesData]=React.useState()
     const [chartData, setChartData] = React.useState();
 
     const DateRef=React.useRef()
@@ -34,13 +32,12 @@ export default function ViewSalesPage({session}) {
     const radio1=React.useRef()
     const radio2=React.useRef()
     const radio=React.useRef()
-    const [pageCount,setPageCount]=React.useState(0)
-    const [outOfPage,setOutOfPage]=React.useState(0)
-    const [OneCashier,setOneCashier]=React.useState(0)
-    const [ManyCashiers,setManyCashiers]=React.useState([])
+    const chartjs1=React.useRef()
+    const chartjs2=React.useRef()
+    const chartjs3=React.useRef()
+    const view=React.useRef()
     const [Branches, setBranches]=React.useState([])
     const branch=React.useRef()
-    const [dropDownManu, setDropDownManu]=React.useState(false)
 
     let toastId
     let data
@@ -54,7 +51,6 @@ export default function ViewSalesPage({session}) {
         cashier.current='all'
 
     },[])
-
 
     const Expense=React.useRef([])
     const PerExpense=React.useRef([])
@@ -204,9 +200,10 @@ export default function ViewSalesPage({session}) {
     const handleChangeProduct=(e)=>{
       const { name } = e.target;
 
+      view.current.style.display='block'
+
       if (Branches.length < 1) {
         getBrunches()
-        
       }
 
       if (name==='1') {
@@ -221,7 +218,6 @@ export default function ViewSalesPage({session}) {
       }
     
     }
-
 
     const loopDataDate=()=>{
 
@@ -314,7 +310,21 @@ export default function ViewSalesPage({session}) {
     
     }
 
+    const handleChangeView=(e)=>{
+      const { name, value } = e.target;
 
+      
+      if (value==='1') {
+        chartjs1.current.style.display='flex'
+        chartjs2.current.style.width='50%'
+        chartjs3.current.style.width='50%'
+      } else {
+        chartjs1.current.style.display='block'
+        chartjs2.current.style.width='100%'
+        chartjs3.current.style.width='100%'
+      }
+    
+    }
 
     const options2 = {
         scales: {
@@ -338,8 +348,7 @@ export default function ViewSalesPage({session}) {
             },
           },
         },
-      };
-
+    };
 
     const getBrunches=async()=>{
         let response=await getBranches(session)
@@ -408,7 +417,6 @@ export default function ViewSalesPage({session}) {
                           name="2"
                           />
                           </div>
-                          
                          
                         </div>
                         <div className="col-md-2 p-1">
@@ -444,16 +452,25 @@ export default function ViewSalesPage({session}) {
                           }    
                         </select>
                         </div>
+                        <div ref={view} className="col-md-2 p-1 view">
+                          <label className="fw-bold">Choose View</label>
+                          <select
+                          className="form-control"
+                          onChange={handleChangeView}
+                          name="view"
+                        >
+                         <option value={'1'}>Default</option>
+                         <option value={'2'}>Full</option>
+                        </select>
+                        </div>
                         
                         </div>
 
                           {
                               chartData && (
                                 <>
-
-                                
-                                <div className="chart-js">
-                                <div className="chartjs">
+                                <div ref={chartjs1} className="chart-js">
+                                <div ref={chartjs2} className="chartjs">
                                   <div className="chartjs-div">
                                   <BarChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                   </div>
@@ -461,27 +478,33 @@ export default function ViewSalesPage({session}) {
                                   <PolarAreaChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                   </div>
                                   <div className='chartjs-div polar'>
-                                  <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                  <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                   </div>
 
                                 </div>
-                                <div className="chartjs">
+                                <div ref={chartjs3} className="chartjs">
                                   <div className="chartjs-div polar">
                                   <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                   </div>
                                   <div className='chartjs-div'>
                                   <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                   </div>
-                                  <div className='chartjs-div polar'>
-                                  <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                                  </div>
+                                  {
+                                    radio.current===1 && (
+                                      <>
+                                      <div className='chartjs-div polar' >
+                                        <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                      </div>
+                                      </>
+                                    )
+                                  }
+                                  
                                 </div>
                                 </div>
 
                                 </>
                                 )
                           }
-                                              
                             
                         </div>
                     </div>

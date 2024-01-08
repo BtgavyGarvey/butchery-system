@@ -9,6 +9,10 @@ import { getProducts, newSale } from "../../../../../src/app/api/v1/controller/b
 import { Today } from "../../../../layout/utils"
 import lodash from 'lodash'
 
+
+// const ThermalPrinter =dynamic(()=> from ('node-thermal-printer'), {ssr:false})
+// const PrinterTypes =dynamic(()=> from ('node-thermal-printer').then(mod=>mod.types),{ssr:false})
+
 let paymentType={
     type:1,
     cash:0,
@@ -92,6 +96,43 @@ export default function MakeSalesPage({session,data}) {
             }
         }
     },[ProductData])
+
+    // const scanPrinter=async()=>{
+
+    //     // let PrinterThermal=ThermalPrinter().printer()
+    //     // let Printer_Types=PrinterTypes().types()
+        
+    //     // let printer=new PrinterThermal({
+    //     //   type:Printer_Types.EPSON,
+    //     //   interface: 'tcp://'
+    //     // })
+  
+    //     // printer.alignCenter()
+    //     // printer.println(session.user.butchery)
+    //     // // await printer.printImage('./directory')
+    //     // printer.cut()
+  
+    //     // try {
+    //     //   let execute = printer.execute()
+    //     //   console.log('Print done!', execute);
+    //     // } catch (error) {
+    //     //   console.error("Print failed: ", error)
+    //     // }
+  
+    //     let printer
+  
+    //     try {
+  
+    //       const {printer: ThermalPrinter, types:PrinterTypes}=await import('node-thermal-printer')
+  
+    //       printer = new ThermalPrinter({
+  
+    //       })
+          
+    //     } catch (error) {
+          
+    //     }
+    //   }
 
     const readOnly=()=>{
         totalPrice.current=0

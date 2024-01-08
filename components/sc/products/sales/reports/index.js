@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
@@ -21,9 +22,6 @@ let DataQuantity=[]
 
 export default function ViewSalesPage({session}) {
 
-
-    const [SalesData, setSalesData]=React.useState([])
-    const [OneSalesData, setOneSalesData]=React.useState()
     const [chartData, setChartData] = React.useState();
 
     const DateRef=React.useRef()
@@ -34,13 +32,12 @@ export default function ViewSalesPage({session}) {
     const radio1=React.useRef()
     const radio2=React.useRef()
     const radio=React.useRef()
-    const [pageCount,setPageCount]=React.useState(0)
-    const [outOfPage,setOutOfPage]=React.useState(0)
-    const [OneCashier,setOneCashier]=React.useState(0)
-    const [ManyCashiers,setManyCashiers]=React.useState([])
+    const chartjs1=React.useRef()
+    const chartjs2=React.useRef()
+    const chartjs3=React.useRef()
+    const view=React.useRef()
     const [Branches, setBranches]=React.useState([])
     const branch=React.useRef()
-    const [dropDownManu, setDropDownManu]=React.useState(false)
 
     let toastId
     let data
@@ -55,11 +52,9 @@ export default function ViewSalesPage({session}) {
 
     },[])
 
-
     const Revenue=React.useRef([])
 
     const RevenuePerProduct=React.useRef([])
-
     
     const getReport=async()=>{
 
@@ -196,6 +191,8 @@ export default function ViewSalesPage({session}) {
     const handleChangeProduct=(e)=>{
       const { name } = e.target;
 
+      view.current.style.display='block'
+
       if (Branches.length < 1) {
         getBrunches()
         
@@ -210,6 +207,22 @@ export default function ViewSalesPage({session}) {
         radio.current=2
         getReport()
       radio1.current.checked=false
+      }
+    
+    }
+
+    const handleChangeView=(e)=>{
+      const { name, value } = e.target;
+
+      
+      if (value==='1') {
+        chartjs1.current.style.display='flex'
+        chartjs2.current.style.width='50%'
+        chartjs3.current.style.width='50%'
+      } else {
+        chartjs1.current.style.display='block'
+        chartjs2.current.style.width='100%'
+        chartjs3.current.style.width='100%'
       }
     
     }
@@ -331,8 +344,6 @@ export default function ViewSalesPage({session}) {
     
     }
 
-
-
     const options2 = {
         scales: {
           x: {
@@ -355,23 +366,7 @@ export default function ViewSalesPage({session}) {
             },
           },
         },
-      };
-
-
-    // const handleDateClick=(e)=>{
-    //     DateRef.current=formatDate(e.target.value)
-    //     getSalesData()
-    // }
-
-    // const handleCashierClick=(e)=>{
-    //     cashier.current=e.target.value
-    //     getSalesData()
-    // }
-
-    // const handleProductClick=(e)=>{
-    //     product.current=e.target.value
-    //     getSalesData()
-    // }
+    };
 
     const getBrunches=async()=>{
         let response=await getBranches(session)
@@ -382,6 +377,8 @@ export default function ViewSalesPage({session}) {
         branch.current=e.target.value
         getReport(1)
     }
+
+    
 
   return (
     <>
@@ -417,20 +414,6 @@ export default function ViewSalesPage({session}) {
                     <div class="card shadow">
                     <div class="card-header d-flex justify-content-between py-3">
                             <p class="text-dark m-0 fw-bold">{refDay.current}</p>
-                            {/* <div class="dropdown border rounded-pill">
-                                <button onClick={()=>{setDropDownManu(!dropDownManu)}}
-                                    class="dropdown-btn btn btn-primary bg-primary dropdown-toggle text-center border rounded-pill"
-                                    aria-expanded="false" data-bs-toggle="dropdown"
-                                    type="button"><strong>Sales&nbsp;</strong>
-                                </button>
-                               
-                                <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
-                                </div>
-                                    
-                            </div> */}
                       </div>
                         
                         <div class="card-body">
@@ -489,115 +472,56 @@ export default function ViewSalesPage({session}) {
                           }    
                         </select>
                         </div>
-                        {/* <div className="col-md-2 p-1">
-                          <label className="fw-bold">Choose Product</label>
+                        <div ref={view} className="col-md-2 p-1 view">
+                          <label className="fw-bold">Choose View</label>
                           <select
                           className="form-control"
-                          onChange={handleChangeProduct}
-                          name="timeFrame"
+                          onChange={handleChangeView}
+                          name="view"
                         >
-                         <option></option>
-                         <option value={'2'}>Report Per Product</option>
+                         <option value={'1'}>Default</option>
+                         <option value={'2'}>Full</option>
                         </select>
-                        </div> */}
                         </div>
-                            {/* <div class="row">
-                            
-                                <div class="col-md-3 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Products&nbsp;<select onChange={handleProductClick}
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="all">All</option>
-                                                {
-                                                    soldProducts.map((result)=>{
-                                                        return (
-                                                            <>
-                                                            <option value={result} >{result}</option>
-                                                            
-                                                            </>
-                                                        )
-
-                                                    })
-                                                }
-                                            </select>&nbsp;</label></div>
+                        </div>
+                        {
+                            chartData && (
+                              <>
+                              <div ref={chartjs1} className="chart-js">
+                              <div ref={chartjs2} className="chartjs">
+                                <div className="chartjs-div">
+                                <BarChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                 </div>
-                                <div class="col-md-3 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Cashier&nbsp;<select onChange={handleCashierClick}
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="all">All</option>
-                                                {
-                                                    ManyCashiers.map((result)=>{
-                                                        return (
-                                                            <>
-                                                            <option value={result.id} >{result.firstName} {result.lastName}</option>
-                                                            
-                                                            </>
-                                                        )
-
-                                                    })
-                                                }
-                                            </select>&nbsp;</label></div>
+                                <div className='chartjs-div polar'>
+                                <PolarAreaChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                 </div>
-                                <div class="col-md-2 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Date&nbsp;<input type="date" ref={DateRef} onChange={handleDateClick}
-                                                class="d-inline-block form-control form-control-sm" />
-                                            &nbsp;</label></div>
+                                <div className='chartjs-div polar'>
+                                <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                Branches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
+
+                              </div>
+                              <div ref={chartjs3} className="chartjs">
+                                <div className='chartjs-div'>
+                                <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
                                 </div>
-                            </div> */}
+                                <div className="chartjs-div polar">
+                                <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                </div>
+                                {
+                                  radio.current===1 && (
+                                    <>
+                                    <div className='chartjs-div polar' >
+                                      <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
+                                    </div>
+                                    </>
+                                  )
+                                }
+                              </div>
+                              </div>
 
-        {
-            chartData && (
-              <>
-
-              
-              <div className="chart-js">
-              <div className="chartjs">
-                <div className="chartjs-div">
-                <BarChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <PolarAreaChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <BubbleChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-
-              </div>
-              <div className="chartjs">
-                <div className='chartjs-div'>
-                <LineChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className="chartjs-div polar">
-                <PieChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-                <div className='chartjs-div polar'>
-                <DoughnutChart chartData={chartData} options={options2} timeDate={refDay.current}/>
-                </div>
-              </div>
-              </div>
-
-              </>
-              )
-        }
-                            
-                            
+                              </>
+                              )
+                        }
                         </div>
                     </div>
                 </div>
