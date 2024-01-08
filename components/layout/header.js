@@ -39,8 +39,6 @@ export default function Header({session}) {
                 </div>
                 
                 <ul class="navbar-nav flex-wrap ms-auto">
-                                        type="text" placeholder="Search for ..." />
-                    
                     <li class="nav-item dropdown no-arrow">
                         <div class="nav-item dropdown no-arrow ">
                         <span class="d-block d-lg-inline  text-gray-600 small">{session.name}</span>
