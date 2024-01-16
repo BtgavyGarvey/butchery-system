@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../layout/footer"
 import Header from "../../layout/header"
 import NavBar from "../../layout/navbar"
-import { getBranches, getExpense, newExpense } from "../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getExpense, isShopOpened, newExpense } from "../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { DateTime, Today, formatDate } from "../../layout/utils"
 import ReactPaginate from "react-paginate"
@@ -51,9 +51,40 @@ export default function ViewExpensePage({session}) {
         page.current=1
         product.current='all'
         cashier.current='all'
-        getExpenseData()
-        getBrunches()
+        
+
+        isShopClosed(1)
+
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getExpenseData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getExpenseData()
+                    getBrunches()
+                }
+                return
+            }
+        }
+    }
 
     const getBrunches=async()=>{
         let response=await getBranches(session)
@@ -180,6 +211,14 @@ export default function ViewExpensePage({session}) {
     const new_Expense=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
         NewExpense['branch']=branch.current
 
         if (!NewExpense.amount || !NewExpense.name) {

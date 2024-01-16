@@ -7,6 +7,7 @@ import { checkResetPasswordCode, forgotPassword, resetPassword } from "../../../
 import NavBar from "../../../layout/navbar";
 import Header from "../../../layout/header";
 import Footer from "../../../layout/footer";
+import { isShopOpened } from "../../../../src/app/api/v1/controller/butchery/route";
 
 let initialState = {
     password: "",
@@ -35,8 +36,24 @@ export default function ForgotPasswordPage({param, session}){
     const confirmCodeBtn=React.useRef(null)
     const resetPassBtn=React.useRef(null)
 
+    const isShopClosed=async()=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (!shopOpened) {
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            
+        }
+        
+    }
+
     
     const sendCode=async()=>{
+
 
         if (formData.username.trim() !=="") {
 
@@ -118,6 +135,14 @@ export default function ForgotPasswordPage({param, session}){
     const resetPass=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed()
+
+        toast.dismiss(toastId)
         
         if (formData.password.trim() !=="") {
 

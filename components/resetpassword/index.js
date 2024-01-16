@@ -56,7 +56,7 @@ export default function ForgotPasswordPage(){
             }
             
         } else {
-            toastId=toast.error('Please enter email',{
+            toastId=toast.error('Please enter username',{
                 id:toastId
             })
         }

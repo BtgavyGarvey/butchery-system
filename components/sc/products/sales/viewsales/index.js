@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranchById, getBranches, getSales, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranchById, getBranches, getSales, isShopOpened, rollBackSales } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
@@ -48,10 +48,37 @@ export default function ViewSalesPage({session}) {
         branch.current=session.user.branch
         product.current='all'
         cashier.current='all'
-        getSalesData()
-        getBrunches()
+        isShopClosed(1)
 
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+            if (val===1) {
+                getSalesData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getSalesData()
+                    getBrunches()
+                }
+                return
+            }
+        }
+    }
 
     const hideModal=()=>{
         modalRef2.current.style.display='none'
@@ -107,6 +134,14 @@ export default function ViewSalesPage({session}) {
     }
 
     const rollBackSale=async(data)=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
 
         let answer=confirm(`Are you sure you want to roll back the sale of ${data.name}`)
 

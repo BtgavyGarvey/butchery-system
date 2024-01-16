@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import { getCashiers, updateCashier } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
-import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, isShopOpened } from "../../../../src/app/api/v1/controller/butchery/route"
 
 export default function CashiersPage({session}) {
 
@@ -34,9 +34,41 @@ export default function CashiersPage({session}) {
         searchParams.current='all'
         pageLimit.current=25
         page.current=1
-        getCashiersData()
-        getBrunches()
+        isShopClosed(1)
+        
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getCashiersData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+
+                if (val===1) {
+                    getCashiersData()
+                    getBrunches()
+                }
+                return
+            }
+            
+        }
+    }
 
     const showModal=()=>{
 
@@ -117,6 +149,14 @@ export default function CashiersPage({session}) {
 
     const editCashier=async(id,val)=>{
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
+
         let answer=confirm(`Are you sure you want to ${val===1 ? 'GRANT' : 'DENY'} the selected cashier access, ${oneCashiersData.cashierInfo.firstName} ${oneCashiersData.cashierInfo.lastName}?`)
 
         if (!answer) {
@@ -126,6 +166,7 @@ export default function CashiersPage({session}) {
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
+
         let editData=await updateCashier(id,val)
 
         toast.dismiss(toastId)
@@ -142,6 +183,15 @@ export default function CashiersPage({session}) {
     }
 
     const deleteCashier=async(id,data)=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
+
 
         alert('This action is NOT reversible')
 

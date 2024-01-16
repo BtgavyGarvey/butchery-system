@@ -5,7 +5,7 @@ import NavBar from "../../../layout/navbar";
 import Header from "../../../layout/header";
 import Footer from "../../../layout/footer";
 import toast, { Toaster } from "react-hot-toast";
-import { getBranches, getProducts, newProduct } from "../../../../src/app/api/v1/controller/butchery/route";
+import { getBranches, getProducts, isShopOpened, newProduct } from "../../../../src/app/api/v1/controller/butchery/route";
 
 let initialState = {
     price: "",
@@ -49,9 +49,38 @@ export default function NewProductPage({session}) {
 
     React.useEffect(()=>{
         branch.current=session.user.branch
-        getBrunches()
-        getProdacts(session.user.branch)
+        isShopClosed(1)
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getBrunches()
+                getProdacts(session.user.branch)
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getBrunches()
+                    getProdacts(session.user.branch)
+                }
+                return
+                
+            }
+        }
+    }
 
     const handleInputChange = (e) => {
         
@@ -146,6 +175,14 @@ export default function NewProductPage({session}) {
     const onSubmit=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
         var isValid=await validate()
 
         try {

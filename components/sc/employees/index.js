@@ -6,7 +6,7 @@ import Header from "../../layout/header";
 import NavBar from "../../layout/navbar";
 import toast, { Toaster } from "react-hot-toast";
 import { newUser } from "../../../src/app/api/v1/controller/user/route";
-import { getBranches } from "../../../src/app/api/v1/controller/butchery/route";
+import { getBranches, isShopOpened } from "../../../src/app/api/v1/controller/butchery/route";
 
 let initialState = {
     firstName:"",
@@ -27,8 +27,38 @@ export default function NewEmployeePage({session}) {
     const [Branches, setBranches] = React.useState([]);
 
     React.useEffect(()=>{
-        myBranches()
+        isShopClosed(1)
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                myBranches()
+            }
+            return
+            
+        }
+        else{
+
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+
+                if (val===1) {
+                    myBranches()
+                }
+                return
+            }
+            
+        }
+    }
 
     const myBranches=async()=>{
 
@@ -79,6 +109,15 @@ export default function NewEmployeePage({session}) {
     const onSubmit=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
+
         var isValid=await validate()
 
         try {

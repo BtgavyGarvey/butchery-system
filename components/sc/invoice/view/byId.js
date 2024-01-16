@@ -6,7 +6,7 @@ import NavBar from "../../../layout/navbar"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
 import { Today } from "../../../layout/utils"
-import { getAllProducts, getInvoiceDetails, newInvoiceDetails } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getAllProducts, getInvoiceDetails, isShopOpened, newInvoiceDetails } from "../../../../src/app/api/v1/controller/butchery/route"
 
 let Branches=[]
 
@@ -41,9 +41,36 @@ export default function ViewProductsPage({session, param}) {
     
     React.useEffect(()=>{
         modalRef1.current.style.display='none'
-        getProductData()
-        getInvoiceData()
+        isShopClosed(1)
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getProductData()
+                getInvoiceData()
+            }
+            return
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getProductData()
+                    getInvoiceData()
+                }
+                return
+            }
+        }
+    }
 
     const showModal=()=>{
         modalRef1.current.style.display='block'
@@ -94,7 +121,6 @@ export default function ViewProductsPage({session, param}) {
         let data={
             branch,
         }
-        toast()
         let response=await getAllProducts(data)
         setProductDataData(response.products)
 
@@ -121,6 +147,14 @@ export default function ViewProductsPage({session, param}) {
     const newInvoices=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
 
         InvoiceDetails.value=1
 

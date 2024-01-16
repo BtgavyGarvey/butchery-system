@@ -10,7 +10,7 @@ import { faArrowAltCircleUp, faEye } from "@fortawesome/free-solid-svg-icons"
 import { getUsers, newEmployeePayment, resetEmployeePayment, reverseEmployeePayment } from "../../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
 import { Today } from "../../../layout/utils"
-import { getBranches } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, isShopOpened } from "../../../../src/app/api/v1/controller/butchery/route"
 
 export default function EmployeesPaymentPage({session}) {
 
@@ -45,9 +45,40 @@ export default function EmployeesPaymentPage({session}) {
         searchParams.current='all'
         pageLimit.current=25
         page.current=1
-        getEmployeesData()
-        getBrunches()
+        isShopClosed(1)
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getEmployeesData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+
+                if (val===1) {
+                    getEmployeesData()
+                    getBrunches()
+                }
+                return
+            }
+            
+        }
+    }
 
     const getBrunches=async()=>{
         let response=await getBranches(session)
@@ -68,42 +99,6 @@ export default function EmployeesPaymentPage({session}) {
     const hideModal=()=>{
         modalRef1.current.style.display='none'
         modalRef2.current.style.display='none'
-    }
-
-    const deleteProduct=async(branch,id,code,val)=>{
-
-        let answer
-        let temp
-
-        if (val===-1) {
-            answer=confirm(`Are you sure you want to delete product with ID: ${code}`)
-            temp=2
-        } 
-        else if (val===2) {
-            answer=confirm(`Are you sure you want to archive product with ID: ${code}`)
-            temp=1
-        }
-        else {
-            answer=confirm(`Are you sure you want to restore product with ID: ${code}`)
-            temp=2
-        }
-
-        if (answer) {
-            toastId=toast.loading('Loading, please wait...',{
-                id:toastId
-            })
-
-            let response=await deleteProducts(branch,id,session,val)
-            toast.dismiss(toastId)
-            if (response) {
-                toast.success('Successful')
-                getProductData(temp)
-            }
-            else{
-                toast.error('Failed')
-            }
-        }
-        
     }
 
     const totalAmount=(amount)=>{
@@ -187,6 +182,14 @@ export default function EmployeesPaymentPage({session}) {
 
     const resetPayments=async(value)=>{
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
+
         let answer
 
         alert('This action is NOT reversible')
@@ -231,6 +234,14 @@ export default function EmployeesPaymentPage({session}) {
 
     const reversePayments=async(id)=>{
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
+
         alert('This action is NOT reversible')
 
         let answer=confirm(`Are you sure you want to reverse this payment?`)
@@ -259,8 +270,18 @@ export default function EmployeesPaymentPage({session}) {
     }
 
     const newEmployeesPayment=async(e)=>{
-
+        
         e.preventDefault()
+        
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
+
+        
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId

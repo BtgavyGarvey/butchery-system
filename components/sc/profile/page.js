@@ -3,7 +3,7 @@
 import NavBar from "../../layout/navbar"
 import Header from "../../layout/header"
 import Footer from "../../layout/footer"
-import { editButcheryProfile, generateUniqueBranchId, getButcheryProfile, newBranch, openCloseShop } from "../../../src/app/api/v1/controller/butchery/route"
+import { editButcheryProfile, generateUniqueBranchId, getButcheryProfile, isShopOpened, newBranch, openCloseShop } from "../../../src/app/api/v1/controller/butchery/route"
 import React from 'react'
 import { AddDate, DateOnly } from "../../layout/utils"
 import { City } from 'country-state-city'
@@ -52,12 +52,38 @@ export default function ProfilePage({session}) {
     }
 
     React.useEffect(()=>{
-        getProfile()
         modalRef1.current.style.display='none'
         modalRef2.current.style.display='none'
-
+        isShopClosed(1)
 
     },[session])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getProfile()
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getProfile()
+                }
+                return
+            }
+        }
+    }
 
     const showModal=(val)=>{
 
@@ -264,6 +290,14 @@ export default function ProfilePage({session}) {
     const new_Branch=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
         var isValid=await validate()
 
         try {
@@ -295,6 +329,14 @@ export default function ProfilePage({session}) {
 
         e.preventDefault()
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
+
         try {
             toastId=toast.loading('Please wait. Loading...',{
                 id:toastId
@@ -320,6 +362,14 @@ export default function ProfilePage({session}) {
     const editButchery=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
 
         try {
             toastId=toast.loading('Please wait. Loading...',{
@@ -347,6 +397,14 @@ export default function ProfilePage({session}) {
 
         e.preventDefault()
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
+
         try {
             toastId=toast.loading('Please wait. Loading...',{
                 id:toastId
@@ -370,6 +428,14 @@ export default function ProfilePage({session}) {
     }
 
     const closeOpenShop=async(val)=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
 
         let answer
 

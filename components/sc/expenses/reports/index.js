@@ -4,7 +4,7 @@ import React from "react"
 import Footer from "../../../layout/footer"
 import Header from "../../../layout/header"
 import NavBar from "../../../layout/navbar"
-import { getBranches, getReportData } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getReportData, isShopOpened } from "../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { DateWeek, Today } from "../../../layout/utils"
 import BarChart from "../../../layout/utils/chartjs/barChart";
@@ -50,7 +50,22 @@ export default function ViewSalesPage({session}) {
         product.current='all'
         cashier.current='all'
 
+
     },[])
+
+    const isShopClosed=async()=>{
+
+      let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+      if (!shopOpened) {
+        if (session.user.access===1) {
+          toast('Your Employer has closed the shop')
+          signOut()
+          router.push('/')
+        }
+      }
+      
+  }
 
     const Expense=React.useRef([])
     const PerExpense=React.useRef([])
@@ -189,16 +204,21 @@ export default function ViewSalesPage({session}) {
 
     }
 
-    const handleChangeInput=(e)=>{
+    const handleChangeInput=async(e)=>{
       const { value } = e.target;
     
       refDay.current=value
 
+        await isShopClosed()
+         
+
       getReport()
     }
 
-    const handleChangeProduct=(e)=>{
+    const handleChangeProduct=async(e)=>{
       const { name } = e.target;
+
+        await isShopClosed()
 
       view.current.style.display='block'
 

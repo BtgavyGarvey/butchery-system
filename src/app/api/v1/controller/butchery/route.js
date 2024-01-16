@@ -21,6 +21,12 @@ import lodash from "lodash";
 import mongoose from "mongoose";
 import { format } from "date-fns";
 
+// import ThermalPrinter from 'node-thermal-printer'
+// import { ThermalPrinter, PrinterTypes} from 'node-thermal-printer'
+import Printer from 'node-printer'
+import escpos from 'escpos'
+import Cashier from "../../model/cashiers";
+
 // DB CONNECTION
 
 DbConnect()
@@ -212,6 +218,36 @@ export async function tokenGeneration (id, emailToken) {
   }
 };
 
+export async function printReceipt (text) {
+
+  try {
+    const foundPrinters=Printer.getPrinters()
+  
+    if (!foundPrinters) {
+      console.log('No printers available');
+
+      return
+      
+    }
+
+    const selectedPrinter=foundPrinters[0]
+
+    const device = new escpos.Network(selectedPrinter.address,selectedPrinter.port)
+    const printerInstance=new escpos.Printer(device)
+
+    device.open(()=>{
+      printerInstance
+        .font('a')
+        .align('lt')
+        .text(text)
+        .cut()
+        .close()
+    })
+  } catch (error) {
+    console.log('Error printing to POS printer:',error);
+  }
+
+}
 // EXTENSION FUNCTIONS OF HTTP METHODS
 
 export async function newButchery(value){
@@ -2452,7 +2488,6 @@ export async function openCloseShop(data){
   let responseData={
     message:'',
     success:false,
-    invoices:''
   }
 
   try {
@@ -2476,4 +2511,33 @@ export async function openCloseShop(data){
     return responseData
   }
 
+}
+
+export async function isShopOpened(branch,cashier){
+
+  try {
+
+    let promise=[
+      Branch.findOne({id:branch}),
+      Cashier.findOne({cashier, __v:1})
+    ]
+
+    let promises= await Promise.allSettled(promise)
+
+    let myBranch=promises[0].value
+    let myCashier=promises[1].value
+    let butchery=await Butchery.findOne({id:myBranch.butchery})
+
+    if (butchery.__v !==1 || !myCashier) {
+      console.log('Closed');
+      return false
+    }
+    console.log('Open');
+    
+    return true
+    
+  } catch (error) {
+    console.log(error);
+    return false
+  }
 }

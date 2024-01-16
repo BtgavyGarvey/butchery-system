@@ -1,11 +1,10 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
-import { getBranches, getReportData } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, getReportData, isShopOpened } from "../../../../../src/app/api/v1/controller/butchery/route"
 import toast, { Toaster } from "react-hot-toast"
 import { DateWeek, Today } from "../../../../layout/utils"
 import BarChart from "../../../../layout/utils/chartjs/barChart";
@@ -49,8 +48,24 @@ export default function ViewSalesPage({session}) {
         branch.current=session.user.branch
         product.current='all'
         cashier.current='all'
+        isShopClosed()
 
     },[])
+
+    const isShopClosed=async()=>{
+
+      let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+      if (!shopOpened) {
+        if (session.user.access===1) {
+          toast('Your Employer has closed the shop')
+          signOut()
+          router.push('/')
+        }
+          
+      }
+      
+  }
 
     const Revenue=React.useRef([])
 

@@ -7,7 +7,7 @@ import NavBar from "../../../layout/navbar"
 import { faArchive, faArrowAltCircleUp, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { deleteProducts, editProducts, getBranches, getProducts, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
+import { deleteProducts, editProducts, getBranches, getProducts, isShopOpened, productsIssue } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 
 // let Branches=[]
@@ -44,9 +44,39 @@ export default function ViewProductsPage({session}) {
         pageLimit.current=25
         page.current=1
         achievedVal.current=1
-        getProductData()
-        getBrunches()
+
+        isShopClosed(1)
+        
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+            
+            if (val===1) {
+                getProductData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getProductData()
+                    getBrunches()
+                }
+                return
+            }
+        }
+    }
 
     const getBrunches=async()=>{
         let response=await getBranches(session)
@@ -102,6 +132,14 @@ export default function ViewProductsPage({session}) {
 
         let answer
         let temp
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
 
         if (val===-1) {
             answer=confirm(`Are you sure you want to delete product with ID: ${code}`)
@@ -227,6 +265,14 @@ export default function ViewProductsPage({session}) {
     }
 
     const editProduct=async()=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
@@ -245,6 +291,14 @@ export default function ViewProductsPage({session}) {
     }
 
     const productIssue=async()=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })

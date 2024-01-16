@@ -1,13 +1,24 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import React from "react"
 import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
 import toast, { Toaster } from "react-hot-toast"
-import { getProducts, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { getProducts, isShopOpened, newSale, printReceipt } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { Today } from "../../../../layout/utils"
 import lodash from 'lodash'
+// import browserify from 'browserify-fs'
+// import {Printer, Types} from 'escpos'
+// import Printer from 'node-printer'
+
+// import { creatFsFromVolume, Volume} from 'memfs'
+
+// const volume = Volume.fromJSON({})
+
+// global.fs=creatFsFromVolume(volume)
+// global.fs=browserify
 
 
 // const ThermalPrinter =dynamic(()=> from ('node-thermal-printer'), {ssr:false})
@@ -27,8 +38,8 @@ export default function MakeSalesPage({session,data}) {
     let toastId
     const modalRef1=React.useRef()
 
-    const [ProductData, setProductDataData]=React.useState(data.products)
-    branch=data.products[0].documents.branches.name
+    const [ProductData, setProductDataData]=React.useState(data?.products)
+    branch=data?.products[0]?.documents.branches.name
 
     const getProductData=async()=>{
 
@@ -53,6 +64,9 @@ export default function MakeSalesPage({session,data}) {
     React.useEffect(()=>{
         modalRef1.current.style.display='none'
         bothRef.current.style.display='none'
+        
+        // const foundPrinters=Printer.getPrinters()
+        // setPrinters(foundPrinters)
     },[])
 
 
@@ -75,6 +89,7 @@ export default function MakeSalesPage({session,data}) {
     const [total, setTotal]=React.useState(totalState)
     const [change, setChange]=React.useState()
     const [display, setDisplay]=React.useState(false)
+    const [Printers, setPrinters]=React.useState([])
 
     if (ProductData.length>0) {
 
@@ -95,44 +110,52 @@ export default function MakeSalesPage({session,data}) {
                 ProductData[i].documents['sellingTime']=Today()
             }
         }
+
+        printReceipt('Hello World')
     },[ProductData])
 
-    // const scanPrinter=async()=>{
+    const isShopClosed=async()=>{
 
-    //     // let PrinterThermal=ThermalPrinter().printer()
-    //     // let Printer_Types=PrinterTypes().types()
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (!shopOpened) {
+
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            
+        }
         
-    //     // let printer=new PrinterThermal({
-    //     //   type:Printer_Types.EPSON,
-    //     //   interface: 'tcp://'
-    //     // })
-  
-    //     // printer.alignCenter()
-    //     // printer.println(session.user.butchery)
-    //     // // await printer.printImage('./directory')
-    //     // printer.cut()
-  
-    //     // try {
-    //     //   let execute = printer.execute()
-    //     //   console.log('Print done!', execute);
-    //     // } catch (error) {
-    //     //   console.error("Print failed: ", error)
-    //     // }
-  
+    }
+
+    // const printReceipt=async()=>{
+
     //     let printer
   
     //     try {
   
-    //       const {printer: ThermalPrinter, types:PrinterTypes}=await import('node-thermal-printer')
-  
-    //       printer = new ThermalPrinter({
-  
-    //       })
+    //         const {printer: ThermalPrinter, types:PrinterTypes}=await import('node-thermal-printer')
+    
+    //         printer = new ThermalPrinter({
+    //             type:PrinterTypes.EPSON,
+    //             interface:'tcp://'
+    //         })
+
+    //         printer.alignCenter()
+    //         printer.println('Hello World')
+    //         await printer.printImage('./directory')
+    //         printer.cut()
+
+    //         let execute = printer.execute()
+    //         console.log('Print done!', execute);
           
     //     } catch (error) {
+    //       console.error("Print failed: ", error)
           
     //     }
-    //   }
+    // }
 
     const readOnly=()=>{
         totalPrice.current=0
@@ -340,6 +363,14 @@ export default function MakeSalesPage({session,data}) {
     const submit=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed()
+
+        // toast.dismiss(toastId)
         
         for (let i = 0; i < sellData.length; i++) {
             sellData[i]['sellingTime']=Today()
@@ -430,6 +461,12 @@ export default function MakeSalesPage({session,data}) {
         totalChange(totalPrice.current)
        
     }
+
+    const PrintReceipt=()=>{
+        // printReceipt()
+    }
+
+    console.log(Printers);
 
   return (
     <>

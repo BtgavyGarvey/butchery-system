@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons"
 import { deleteUser, editUser, getUsers, newCashier } from "../../../src/app/api/v1/controller/user/route"
 import ReactPaginate from "react-paginate"
-import { getBranches } from "../../../src/app/api/v1/controller/butchery/route"
+import { getBranches, isShopOpened } from "../../../src/app/api/v1/controller/butchery/route"
 
 export default function EmployeesPage({session}) {
 
@@ -36,9 +36,42 @@ export default function EmployeesPage({session}) {
         searchParams.current='all'
         pageLimit.current=25
         page.current=1
-        getEmployeesData()
-        getBrunches()
+
+        isShopClosed(1)
+        
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getEmployeesData()
+                getBrunches()
+            }
+            return
+            
+        }
+        else{
+
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+
+                if (val===1) {
+                    getEmployeesData()
+                    getBrunches()
+                }
+                return
+            }
+            
+        }
+    }
 
     const showModal=()=>{
 
@@ -126,6 +159,14 @@ export default function EmployeesPage({session}) {
 
         e.preventDefault()
 
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
+
         toastId=toast.loading('Loading, please wait...',{
             id:toastId
         })
@@ -145,6 +186,14 @@ export default function EmployeesPage({session}) {
     }
 
     const makeCashier=async()=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
 
         oneEmployeesData['password']='#65£.@'
 
@@ -166,6 +215,14 @@ export default function EmployeesPage({session}) {
     }
 
     const deleteEmployee=async(id,data)=>{
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        toast.dismiss(toastId)
 
         alert('This action is NOT reversible')
 
@@ -202,8 +259,6 @@ export default function EmployeesPage({session}) {
         branch.current=e.target.value
         getEmployeesData()
     }
-
-
 
     const handleInputChangeSearch = (e) => {
       

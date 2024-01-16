@@ -6,11 +6,15 @@ import Footer from "../../layout/footer"
 import MonthYear, { DateWeek, Today, formatDate } from '../../layout/utils/index'
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
-import { getReportData } from "../../../src/app/api/v1/controller/butchery/route"
+import { getReportData, isShopOpened } from "../../../src/app/api/v1/controller/butchery/route"
+import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage({session}) {
 
     let toastId
+
+    let router=useRouter()
 
     let dateDetails=Today()
 
@@ -30,10 +34,32 @@ export default function DashboardPage({session}) {
     const [YearsAgoExpense,setYearsAgoExpense]=React.useState('0')
     
     const branch=React.useRef()
+
     React.useEffect(()=>{
         branch.current=session.user.branch
-        getReport()
+        isShopClosed()
+
     },[])
+
+    const isShopClosed=async()=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+            getReport()
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                getReport()
+            }
+        }
+    }
     
     const getReport=async()=>{
 

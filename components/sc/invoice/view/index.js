@@ -8,7 +8,7 @@ import { faEye } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import toast, { Toaster } from "react-hot-toast"
 import { Today, formatDate } from "../../../layout/utils"
-import { getAllProducts, getBranches, getInvoices, newInvoice } from "../../../../src/app/api/v1/controller/butchery/route"
+import { getAllProducts, getBranches, getInvoices, isShopOpened, newInvoice } from "../../../../src/app/api/v1/controller/butchery/route"
 import ReactPaginate from "react-paginate"
 import { useRouter } from "next/navigation"
 
@@ -44,10 +44,42 @@ export default function ViewProductsPage({session}) {
         pageLimit.current=25
         page.current=1
         achievedVal.current=1
-        getProductData()
-        getInvoiceData()
-        getBranchesData()
+
+        isShopClosed(1)
+        
     },[])
+
+    const isShopClosed=async(val)=>{
+
+        let shopOpened=await isShopOpened(session.user.branch,session.user.id)
+
+        if (shopOpened) {
+
+            if (val===1) {
+                getProductData()
+                getInvoiceData()
+                getBranchesData()
+            }
+            return
+            
+        }
+        else{
+            if (session.user.access===1) {
+                toast('Your Employer has closed the shop')
+                signOut()
+                router.push('/')
+            }
+            else{
+                if (val===1) {
+                    getProductData()
+                    getInvoiceData()
+                    getBranchesData()
+                }
+                return
+                
+            }
+        }
+    }
 
     const showModal=()=>{
         modalRef1.current.style.display='block'
@@ -128,7 +160,6 @@ export default function ViewProductsPage({session}) {
         let data={
             branch:branch.current,
         }
-        toast()
         let response=await getAllProducts(data)
         setProductDataData(response.products)
 
@@ -174,6 +205,14 @@ export default function ViewProductsPage({session}) {
     const newInvoices=async(e)=>{
 
         e.preventDefault()
+
+        toastId=toast.loading('Checking status, please wait...',{
+            id:toastId
+        })
+
+        await isShopClosed(2)
+
+        // toast.dismiss(toastId)
 
         toastId=toast.loading('Loading, please wait...',{
             id:toastId

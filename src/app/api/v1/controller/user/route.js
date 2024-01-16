@@ -646,12 +646,29 @@ export async function loginUser(username, password, req) {
         };
       }
 
+      if (butchery.__v !==1 && user.role ==='Employee') {
+        return {
+          message: 'The shop is closed. Contact your employer',
+          success: false,
+        };
+      }
+
       const cashierName = user.firstName + ' ' + user.lastName + ' (' + user.username + ')';
       if (process.env.NODE_ENV === 'production') {
         loginDetails(req, cashierUser.cashier, butchery.email, butchery.name, cashierName);
       }
 
-      const access = true;
+      let access = 0
+
+      if (user.role==='Administrator') {
+        access=2
+        
+      } else if (user.role==='Employer') {
+        access=3
+        
+      } else if (user.role==='Employee'){
+        access=1
+      }
 
       return {
         success: true,
