@@ -52,8 +52,12 @@ export default function ProfilePage({session}) {
     }
 
     React.useEffect(()=>{
-        modalRef1.current.style.display='none'
-        modalRef2.current.style.display='none'
+
+        if (session.user.access !== 1) {
+            modalRef1.current.style.display='none'
+            modalRef2.current.style.display='none'
+        }
+        
         isShopClosed(1)
 
     },[session])
@@ -515,18 +519,24 @@ export default function ProfilePage({session}) {
                     </div>
                     <div class="card-body shadow d-flex justify-content-between">
                         <span className="text-dark"><span className="text-info fw-bold">NB: </span> Changes will be effective on next login.</span>
-                        <span>
-                            {
-                                Butchery && (
-                                    Butchery?.__v===1 ? (
-                                        <a onClick={e=>{closeOpenShop(2)}} className="text-danger fw-bold faEdit">Close Shop</a>
-                                    ):(
-                                        <a onClick={e=>{closeOpenShop(1)}} className="text-success fw-bold faEdit">Open Shop</a>
-                                    )
-                                )
-                                
-                            }
-                        </span>
+
+                        {
+                            session.user.access !==1 && (
+                                <span>
+                                    {
+                                        Butchery && (
+                                            Butchery?.__v===1 ? (
+                                                <a onClick={e=>{closeOpenShop(2)}} className="text-danger fw-bold faEdit">Close Shop</a>
+                                            ):(
+                                                <a onClick={e=>{closeOpenShop(1)}} className="text-success fw-bold faEdit">Open Shop</a>
+                                            )
+                                        )
+                                        
+                                    }
+                                </span>
+                            )
+                        }
+                        
                     </div>
                 </div>
                 <div></div>
@@ -565,217 +575,232 @@ export default function ProfilePage({session}) {
                             </div>
                         </div>
                     </div>
-                <hr className="dhr"/>
 
-                    <div class="col-sm-6 offset-sm-4 text-center m-auto p-2">
-                        <div class="row">
-                            <div class="col">
-                                <div class="card">
-                                    <div class="card-header card_header">
-                                        <h3 class="text-capitalize fw-bolder text-center mb-0"><strong><span
-                                                    className="text-primary">Butchery Settings</span></strong>
-                                        </h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <form onSubmit={editButchery} className="border-1 border-danger shadow">
-                                    <div class="row">
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span
-                                                        >Butchery
-                                                        Code</span></strong></label><input value={Butchery?.code}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="text"  disabled/></div>
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span >Butchery Name
-                                                        </span></strong></label><input value={Butchery?.name}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="text" required onChange={handleInputChangeButchery}  name="name" minLength={3}/></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span
-                                                        >Butchery
-                                                        Email</span></strong></label><input value={Butchery?.email}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="email"  disabled name="name"/></div>
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span >Phone
-                                                        Number</span></strong></label><input value={Butchery?.mobile} minLength={10}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="tel" required onChange={handleInputChangeButchery}  name="mobile"/></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span
-                                                        >Butchery
-                                                        Country</span></strong></label><input value={Butchery?.country[0].name}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="text"  disabled name="name"/></div>
-                                        <div class="col-sm-6 text-dark"><label class="form-label"
-                                                style={{margin: "8px"}}><strong><span >Registration
-                                                        Date</span></strong></label><input value={DateOnly(Butchery?.createdAt)}
-                                                class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
-                                                type="text" disabled  name="email"/></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-12"><button
-                                                class="btn btn-success font-monospace text-dark text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder link-light border rounded-pill border-2 border-primary shadow rubberBand animated"
-                                                type="submit" style={{margin: "8px"}}>Save</button></div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-sm-8 offset-sm-6 text-center m-auto" >
-                        <div class="row">
-                            <div class="col offset-sm-2">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="text-capitalize fw-bolder mb-0"><strong><span
-                                                    className="text-danger">Branch Settings</span></strong></h3>
-                                    </div>
-                                    <div>
-                                        <a onClick={newBranchClick} className="fw-bold text-primary faEdit">New Branch</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {
-                            renderBranches()
-                        }
+                    {
+                        session.user.access !== 1 && (
+                            <>
+                            <hr className="dhr"/>
 
-                    </div>
-                </div>
-
-                <div ref={modalRef2} className="modal " role="dialog"
-                        tabindex="-1" id="modal-1">
-                        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-                            <div class="modal-content bg-dark">
-                                <div class="modal-header text-capitalize">
-                                    <h2 class="modal-title fw-bolder">New Branch</h2><button class="btn-close"
-                                        type="button" aria-label="Close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form onSubmit={new_Branch}>
-                                    <div class="modal-body">
-                                    
-                                        <div class="d-grid">
-                                            <div class="col ">
-                                                
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Name</label>
-                                                            <input onChange={handleInputChangeNew}
-                                                            class="border rounded-pill border-2 border-primary shadow-sm form-control"
-                                                             required name="name" minLength={3}/>
-                                                    </div>
-                                                </div>
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Mobile</label>
-                                                            <input onChange={handleInputChangeNew}
-                                                            class="border rounded-pill border-2 border-primary shadow-sm form-control"
-                                                              required name="mobile" minLength={10}/>
-                                                    </div>
-                                                </div>
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Region</label>
-                                                            <select
-                                                            class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-select form-select-lg bounce animated"
-                                                            required onChange={handleInputChangeNew} name="region"> 
-                                                            <option ></option>
-                                                            {
-                                                                Cities &&(
-                                                                    renderCountries()
-                                                                )
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
+                            <div class="col-sm-6 offset-sm-4 text-center m-auto p-2">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="card">
+                                            <div class="card-header card_header">
+                                                <h3 class="text-capitalize fw-bolder text-center mb-0"><strong><span
+                                                            className="text-primary">Butchery Settings</span></strong>
+                                                </h3>
                                             </div>
-                                            
-                                        
                                         </div>
                                     </div>
-                                    <div class="modal-footer"><button class="btn btn-light" type="button"
-                                            data-bs-dismiss="modal" data-bs-target="#modal-1"
-                                            data-bs-toggle="modal" onClick={()=>{hideModal()}}>Close</button><button class="btn btn-primary"
-                                            type="submit" data-bs-target="#modal-1" data-bs-toggle="modal">Save</button>
-                                    </div>
-                                </form>
-                                
-                            </div>
-                        </div>
-                </div>
-
-                <div ref={modalRef1} className="modal " role="dialog"
-                        tabindex="-1" id="modal-1">
-                        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-                            <div class="modal-content bg-dark">
-                                <div class="modal-header text-capitalize">
-                                    <h2 class="modal-title fw-bolder">Edit Branch</h2><button class="btn-close"
-                                        type="button" aria-label="Close" data-bs-dismiss="modal"></button>
                                 </div>
-                                <form onSubmit={editBranch}>
-                                    <div class="modal-body">
-                                    
-                                        <div class="d-grid">
-                                            <div class="col ">
-                                                
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Name</label>
-                                                            <input onChange={handleInputChangeBranch} value={OneBranches?.name}
-                                                            class="border rounded-pill border-2 border-primary shadow-sm form-control"
-                                                             required name="name" minLength={3}/>
-                                                    </div>
-                                                </div>
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Mobile</label>
-                                                            <input onChange={handleInputChangeBranch} value={OneBranches?.mobile}
-                                                            class="border rounded-pill border-2 border-primary shadow-sm form-control"
-                                                              required name="mobile" minLength={10}/>
-                                                    </div>
-                                                </div>
-                                                <div class="row d-flex">
-                                                    <div class="col d-grid"><label class="form-label">Branch
-                                                            Region</label>
-                                                            <select
-                                                            class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-select form-select-lg bounce animated"
-                                                            required onChange={handleInputChangeBranch} name="region"> 
-                                                            <option value={OneBranches?.region}>{OneBranches?.region}</option>
-                                                            {
-                                                                Cities &&(
-                                                                    renderCountries()
-                                                                )
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <form onSubmit={editButchery} className="border-1 border-danger shadow">
+                                            <div class="row">
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span
+                                                                >Butchery
+                                                                Code</span></strong></label><input value={Butchery?.code}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="text"  disabled/></div>
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span >Butchery Name
+                                                                </span></strong></label><input value={Butchery?.name}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="text" required onChange={handleInputChangeButchery}  name="name" minLength={3}/></div>
                                             </div>
-                                            
-                                        
+                                            <div class="row">
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span
+                                                                >Butchery
+                                                                Email</span></strong></label><input value={Butchery?.email}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="email"  disabled name="name"/></div>
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span >Phone
+                                                                Number</span></strong></label><input value={Butchery?.mobile} minLength={10}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="tel" required onChange={handleInputChangeButchery}  name="mobile"/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span
+                                                                >Butchery
+                                                                Country</span></strong></label><input value={Butchery?.country[0].name}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="text"  disabled name="name"/></div>
+                                                <div class="col-sm-6 text-dark"><label class="form-label"
+                                                        style={{margin: "8px"}}><strong><span >Registration
+                                                                Date</span></strong></label><input value={DateOnly(Butchery?.createdAt)}
+                                                        class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-control form-control-lg bounce animated"
+                                                        type="text" disabled  name="email"/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12"><button
+                                                        class="btn btn-success font-monospace text-dark text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder link-light border rounded-pill border-2 border-primary shadow rubberBand animated"
+                                                        type="submit" style={{margin: "8px"}}>Save</button></div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            </>
+                        )
+                    }
+                    
+                </div>
+                {
+                    session.user.access !== 1 && (
+                        <>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-8 offset-sm-6 text-center m-auto" >
+                                <div class="row">
+                                    <div class="col offset-sm-2">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="text-capitalize fw-bolder mb-0"><strong><span
+                                                            className="text-danger">Branch Settings</span></strong></h3>
+                                            </div>
+                                            <div>
+                                                <a onClick={newBranchClick} className="fw-bold text-primary faEdit">New Branch</a>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer"><button class="btn btn-light" type="button"
-                                            data-bs-dismiss="modal" data-bs-target="#modal-1"
-                                            data-bs-toggle="modal" onClick={()=>{hideModal()}}>Close</button><button class="btn btn-primary"
-                                            type="submit" data-bs-target="#modal-1" data-bs-toggle="modal">Save</button>
-                                    </div>
-                                </form>
+                                </div>
                                 
+                                {
+                                    renderBranches()
+                                }
+
                             </div>
                         </div>
-                </div>
+
+                        <div ref={modalRef2} className="modal " role="dialog"
+                                tabindex="-1" id="modal-1">
+                                <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+                                    <div class="modal-content bg-dark">
+                                        <div class="modal-header text-capitalize">
+                                            <h2 class="modal-title fw-bolder">New Branch</h2><button class="btn-close"
+                                                type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form onSubmit={new_Branch}>
+                                            <div class="modal-body">
+                                            
+                                                <div class="d-grid">
+                                                    <div class="col ">
+                                                        
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Name</label>
+                                                                    <input onChange={handleInputChangeNew}
+                                                                    class="border rounded-pill border-2 border-primary shadow-sm form-control"
+                                                                    required name="name" minLength={3}/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Mobile</label>
+                                                                    <input onChange={handleInputChangeNew}
+                                                                    class="border rounded-pill border-2 border-primary shadow-sm form-control"
+                                                                    required name="mobile" minLength={10}/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Region</label>
+                                                                    <select
+                                                                    class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-select form-select-lg bounce animated"
+                                                                    required onChange={handleInputChangeNew} name="region"> 
+                                                                    <option ></option>
+                                                                    {
+                                                                        Cities &&(
+                                                                            renderCountries()
+                                                                        )
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer"><button class="btn btn-light" type="button"
+                                                    data-bs-dismiss="modal" data-bs-target="#modal-1"
+                                                    data-bs-toggle="modal" onClick={()=>{hideModal()}}>Close</button><button class="btn btn-primary"
+                                                    type="submit" data-bs-target="#modal-1" data-bs-toggle="modal">Save</button>
+                                            </div>
+                                        </form>
+                                        
+                                    </div>
+                                </div>
+                        </div>
+
+                        <div ref={modalRef1} className="modal " role="dialog"
+                                tabindex="-1" id="modal-1">
+                                <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+                                    <div class="modal-content bg-dark">
+                                        <div class="modal-header text-capitalize">
+                                            <h2 class="modal-title fw-bolder">Edit Branch</h2><button class="btn-close"
+                                                type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form onSubmit={editBranch}>
+                                            <div class="modal-body">
+                                            
+                                                <div class="d-grid">
+                                                    <div class="col ">
+                                                        
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Name</label>
+                                                                    <input onChange={handleInputChangeBranch} value={OneBranches?.name}
+                                                                    class="border rounded-pill border-2 border-primary shadow-sm form-control"
+                                                                    required name="name" minLength={3}/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Mobile</label>
+                                                                    <input onChange={handleInputChangeBranch} value={OneBranches?.mobile}
+                                                                    class="border rounded-pill border-2 border-primary shadow-sm form-control"
+                                                                    required name="mobile" minLength={10}/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row d-flex">
+                                                            <div class="col d-grid"><label class="form-label">Branch
+                                                                    Region</label>
+                                                                    <select
+                                                                    class="border rounded-pill text-dark border-1 border-primary shadow-sm focus-ring focus-ring-success form-select form-select-lg bounce animated"
+                                                                    required onChange={handleInputChangeBranch} name="region"> 
+                                                                    <option value={OneBranches?.region}>{OneBranches?.region}</option>
+                                                                    {
+                                                                        Cities &&(
+                                                                            renderCountries()
+                                                                        )
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer"><button class="btn btn-light" type="button"
+                                                    data-bs-dismiss="modal" data-bs-target="#modal-1"
+                                                    data-bs-toggle="modal" onClick={()=>{hideModal()}}>Close</button><button class="btn btn-primary"
+                                                    type="submit" data-bs-target="#modal-1" data-bs-toggle="modal">Save</button>
+                                            </div>
+                                        </form>
+                                        
+                                    </div>
+                                </div>
+                        </div>
+                        </>
+                    )
+                }
+                
             </div>
             <Footer />
         </div>

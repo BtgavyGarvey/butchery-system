@@ -69,7 +69,7 @@ export default function ForgotPasswordPage(){
 
             const data={
                 code:formData.code,
-                email:formData.email
+                username:formData.username
             }
 
             try {

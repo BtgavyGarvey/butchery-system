@@ -352,21 +352,26 @@ export default function ViewExpensePage({session}) {
                                                 class="d-inline-block form-control form-control-sm" />
                                             &nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                Branches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
-                                </div>
+                                {
+                                    session.user.access !==1 && (
+                                        <div class="col-md-3">
+                                            <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                                    class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                                    class="d-inline-block form-select form-select-sm">
+                                                    {
+                                                        Branches.map((result)=>{
+                                                            return (
+                                                                <>
+                                                                <option value={result.id}>{result.name}</option>
+                                                                </>
+                                                            )
+                                                        })
+                                                    }    
+                                                </select>&nbsp;</label></div>
+                                        </div>
+                                    )
+                                }
+                                
                             </div>
                             
                             <div class="table-responsive table-height font-monospace border-1 shadow-sm table mt-2"

@@ -128,6 +128,12 @@ export default function ViewProductsPage({session}) {
 
         for (let i = 0; i < Invoices.length; i++) {
 
+            if (!Branches.length >0) {
+
+                Branches.push(Invoices[i]?.documents.branches)
+                
+            }
+
             result1.push(
                 <>
                 <tr>
@@ -331,21 +337,27 @@ export default function ViewProductsPage({session}) {
                                             &nbsp;</label></div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                AllBranches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
-                                </div>
+                                {
+                                    session.user.access !==1 && (
+                                        <div class="col-md-3">
+                                        <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                                class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                                class="d-inline-block form-select form-select-sm">
+                                                {
+                                                    AllBranches.map((result)=>{
+                                                        return (
+                                                            <>
+                                                            <option value={result.id}>{result.name}</option>
+                                                            </>
+                                                        )
+                                                    })
+                                                }    
+                                            </select>&nbsp;</label></div>
+                                    </div>
+                                    )
+                                }
+
+                                
                             </div>
                             <div class="table-responsive table-height font-monospace border-2  shadow-sm table"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">
@@ -429,13 +441,24 @@ export default function ViewProductsPage({session}) {
                                                              style={{textAlign: "center"}} required>
                                                                 <option value={''}></option>
                                                                 {
-                                                                    AllBranches?.map((result)=>{
-                                                                        return (
-                                                                            <>
-                                                                            <option value={result.id}>{result.name}</option>
-                                                                            </>
-                                                                        )
-                                                                    })
+                                                                    session.user.access !== 1 ? (
+                                                                        AllBranches?.map((result)=>{
+                                                                            return (
+                                                                                <>
+                                                                                <option value={result.id}>{result.name}</option>
+                                                                                </>
+                                                                            )
+                                                                        })
+                                                                    ):(
+                                                                        Branches?.map((result)=>{
+                                                                            return (
+                                                                                <>
+                                                                                <option value={result.id}>{result.name}</option>
+                                                                                </>
+                                                                            )
+                                                                        })
+                                                                    )
+                                                                    
                                                                 }
                                                             </select>
                                                     </div>

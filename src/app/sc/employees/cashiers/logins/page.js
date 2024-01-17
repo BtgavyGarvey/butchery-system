@@ -15,11 +15,24 @@ export default async function Cashier() {
     redirect('/')
   }
 
+  const toDashboard=()=>{
+    redirect('/sc/dashboard')
+  }
+
+
   return (
     <>
     {
       session ? (
-        <CashiersLoginActivitiesPage session={session}/>
+        <>
+          {
+            session.user.access !==1 ? (
+              <CashiersLoginActivitiesPage session={session}/>
+            ):(
+              toDashboard()
+            )
+          }
+        </>
       ):(
         logOut()
       )

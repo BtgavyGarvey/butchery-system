@@ -15,6 +15,11 @@ export default async function ViewProducts() {
     redirect('/')
   }
 
+  // const toDashboard=()=>{
+  //   redirect('/sc/dashboard')
+  // }
+
+
   return (
     <>
     {

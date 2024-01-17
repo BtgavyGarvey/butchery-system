@@ -15,11 +15,24 @@ export default async function ViewSales() {
     redirect('/')
   }
 
+  const toDashboard=()=>{
+    redirect('/sc/dashboard')
+  }
+
+
   return (
     <>
     {
       session ? (
-        <RollBackPage session={session}/>
+        <>
+          {
+            session.user.access !==1 ? (
+              <RollBackPage session={session}/>
+            ):(
+              toDashboard()
+            )
+          }
+        </>
       ):(
         logOut()
       )

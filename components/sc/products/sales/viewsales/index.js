@@ -325,7 +325,11 @@ export default function ViewSalesPage({session}) {
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
-                                    <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
+                                    {
+                                        session.user.access !==1 && (
+                                            <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
+                                        )
+                                    }
                                     <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
                                 </div>
                                     
@@ -364,45 +368,55 @@ export default function ViewSalesPage({session}) {
                                                 }
                                             </select>&nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3 text-wrap">
-                                    <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
-                                        <label class="form-label">Cashier&nbsp;<select onChange={handleCashierClick}
-                                                class="d-inline-block form-select form-select-sm">
-                                                <option value="all">All</option>
-                                                {
-                                                    ManyCashiers.map((result)=>{
-                                                        return (
-                                                            <>
-                                                            <option value={result.id} >{result.firstName} {result.lastName}</option>
-                                                            
-                                                            </>
-                                                        )
+                                {
+                                    session.user.access !==1 && (
+                                        <div class="col-md-3 text-wrap">
+                                        <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
+                                            <label class="form-label">Cashier&nbsp;<select onChange={handleCashierClick}
+                                                    class="d-inline-block form-select form-select-sm">
+                                                    <option value="all">All</option>
+                                                    {
+                                                        ManyCashiers.map((result)=>{
+                                                            return (
+                                                                <>
+                                                                <option value={result.id} >{result.firstName} {result.lastName}</option>
+                                                                
+                                                                </>
+                                                            )
 
-                                                    })
-                                                }
-                                            </select>&nbsp;</label></div>
-                                </div>
+                                                        })
+                                                    }
+                                                </select>&nbsp;</label></div>
+                                        </div>
+                                    )
+                                }
+                                
                                 <div class="col-md-2 text-wrap">
                                     <div id="dataTable_length-1" class="dataTables_length" aria-controls="dataTable">
                                         <label class="form-label">Date&nbsp;<input type="date" ref={DateRef} onChange={handleDateClick}
                                                 class="d-inline-block form-control form-control-sm" />
                                             &nbsp;</label></div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                Branches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
-                                </div>
+                                {
+                                    session.user.access !==1 && (
+                                        <div class="col-md-3">
+                                        <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                                class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                                class="d-inline-block form-select form-select-sm">
+                                                {
+                                                    Branches.map((result)=>{
+                                                        return (
+                                                            <>
+                                                            <option value={result.id}>{result.name}</option>
+                                                            </>
+                                                        )
+                                                    })
+                                                }    
+                                            </select>&nbsp;</label></div>
+                                    </div>
+                                    )
+                                }
+                                
                             </div>
                             <div class="row">
                                 <div class="Dflex col-md-12 bg-light justify-content-between">

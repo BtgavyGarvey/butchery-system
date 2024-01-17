@@ -1,7 +1,7 @@
 'use server'
 
 import { NextResponse } from "next/server";
-import DbConnect, { MiddleWare, generateId, newUserValidation, sanitizeMessage, sendEmail } from "../../utils";
+import DbConnect, { MiddleWare, generateId, newUserValidation, sanitizeMessage, sendEmail, setCookies } from "../../utils";
 import Token from "../../model/token";
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
@@ -661,12 +661,15 @@ export async function loginUser(username, password, req) {
       let access = 0
 
       if (user.role==='Administrator') {
+        setCookies(req,'2')
         access=2
         
       } else if (user.role==='Employer') {
+        setCookies(req,'3')
         access=3
         
       } else if (user.role==='Employee'){
+        setCookies(req,'1')
         access=1
       }
 
@@ -964,6 +967,7 @@ export async function forgotPassword(body) {
       expiresAt: Date.now() + 5 * (60 * 1000) // 5 minutes
     });
 
+    // console.log(resetToken);
     // Email the reset token to the user
     const message = `
       <h2>Hello ${user.firstName}</h2>
@@ -1007,6 +1011,7 @@ export async function checkResetPasswordCode(body) {
     success:false
   }
 
+
   try {
 
     const myCode = body.code.trim();
@@ -1046,6 +1051,7 @@ export async function resetPassword (body) {
 
   try {
 
+
     const { password, username } = body;
 
     const user = await User.findOne({ username }).select("-password");
@@ -1069,7 +1075,7 @@ export async function resetPassword (body) {
     await cashier.save();
 
     const message = `
-      <h2>Hello ${user.user.firstName} ${user.user.firstName},</h2>
+      <h2>Hello ${user.firstName} ${user.lastName},</h2>
       <p>You have reset your password successfully.</p>
       <p>If you did not change your password, contact us on the email below.</p>
       <p><a href=${process.env.EMAIL_USER} alt='_blank' clicktracking=off>${process.env.EMAIL_USER}.</a></p><br />

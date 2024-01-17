@@ -15,11 +15,23 @@ export default async function Employees() {
     redirect('/')
   }
 
+  const toDashboard=()=>{
+    redirect('/sc/dashboard')
+  }
+
   return (
     <>
     {
       session ? (
-        <NewEmployeesPage session={session}/>
+        <>
+          {
+            session.user.access !==1 ? (
+              <NewEmployeesPage session={session}/>
+            ):(
+              toDashboard()
+            )
+          }
+        </>
       ):(
         logOut()
       )

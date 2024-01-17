@@ -55,10 +55,16 @@ export default function NavBar({session}) {
                     <li class="nav-item" title="View Sales"><a class="nav-link" href="/sc/products/sales/viewsales"><i
                                 class="far fa-money-bill-alt"></i><span className="p-1">View Sales</span></a>
                     </li>
+
+                    {
+                        session.access !==1 && (
+                                <li class="nav-item" title="View Employees"><a class="nav-link"
+                                        href="/sc/employees/view"><i class="fas fa-table"></i><span className="p-1">View Employees</span></a>
+                                </li>
+                        )
+                    }
                     
-                    <li class="nav-item" title="View Employees"><a class="nav-link"
-                            href="/sc/employees/view"><i class="fas fa-table"></i><span className="p-1">View Employees</span></a>
-                    </li>
+                    
                     
                     <li class="nav-item" title="Expenses"><a class="nav-link"
                             href="/sc/expenses"><i class="fas fa-table"></i><span className="p-1">Expenses</span></a>

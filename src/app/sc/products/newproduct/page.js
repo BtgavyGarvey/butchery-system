@@ -15,11 +15,24 @@ export default async function NewProduct() {
     redirect('/')
   }
 
+  const toDashboard=()=>{
+    redirect('/sc/dashboard')
+  }
+
+
   return (
     <>
     {
       session ? (
-        <NewProductPage session={session}/>
+        <>
+          {
+            session.user.access !==1 ? (
+              <NewProductPage session={session}/>
+            ):(
+              toDashboard()
+            )
+          }
+        </>
       ):(
         logOut()
       )

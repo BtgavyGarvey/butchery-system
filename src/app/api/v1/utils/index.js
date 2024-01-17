@@ -5,6 +5,7 @@ import Joi from 'joi';
 import moment from 'moment';
 import crypto from 'crypto';
 import {addMonths} from 'date-fns'
+import { NextResponse } from 'next/server';
 
 // import jwt from 'jsonwebtoken'
 
@@ -226,4 +227,47 @@ export const AddDate=async(from,value)=>{
     const plusDate = addMonths(today, value);
     return plusDate
 }
+
+export function setCookies(value) {
+ 
+    // Setting cookies on the response using the `ResponseCookies` API
+    const response = NextResponse.next()
+    response.cookies.set('access', value)
+    // response.cookies.set('session', value.session)
+    response.cookies.set({
+      name: 'access',
+      value: value,
+      path: '/sc/',
+    })
+    // response.cookies.set({
+    //   name: 'session',
+    //   value: value.session,
+    //   path: '/',
+    // })
+  
+    // let cookie = response.cookies.get('access')
+    // console.log(cookie)
+    // cookie = response.cookies.get('session')
+    // console.log(cookie)
+   
+  }
+  
+  export function getCookies(request,value) {
+      // Getting cookies from the request using the `RequestCookies` API
+      let cookie = request.cookies.get(value)
+      console.log(cookie) // => { name: 'nextjs', value: 'fast', Path: '/' }
+      const allCookies = request.cookies.getAll()
+  
+     
+      return cookie
+    }
+  
+  export function deleteCookies(request,value) {
+      // Getting cookies from the request using the `RequestCookies` API
+     
+      request.cookies.has(value) // => true
+      request.cookies.delete(value)
+      request.cookies.has(value) // => false
+     
+  }
 

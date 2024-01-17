@@ -384,7 +384,12 @@ export default function ViewProductsPage({session}) {
                                 </button>
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
-                                    <a class="dropdown-item" href="/sc/products/newproduct"  >New Product</a>
+                                    {
+                                        session.user.access !== 1 && (
+                                            <a class="dropdown-item" href="/sc/products/newproduct"  >New Product</a>
+
+                                        )
+                                    }
                                     <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>Dead Stock/Issues</a>
                                     {
                                         achivedProducts ? (
@@ -400,13 +405,19 @@ export default function ViewProductsPage({session}) {
                                             </>
                                         ):(
                                             <>
-                                    <a class="dropdown-item" onClick={(e)=>{
-                                        achievedVal.current=2
-                                        getProductData()
-                                        setproductInfo('Archived Products')
-                                        setAchivedProducts(true)
-                                        setDropDownManu(false)
-                                    }}>Archived Products</a>
+                                            {
+                                                session.user.access !==1 && (
+                                                    <>
+                                                    <a class="dropdown-item" onClick={(e)=>{
+                                                        achievedVal.current=2
+                                                        getProductData()
+                                                        setproductInfo('Archived Products')
+                                                        setAchivedProducts(true)
+                                                        setDropDownManu(false)
+                                                    }}>Archived Products</a>
+                                                    </>
+                                                )
+                                            }
                                             
                                             </>
                                         )
@@ -435,21 +446,27 @@ export default function ViewProductsPage({session}) {
                                                 aria-controls="dataTable" placeholder="Search" onChange={handleInputChangeSearch}/>&nbsp;</label></div>
                                 </div>
 
-                                <div class="col-md-4">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
-                                            class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
-                                            class="d-inline-block form-select form-select-sm">
-                                            {
-                                                Branches.map((result)=>{
-                                                    return (
-                                                        <>
-                                                        <option value={result.id}>{result.name}</option>
-                                                        </>
-                                                    )
-                                                })
-                                            }    
-                                        </select>&nbsp;</label></div>
-                                </div>
+                                {
+                                    session.user.access !== 1 && (
+                                        <div class="col-md-4">
+                                        <div class="text-md-end dataTables_filter" id="dataTable_filter"><label
+                                                class="form-label">Branch&nbsp;<select onChange={handleBranchClick}
+                                                class="d-inline-block form-select form-select-sm">
+                                                {
+                                                    Branches.map((result)=>{
+                                                        return (
+                                                            <>
+                                                            <option value={result.id}>{result.name}</option>
+                                                            </>
+                                                        )
+                                                    })
+                                                }    
+                                            </select>&nbsp;</label></div>
+                                    </div>
+                                    )
+                                }
+
+                                
                             </div>
                             <div class="table-responsive table-height font-monospace border-2  shadow-sm table"
                                 id="dataTable" role="grid" aria-describedby="dataTable_info">

@@ -24,7 +24,7 @@ export default function ViewSalesPage({session}) {
     const [chartData, setChartData] = React.useState();
 
     const DateRef=React.useRef()
-    const refDay=React.useRef('Sales In The Past 5 Years')
+    const refDay=React.useRef('Sales Today')
     const cashier=React.useRef()
     const text=React.useRef('')
     const product=React.useRef()
@@ -247,12 +247,7 @@ export default function ViewSalesPage({session}) {
         let value=refDay.current
         data=Revenue.current
     
-        if (value==='Sales In The Past 5 Years') {
-          text.current='Years'
-          label=data?.map((item) => item.year)
-          
-        }
-        else if (value==='Sales Today') {
+        if (value==='Sales Today') {
             text.current="Hours"
           label=data?.map((item) => item.hour)
           
@@ -461,32 +456,43 @@ export default function ViewSalesPage({session}) {
                           onChange={handleChangeInput}
                           name="timeFrame"
                         >
-                          <option value={'Sales In The Past 5 Years'}></option>
                           <option value={'Sales Today'}>Sales Today</option>
-                          <option value={'Sales This Week'}>This Week</option>
-                          <option value={'Sales This Month'}>Sales This Month</option>
-                          <option value={'Sales This Year'}>Sales This Year</option>
-                          <option value={'Sales In The Past 5 Years'}>Sales In The Past 5 Years</option>
-                        </select>
-                        </div>
-                        <div className="col-md-2 p-1">
-                          <label className="fw-bold">Branch</label>
-                          <select
-                          className="form-control"
-                          onChange={handleBranchClick}
-                          name="timeFrame"
-                        >
                           {
-                              Branches.map((result)=>{
-                                  return (
-                                      <>
-                                      <option value={result.id}>{result.name}</option>
-                                      </>
-                                  )
-                              })
-                          }    
+                            session.user.access !==1 && (
+                              <>
+                              <option value={'Sales This Week'}>This Week</option>
+                              <option value={'Sales This Month'}>Sales This Month</option>
+                              <option value={'Sales This Year'}>Sales This Year</option>
+                              <option value={'Sales In The Past 5 Years'}>Sales In The Past 5 Years</option>
+                              </>
+                            )
+                          }
+                          
                         </select>
                         </div>
+                        {
+                          session.user.access !==1 && (
+                            <div className="col-md-2 p-1">
+                            <label className="fw-bold">Branch</label>
+                            <select
+                            className="form-control"
+                            onChange={handleBranchClick}
+                            name="timeFrame"
+                          >
+                            {
+                                Branches.map((result)=>{
+                                    return (
+                                        <>
+                                        <option value={result.id}>{result.name}</option>
+                                        </>
+                                    )
+                                })
+                            }    
+                          </select>
+                          </div>
+                          )
+                        }
+                        
                         <div ref={view} className="col-md-2 p-1 view">
                           <label className="fw-bold">Choose View</label>
                           <select
