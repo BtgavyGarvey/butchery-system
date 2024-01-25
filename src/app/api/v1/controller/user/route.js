@@ -933,72 +933,77 @@ export async function verifyEmail(token){
 // REQUEST PASSWORD CODE
 
 export async function forgotPassword(body) {
-  let responseData = {
-    message: '',
-    success: false,
-  };
+
+  let responseData={
+    message:'',
+    success:false
+  }
 
   try {
+
     const { username } = body;
     const user = await User.findOne({ username });
 
     if (!user) {
-      responseData.message = 'Invalid Username.';
-      return responseData;
+      responseData.message='Invalid Username.'      
+      return responseData
     }
 
-    const [branch, butchery] = await Promise.all([
-      Branches.findOne({ id: user.branch }),
-      Butchery.findOne({ id: branch.butchery }),
-    ]);
+    const [branch,butchery]=await Promise.all([
+      Branches.findOne({ id:user.branch }),
+      Butchery.findOne({ id:branch.butchery })
+    ])
 
+    // Delete existing token for the user from DB if it exists
     await Token.deleteMany({ id: user.id });
 
-    const resetToken = crypto.randomBytes(8).toString('hex').toUpperCase();
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    // Generate a random token and hash it before saving to DB
+    const resetToken = crypto.randomBytes(8).toString("hex").toUpperCase();
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest('hex');
 
+    // Save the new token to DB
     await Token.create({
       id: user.id,
       token: hashedToken,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 5 * (60 * 1000), // 5 minutes
+      expiresAt: Date.now() + 5 * (60 * 1000) // 5 minutes
     });
 
-    let sanitizedMessage; // Declare here
-
+    // console.log(resetToken);
+    // Email the reset token to the user
     const message = `
       <h2>Hello ${user.firstName}</h2>
       <p>You requested a password reset.</p>
       <p>Please use the code below to reset your password.</p>
       <p>The reset code is valid for only 5 minutes.</p><br />
       <p>${resetToken}</p><br />
-      <p>Kind Regards</p>
+      <p>Kind Regards</P>
     `;
-
-    const subject = 'Password Reset Request';
+    const subject = "Password Reset Request";
     const send_to = butchery.email;
     const sent_from = process.env.EMAIL_USER;
 
     try {
-      sanitizedMessage = await sanitizeMessage(message);
+
+      const sanitizedMessage = await sanitizeMessage(message);
 
       await sendEmail(subject, sanitizedMessage, send_to, sent_from);
 
-      responseData.message = 'Password reset code sent to your butchery email.';
-      responseData.success = true;
-      return responseData;
+      responseData.message='Password reset code sent to your butchery email.'      
+      responseData.success=true    
+      return responseData
+
     } catch (error) {
-      console.error('Email sending error:', error);
-      responseData.message = 'Server error occurred.';
-      return responseData;
+      console.log(error);
+      responseData.message='Email not set, please try again.'      
+      return responseData
     }
   } catch (error) {
-    console.error('Password reset error:', error);
-    responseData.message = 'Server error occurred.';
-    return responseData;
+    console.log(error);
+    responseData.message='Server error occurred.'      
+    return responseData
   }
-}
-
+};
 
 // CHECK PASSWORD CODE
 
