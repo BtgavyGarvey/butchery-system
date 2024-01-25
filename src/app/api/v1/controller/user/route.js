@@ -964,6 +964,8 @@ export async function forgotPassword(body) {
       expiresAt: Date.now() + 5 * (60 * 1000), // 5 minutes
     });
 
+    let sanitizedMessage; // Declare here
+
     const message = `
       <h2>Hello ${user.firstName}</h2>
       <p>You requested a password reset.</p>
@@ -972,12 +974,13 @@ export async function forgotPassword(body) {
       <p>${resetToken}</p><br />
       <p>Kind Regards</p>
     `;
+
     const subject = 'Password Reset Request';
     const send_to = butchery.email;
     const sent_from = process.env.EMAIL_USER;
 
     try {
-      const sanitizedMessage = await sanitizeMessage(message);
+      sanitizedMessage = await sanitizeMessage(message);
 
       await sendEmail(subject, sanitizedMessage, send_to, sent_from);
 
