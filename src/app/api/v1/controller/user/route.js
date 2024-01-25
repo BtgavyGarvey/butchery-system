@@ -949,10 +949,10 @@ export async function forgotPassword(body) {
       return responseData
     }
 
-    const [branch,butchery]=await Promise.all([
-      Branches.findOne({ id:user.branch }),
-      Butchery.findOne({ id:branch.butchery })
-    ])
+    const branch = await Branches.findOne({ id:user.branch });
+    const butchery = await Butchery.findOne({ id:branch.butchery });
+
+    
 
     // Delete existing token for the user from DB if it exists
     await Token.deleteMany({ id: user.id });
