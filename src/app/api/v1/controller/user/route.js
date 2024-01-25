@@ -995,7 +995,7 @@ export async function forgotPassword(body) {
       responseData.message='Password reset code sent to your butchery email.'      
       responseData.success=true
       
-      await isShopOpened(branch.id,user.id)
+      // await isShopOpened(branch.id,user.id)
       return responseData
 
     } catch (error) {
