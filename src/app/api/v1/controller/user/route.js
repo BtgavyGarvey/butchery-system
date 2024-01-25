@@ -9,7 +9,7 @@ import Morgan from 'morgan'
 import User from "../../model/users";
 import Branches from "../../model/branches";
 import Cashier from "../../model/cashiers";
-import { exportEmail } from "../butchery/route";
+import { exportEmail, isShopOpened } from "../butchery/route";
 import Butchery from "../../model/butchery";
 import EmployeesPayments from "../../model/employeesPayments";
 import LoginDetails from '../../model/loginDetailsModel'
@@ -952,7 +952,10 @@ export async function forgotPassword(body) {
     const branch = await Branches.findOne({ id:user.branch });
     const butchery = await Butchery.findOne({ id:branch.butchery });
 
-    
+    // const [branch,butchery]=await Promise.all([
+    //   Branches.findOne({ id:user.branch }),
+    //   Butchery.findOne({ id:branch.butchery })
+    // ])
 
     // Delete existing token for the user from DB if it exists
     await Token.deleteMany({ id: user.id });
@@ -987,10 +990,12 @@ export async function forgotPassword(body) {
 
       const sanitizedMessage = await sanitizeMessage(message);
 
-      await sendEmail(subject, sanitizedMessage, send_to, sent_from);
+      sendEmail(subject, sanitizedMessage, send_to, sent_from);
 
       responseData.message='Password reset code sent to your butchery email.'      
-      responseData.success=true    
+      responseData.success=true
+      
+      await isShopOpened(branch.id,user.id)
       return responseData
 
     } catch (error) {

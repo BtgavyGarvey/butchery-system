@@ -2529,10 +2529,11 @@ export async function isShopOpened(branch,cashier){
     let butchery=await Butchery.findOne({id:myBranch.butchery})
 
     if (butchery.__v !==1 || !myCashier) {
-      console.log('Closed');
+      // console.log('Closed');
       return false
     }
-    console.log('Open');
+
+    // console.log('Open');
     
     return true
     
