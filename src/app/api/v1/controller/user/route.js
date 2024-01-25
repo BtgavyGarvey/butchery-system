@@ -990,12 +990,12 @@ export async function forgotPassword(body) {
 
       const sanitizedMessage = await sanitizeMessage(message);
 
-      await sendEmail(subject, sanitizedMessage, send_to, sent_from);
+      sendEmail(subject, sanitizedMessage, send_to, sent_from);
 
       responseData.message='Password reset code sent to your butchery email.'      
       responseData.success=true
       
-      // await isShopOpened(branch.id,user.id)
+      await isShopOpened(branch.id,user.id)
       return responseData
 
     } catch (error) {
