@@ -20,11 +20,12 @@ import Invoice from "../../model/invoiceDetails";
 import lodash from "lodash";
 import mongoose from "mongoose";
 import { format } from "date-fns";
+// const ThermalPrinter = require("node-thermal-printer").printer;
 
 // import ThermalPrinter from 'node-thermal-printer'
 // import { ThermalPrinter, PrinterTypes} from 'node-thermal-printer'
-import Printer from 'node-printer'
-import escpos from 'escpos'
+// import Printer from 'node-printer'
+// import escpos from 'escpos'
 import Cashier from "../../model/cashiers";
 
 // DB CONNECTION
@@ -218,36 +219,33 @@ export async function tokenGeneration (id, emailToken) {
   }
 };
 
-export async function printReceipt (text) {
+// export const printReceipt=async()=>{
 
-  try {
-    const foundPrinters=Printer.getPrinters()
-  
-    if (!foundPrinters) {
-      console.log('No printers available');
+//   const ThermalPrinter = require("node-thermal-printer").printer;
+//   const PrinterTypes = require("node-thermal-printer").types;
 
-      return
+//   const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
+//   try {
+//       let printer = new ThermalPrinter({
+//           type: PrinterTypes.EPSON,
+//           interface: 'printer:EPSON L382 Series',
+//           driver: require(electron ? 'electron-printer' : 'printer')
+//       });
+
+//       printer.alignCenter();
+//       printer.println("Hello world");
+//       // await printer.printImage('./assets/olaii-logo-black.png')
+//       printer.cut();
+
+//       let execute = printer.execute()
+//       console.log("Print done!");
       
-    }
-
-    const selectedPrinter=foundPrinters[0]
-
-    const device = new escpos.Network(selectedPrinter.address,selectedPrinter.port)
-    const printerInstance=new escpos.Printer(device)
-
-    device.open(()=>{
-      printerInstance
-        .font('a')
-        .align('lt')
-        .text(text)
-        .cut()
-        .close()
-    })
-  } catch (error) {
-    console.log('Error printing to POS printer:',error);
-  }
-
-}
+    
+//   } catch (error) {
+//       console.error("Print failed: ", error)
+    
+//   }
+// }
 // EXTENSION FUNCTIONS OF HTTP METHODS
 
 export async function newButchery(value){
@@ -2145,6 +2143,7 @@ export const getReportData = async (branch,Today,val) => {
       return responseData
   }
 };
+
 
 export async function newInvoice(data){
   let responseData={

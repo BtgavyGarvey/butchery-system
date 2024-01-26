@@ -182,7 +182,7 @@ export default function NewProductPage({session}) {
 
         await isShopClosed(2)
 
-        // toast.dismiss(toastId)
+        toast.dismiss(toastId)
         var isValid=await validate()
 
         try {

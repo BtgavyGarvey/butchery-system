@@ -9,6 +9,13 @@ import toast, { Toaster } from "react-hot-toast"
 import { getProducts, isShopOpened, newSale, printReceipt } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { Today } from "../../../../layout/utils"
 import lodash from 'lodash'
+// import printJS from 'print-js';
+// import { PrinterTypes} from 'node-thermal-printer'
+// const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
+import receipt from 'receipt'
+import receiptio from 'receiptio'
+import qz from 'qz-tray'
+
 // import browserify from 'browserify-fs'
 // import {Printer, Types} from 'escpos'
 // import Printer from 'node-printer'
@@ -111,7 +118,8 @@ export default function MakeSalesPage({session,data}) {
             }
         }
 
-        printReceipt('Hello World')
+        // printReceipt()
+        printReceipt1()
     },[ProductData])
 
     const isShopClosed=async()=>{
@@ -130,32 +138,61 @@ export default function MakeSalesPage({session,data}) {
         
     }
 
-    // const printReceipt=async()=>{
+    const printReceipt1=async()=>{
 
-    //     let printer
-  
-    //     try {
-  
-    //         const {printer: ThermalPrinter, types:PrinterTypes}=await import('node-thermal-printer')
-    
-    //         printer = new ThermalPrinter({
-    //             type:PrinterTypes.EPSON,
-    //             interface:'tcp://'
-    //         })
+        
+        try {
+            receipt.config.currency = '£';
+            receipt.config.width = 60;
+            receipt.config.ruler = '-';
 
-    //         printer.alignCenter()
-    //         printer.println('Hello World')
-    //         await printer.printImage('./directory')
-    //         printer.cut()
+            const output = receipt.create([
+                { type: 'text', value: [
+                    'MY AWESOME STORE',
+                    '123 STORE ST',
+                    'store@store.com',
+                    'www.store.com'
+                ], align: 'center' },
+                { type: 'empty' },
+                { type: 'properties', lines: [
+                    { name: 'Order Number', value: 'XXXXXXXXXXXX' },
+                    { name: 'Date', value: 'XX/XX/XXXX XX:XX' }
+                ] },
+                { type: 'table', lines: [
+                    { item: 'Product 1', qty: 1, cost: 1000 },
+                    { item: 'Product 2 with a really long name', qty: 1, cost: 17500, discount: { type: 'absolute', value: 1000 } },
+                    { item: 'Another product wth quite a name', qty: 2, cost: 900 },
+                    { item: 'Product 4', qty: 1, cost: 80, discount: { type: 'percentage', value: 0.15 } },
+                    { item: 'This length is ridiculously lengthy', qty: 14, cost: 8516 },
+                    { item: 'Product 6', qty: 3, cost: 500 },
+                    { item: 'Product 7', qty: 3, cost: 500, discount: { type: 'absolute', value: 500, message: '3 for the price of 2' } }
+                ] },
+                { type: 'empty' },
+                { type: 'text', value: 'Some extra information to add to the footer of this docket.', align: 'center' },
+                { type: 'empty' },
+                { type: 'properties', lines: [
+                    { name: 'GST (10.00%)', value: 'AUD XX.XX' },
+                    { name: 'Total amount (excl. GST)', value: 'AUD XX.XX' },
+                    { name: 'Total amount (incl. GST)', value: 'AUD XX.XX' }
+                ] },
+                { type: 'empty' },
+                { type: 'properties', lines: [
+                    { name: 'Amount Received', value: 'AUD XX.XX' },
+                    { name: 'Amount Returned', value: 'AUD XX.XX' }
+                ] },
+                { type: 'empty' },
+                { type: 'text', value: 'Final bits of text at the very base of a docket. This text wraps around as well!', align: 'center', padding: 5 }
+            ]);
 
-    //         let execute = printer.execute()
-    //         console.log('Print done!', execute);
+            console.log(output);
+            console.log("Print done!");
+            
           
-    //     } catch (error) {
-    //       console.error("Print failed: ", error)
+        } catch (error) {
+            console.error("Print failed: ", error)
           
-    //     }
-    // }
+        }
+    }
 
     const readOnly=()=>{
         totalPrice.current=0
@@ -215,10 +252,12 @@ export default function MakeSalesPage({session,data}) {
 
         if (totalPrice.current>0) {
             if (name==='cash') {
+
                 paymentType.cash=value
             } 
             else if(name==='m_pesa') {
                 paymentType.m_pesa=value
+                
             }
         }
         else{
@@ -364,6 +403,9 @@ export default function MakeSalesPage({session,data}) {
 
         e.preventDefault()
 
+        let cash=parseInt(totalPrice.current) - parseInt(paymentType.m_pesa)
+        paymentType.cash=cash
+
         toastId=toast.loading('Checking status, please wait...',{
             id:toastId
         })
@@ -462,11 +504,9 @@ export default function MakeSalesPage({session,data}) {
        
     }
 
-    const PrintReceipt=()=>{
-        // printReceipt()
-    }
+    
 
-    console.log(Printers);
+    // console.log(Printers);
 
   return (
     <>
@@ -491,6 +531,12 @@ export default function MakeSalesPage({session,data}) {
     >
     </Toaster>
     <div id="wrapper" className="bg-light">
+    {/* <div id='pos-receipt'>
+        <h1>Point of Sale Receipt</h1>
+        <p>Product: Beef</p>
+        <p>Quantity: 15</p>
+        <p>Total: 1500</p>
+    </div> */}
         <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
