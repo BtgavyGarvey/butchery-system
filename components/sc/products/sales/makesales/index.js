@@ -98,7 +98,6 @@ export default function MakeSalesPage({session,data}) {
                 ProductData[i].documents['sellingTime']=Today()
             }
         }
-        // printReceipt()
     },[ProductData])
 
     const isShopClosed=async()=>{
@@ -436,7 +435,7 @@ export default function MakeSalesPage({session,data}) {
 
         await isShopClosed()
 
-        // toast.dismiss(toastId)
+        toast.dismiss(toastId)
         
         for (let i = 0; i < sellData.length; i++) {
             sellData[i]['sellingTime']=Today()
