@@ -22,6 +22,7 @@
     "country-state-city": "^3.2.1",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.10",
+    "electron": "^28.2.0",
     "escpos": "^3.0.0-alpha.6",
     "escpos-usb": "^3.0.0-alpha.4",
     "google-auth-library": "^9.2.0",
@@ -34,8 +35,9 @@
     "next": "14.0.2",
     "next-auth": "^4.24.5",
     "node-printer": "^1.0.4",
-    "node-thermal-printer": "^4.0.3",
+    "node-thermal-printer": "^3.0.0",
     "nodemailer": "^6.9.7",
+    "pdfmake": "^0.2.9",
     "print-js": "^1.6.0",
     "qz-tray": "^2.2.3",
     "react": "^18",
@@ -57,6 +59,7 @@
   "devDependencies": {
     "@types/react": "18.2.37",
     "autoprefixer": "^10.0.1",
+    "electron-pos-printer": "github:naxsoumo/electron-pos-printer",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "5.2.2"

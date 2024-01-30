@@ -6,30 +6,10 @@ import Footer from "../../../../layout/footer"
 import Header from "../../../../layout/header"
 import NavBar from "../../../../layout/navbar"
 import toast, { Toaster } from "react-hot-toast"
-import { getProducts, isShopOpened, newSale, printReceipt } from "../../../../../src/app/api/v1/controller/butchery/route"
-import { Today } from "../../../../layout/utils"
+import { getProducts, isShopOpened, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
+import { DayTime, Today } from "../../../../layout/utils"
 import lodash from 'lodash'
-// import printJS from 'print-js';
-// import { PrinterTypes} from 'node-thermal-printer'
-// const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
-import receipt from 'receipt'
-import receiptio from 'receiptio'
-import qz from 'qz-tray'
-
-// import browserify from 'browserify-fs'
-// import {Printer, Types} from 'escpos'
-// import Printer from 'node-printer'
-
-// import { creatFsFromVolume, Volume} from 'memfs'
-
-// const volume = Volume.fromJSON({})
-
-// global.fs=creatFsFromVolume(volume)
-// global.fs=browserify
-
-
-// const ThermalPrinter =dynamic(()=> from ('node-thermal-printer'), {ssr:false})
-// const PrinterTypes =dynamic(()=> from ('node-thermal-printer').then(mod=>mod.types),{ssr:false})
+import printJS from 'print-js'
 
 let paymentType={
     type:1,
@@ -46,6 +26,7 @@ export default function MakeSalesPage({session,data}) {
     const modalRef1=React.useRef()
 
     const [ProductData, setProductDataData]=React.useState(data?.products)
+    const htmlValue=React.useRef('1')
     branch=data?.products[0]?.documents.branches.name
 
     const getProductData=async()=>{
@@ -118,8 +99,6 @@ export default function MakeSalesPage({session,data}) {
             }
         }
 
-        // printReceipt()
-        printReceipt1()
     },[ProductData])
 
     const isShopClosed=async()=>{
@@ -138,56 +117,90 @@ export default function MakeSalesPage({session,data}) {
         
     }
 
-    const printReceipt1=async()=>{
+    const printReceipt=()=>{
 
         
         try {
-            receipt.config.currency = '£';
-            receipt.config.width = 60;
-            receipt.config.ruler = '-';
 
-            const output = receipt.create([
-                { type: 'text', value: [
-                    'MY AWESOME STORE',
-                    '123 STORE ST',
-                    'store@store.com',
-                    'www.store.com'
-                ], align: 'center' },
-                { type: 'empty' },
-                { type: 'properties', lines: [
-                    { name: 'Order Number', value: 'XXXXXXXXXXXX' },
-                    { name: 'Date', value: 'XX/XX/XXXX XX:XX' }
-                ] },
-                { type: 'table', lines: [
-                    { item: 'Product 1', qty: 1, cost: 1000 },
-                    { item: 'Product 2 with a really long name', qty: 1, cost: 17500, discount: { type: 'absolute', value: 1000 } },
-                    { item: 'Another product wth quite a name', qty: 2, cost: 900 },
-                    { item: 'Product 4', qty: 1, cost: 80, discount: { type: 'percentage', value: 0.15 } },
-                    { item: 'This length is ridiculously lengthy', qty: 14, cost: 8516 },
-                    { item: 'Product 6', qty: 3, cost: 500 },
-                    { item: 'Product 7', qty: 3, cost: 500, discount: { type: 'absolute', value: 500, message: '3 for the price of 2' } }
-                ] },
-                { type: 'empty' },
-                { type: 'text', value: 'Some extra information to add to the footer of this docket.', align: 'center' },
-                { type: 'empty' },
-                { type: 'properties', lines: [
-                    { name: 'GST (10.00%)', value: 'AUD XX.XX' },
-                    { name: 'Total amount (excl. GST)', value: 'AUD XX.XX' },
-                    { name: 'Total amount (incl. GST)', value: 'AUD XX.XX' }
-                ] },
-                { type: 'empty' },
-                { type: 'properties', lines: [
-                    { name: 'Amount Received', value: 'AUD XX.XX' },
-                    { name: 'Amount Returned', value: 'AUD XX.XX' }
-                ] },
-                { type: 'empty' },
-                { type: 'text', value: 'Final bits of text at the very base of a docket. This text wraps around as well!', align: 'center', padding: 5 }
-            ]);
+            const receiptHTML = `
+            <div class="receipt" style="max-width: 350px; margin: auto; border: 1px solid #ccc; padding: 20px;">
+                <div class="header" style="text-align: center; margin-bottom: 10px;">
+                <div class="store-name" style="font-size: 1.5em; font-weight: bold;">${session.user.butcheryName} Butchery</div>
+                <div class="branch" style="font-weight: bold;">${session.user.branchName} Branch</div>
+                <div class="contact" style="font-size: 0.8em;">
+                    0759903908<br />
+                    btgavygarvey@gmail.com
+                </div>
+                </div>
+                
+                <div class="datetime" style="text-align: center; margin-bottom: 10px;">
+                ${DayTime()} ${Today().time}
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
 
-            console.log(output);
-            console.log("Print done!");
+                <div class="items" style="margin-bottom: 10px;">
+                <div class="item-header" style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <div class="product">Product</div>
+                    <div class="qty">Qty</div>
+                    <div class="total">Total (KSh.)</div>
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
+
+
+                ${sellData?.map((result) => {
+                    return `
+                    <div class="item" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <div class="product">${result.name}</div>
+                        <div class="qty">${result.quantitySold}</div>
+                        <div class="total">${result.totalPrice}</div>
+                    </div>
+                    `;
+                  })}
+                
+                <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
+                </div>
+
+                <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span class="total-amount">Total amount:</span>
+                <span class="total-amount">KSh ${totalPrice.current}.00</span>
+                </div>
+                <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span class="received-amount">Received Amount:</span>
+                <span class="change-amount">KSh ${parseInt(totalPrice.current)+parseInt(change)}.00</span>
+                </div>
+                <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span class="change-amount">Change Amount:</span>
+                <span class="change-amount">KSh ${change}.00</span>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
+
+                <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
+                <span style="font-style: italic;">You were served by:</span>
+                <span style="font-style: italic; font-weight: bold;">${session.user.name}</span>
+                </div><br />
+                <div class="footer" style="font-size: 0.8em; ">
+                <span style="font-style: italic; font-weight: bold;">Wellcome Back.</span>
+                </div><br />
+                <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
+                <span style="font-style: italic;">System Website:</span>
+                <span style="font-style: italic; font-weight: bold;">butchery-system.com</span>
+                </div>
+            </div>
+            `;
+
+            printJS({
+                printable: receiptHTML, // ID, class, or HTML element to print
+                type: 'raw-html', // 'html' or 'raw-html'
+                // header: 'Print Example', // Optional header
+                // style: '@media print { body {font-family: monospace; font-size: 12pt } }', // Optional styles
+            });
+
+           
+              console.log("Print done!");
             
-          
         } catch (error) {
             console.error("Print failed: ", error)
           
@@ -427,6 +440,7 @@ export default function MakeSalesPage({session,data}) {
 
         toast.dismiss(toastId)
         if (response.success===true) {
+            printReceipt()
           toast.success(`Successful!`,{id:toastId})
             readOnly()
             modalRef1.current.style.display='block'
@@ -504,10 +518,6 @@ export default function MakeSalesPage({session,data}) {
        
     }
 
-    
-
-    // console.log(Printers);
-
   return (
     <>
     <Toaster 
@@ -531,12 +541,7 @@ export default function MakeSalesPage({session,data}) {
     >
     </Toaster>
     <div id="wrapper" className="bg-light">
-    {/* <div id='pos-receipt'>
-        <h1>Point of Sale Receipt</h1>
-        <p>Product: Beef</p>
-        <p>Quantity: 15</p>
-        <p>Total: 1500</p>
-    </div> */}
+    
         <NavBar session={session.user}/>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
@@ -668,33 +673,34 @@ export default function MakeSalesPage({session,data}) {
                             </div>
                             
                             <div ref={modalRef1} class="modal" role="dialog"
-                        tabindex="-1" id="modal-2">
-                        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-                            <div class="modal-content bg-primary">
-                                <div class="modal-header text-capitalize d-flex justify-content-center">
-                                    <h1 class="display-4 modal-title fw-bolder text-warning">CHANGE</h1>
-                                </div>
+                                tabindex="-1" id="modal-2">
+                                <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+                                    <div class="modal-content bg-primary">
+                                        <div class="modal-header text-capitalize d-flex justify-content-center">
+                                            <h1 class="display-4 modal-title fw-bolder text-warning">CHANGE</h1>
+                                        </div>
 
-                                <form onSubmit={e=>{
-                                    e.preventDefault()
-                                    getProductData()
-                                    modalRef1.current.style.display='none'
-                                }}>
-                                <div class="display-2 modal-body d-flex justify-content-center">
-                                    
-                                    <h1 className="display-1 text-light fw-bold">{change?.toLocaleString()}</h1>
+                                        <form onSubmit={e=>{
+                                            e.preventDefault()
+                                            getProductData()
+                                            modalRef1.current.style.display='none'
+                                        }}>
+                                        <div class="display-2 modal-body d-flex justify-content-center">
+                                            
+                                            <h1 className="display-1 text-light fw-bold">{change?.toLocaleString()}</h1>
+                                                
+                                        </div>
+                                        <div class="modal-footer d-flex justify-content-center">
+                                            
+                                            <button class="btn btn-primary bg-success btn-lg"
+                                            type="submit" data-bs-target="#modal-2" data-bs-toggle="modal">CLOSE</button>
+                                        </div>
+                                        </form>
                                         
+                                    </div>
                                 </div>
-                                <div class="modal-footer d-flex justify-content-center">
-                                    
-                                    <button class="btn btn-primary bg-success btn-lg"
-                                    type="submit" data-bs-target="#modal-2" data-bs-toggle="modal">CLOSE</button>
-                                </div>
-                                </form>
-                                
                             </div>
-                        </div>
-                    </div>
+                            
                         </div>
                     </div>
                 </div>

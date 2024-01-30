@@ -173,6 +173,7 @@
   .Dflex{
     display: flex;
   }
+  
 
   @media(max-width: 40em) {
     .cardDiv > .card{
