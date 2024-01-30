@@ -98,7 +98,7 @@ export default function MakeSalesPage({session,data}) {
                 ProductData[i].documents['sellingTime']=Today()
             }
         }
-
+        // printReceipt()
     },[ProductData])
 
     const isShopClosed=async()=>{
@@ -119,7 +119,7 @@ export default function MakeSalesPage({session,data}) {
 
     const printReceipt=()=>{
 
-        
+        const domainName = window.location.hostname;
         try {
 
             const receiptHTML = `
@@ -140,35 +140,46 @@ export default function MakeSalesPage({session,data}) {
                 <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
 
                 <div class="items" style="margin-bottom: 10px;">
-                <div class="item-header" style="display: flex; justify-content: space-between; font-weight: bold;">
-                    <div class="product">Product</div>
-                    <div class="qty">Qty</div>
-                    <div class="total">Total (KSh.)</div>
-                </div>
+                
+
+
+                <table style="width: 100%; margin-bottom: 10px;">
+                <colgroup>
+                    <col style="width: 10%">
+                    <col style="width: 30%">
+                    <col style="width: 30%">
+                    <col style="width: 30%">
+                </colgroup>
+                    <thead>
+                        <tr style="font-weight: bold;">
+                        <td>No.</td>
+                        <td>Product</td>
+                        <td>Quantity</td>
+                        <td>Total (KShs.)</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    ${sellData?.map((result,key) => `
+                        <tr key=${result.id}>
+                            <td>${key+1}</td>
+                            <td>${result.name}</td>
+                            <td>${result.quantitySold}</td>
+                            <td>${result.totalPrice}.00</td>
+                        </tr>
+                    `).join('')}
+                    </tbody>
+                </table>
                 
                 <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
-
-
-                ${sellData?.map((result) => {
-                    return `
-                    <div class="item" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <div class="product">${result.name}</div>
-                        <div class="qty">${result.quantitySold}</div>
-                        <div class="total">${result.totalPrice}</div>
-                    </div>
-                    `;
-                  })}
-                
-                <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
                 </div>
 
-                <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
-                <span class="total-amount">Total amount:</span>
-                <span class="total-amount">KSh ${totalPrice.current}.00</span>
-                </div>
                 <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
                 <span class="received-amount">Received Amount:</span>
                 <span class="change-amount">KSh ${parseInt(totalPrice.current)+parseInt(change)}.00</span>
+                </div>
+                <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span class="total-amount">Total amount:</span>
+                <span class="total-amount">KSh ${totalPrice.current}.00</span>
                 </div>
                 <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
                 <span class="change-amount">Change Amount:</span>
@@ -180,13 +191,13 @@ export default function MakeSalesPage({session,data}) {
                 <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
                 <span style="font-style: italic;">You were served by:</span>
                 <span style="font-style: italic; font-weight: bold;">${session.user.name}</span>
-                </div><br />
-                <div class="footer" style="font-size: 0.8em; ">
+                </div>
+                <div class="footer" style="font-size: 0.8em; display: flex; justify-content: center;">
                 <span style="font-style: italic; font-weight: bold;">Wellcome Back.</span>
-                </div><br />
+                </div>
                 <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
                 <span style="font-style: italic;">System Website:</span>
-                <span style="font-style: italic; font-weight: bold;">butchery-system.com</span>
+                <span style="font-style: italic; font-weight: bold;">${domainName}</span>
                 </div>
             </div>
             `;
@@ -440,6 +451,7 @@ export default function MakeSalesPage({session,data}) {
 
         toast.dismiss(toastId)
         if (response.success===true) {
+            
             printReceipt()
           toast.success(`Successful!`,{id:toastId})
             readOnly()
