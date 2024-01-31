@@ -10,6 +10,7 @@ import { getProducts, isShopOpened, newSale } from "../../../../../src/app/api/v
 import { DayTime, Today } from "../../../../layout/utils"
 import lodash from 'lodash'
 import printJS from 'print-js'
+import { accessToken } from '../../../../../src/app/api/v1/controller/m_pesa/middleware'
 
 let paymentType={
     type:1,
@@ -122,7 +123,7 @@ export default function MakeSalesPage({session,data}) {
         try {
 
             const receiptHTML = `
-            <div class="receipt" style="max-width: 350px; margin: auto; border: 1px solid #ccc; padding: 20px;">
+            <div class="receipt" style="max-width: 300px; margin: auto; border: 1px solid #ccc; padding: 20px;">
                 <div class="header" style="text-align: center; margin-bottom: 10px;">
                 <div class="store-name" style="font-size: 1.5em; font-weight: bold;">${session.user.butcheryName} Butchery</div>
                 <div class="branch" style="font-weight: bold;">${session.user.branchName} Branch</div>
@@ -154,7 +155,7 @@ export default function MakeSalesPage({session,data}) {
                         <td>No.</td>
                         <td>Product</td>
                         <td>Quantity</td>
-                        <td>Total (KShs.)</td>
+                        <td>Total</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -304,6 +305,8 @@ export default function MakeSalesPage({session,data}) {
         totalChange(totalPrice.current)
     }
 
+    accessToken()
+
     const handleInputChange=(val)=>{
 
         const amountEntered=inputRef[`input${val}`].current.value
@@ -352,7 +355,10 @@ export default function MakeSalesPage({session,data}) {
             return
         }
 
-        toast.success(answer)
+        // toast.success(answer)
+        // accessToken()
+        // await initiateSTKPush()
+
 
     }
 
