@@ -27,7 +27,11 @@ export default async function ViewSales() {
         <>
           {
             session.user.access !==1 ? (
-              <RollBackPage session={session}/>
+              session.user.package ===2 ?(
+                <RollBackPage session={session}/>
+              ):(
+                logOut()
+              )
             ):(
               toDashboard()
             )

@@ -292,7 +292,11 @@ export default function ViewExpensePage({session}) {
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" onClick={showModal}>New Expense</a>
-                                    <a class="dropdown-item" href="/sc/expenses/reports">Expense Report Dashboard</a>
+                                    {
+                                        session.user.package === 2 && (
+                                            <a class="dropdown-item" href="/sc/expenses/reports">Expense Report Dashboard</a>
+                                        )
+                                    }
                                 </div>
                                     
                             </div>
@@ -338,7 +342,6 @@ export default function ViewExpensePage({session}) {
                                                         return (
                                                             <>
                                                             <option value={result.id} >{result.firstName} {result.lastName}</option>
-                                                            
                                                             </>
                                                         )
 

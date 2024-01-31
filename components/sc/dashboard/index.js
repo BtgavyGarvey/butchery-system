@@ -495,105 +495,114 @@ export default function DashboardPage({session}) {
                                         </div>
                                     </div>
 
-                                    <div class="card d-flex card-dashboard text-dark"
-                                        >
-                                        <div class="card-body d-grid">
-                                            <div class="row">
-                                                <div class="col d-grid">
-                                                    <div class="row">
-                                                        <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-danger">Revenue</span></strong>
-                                                                (<span className="text-primary">{now.year}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {YearRevenue.toLocaleString()}</p>
-                                                            <p class="fw-bolder">M-Pesa. {M_Pesa?.year.toLocaleString()}</p>
-                                                            <p class="fw-bolder">Cash. {Cash?.year.toLocaleString()}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr />
-                                        <div class="card-body d-grid flex-wrap">
-                                            <div class="row">
-                                                <div class="col d-grid">
-                                                    <div class="row">
-                                                        <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-success">Expense</span></strong>
-                                                                (<span className="text-primary">{now.year}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {YearExpense.toLocaleString()}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr />
-                                        <div class="card-body d-grid flex-wrap">
-                                            <div class="row">
-                                                <div class="col d-grid">
-                                                    <div class="row">
-                                                        <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-primary">Net Income</span></strong>
-                                                                (<span className="text-success">{now.year}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {(YearRevenue-YearExpense).toLocaleString()}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {
+                                        session.user.package === 2 && (
 
-                                    <div class="card d-flex card-dashboard text-dark"
-                                        >
-                                        <div class="card-body d-grid flex-wrap">
-                                            <div class="row">
-                                                <div class="col d-grid flex-wrap">
+                                            <>
+                                            <div class="card d-flex card-dashboard text-dark"
+                                                >
+                                                <div class="card-body d-grid">
                                                     <div class="row">
-                                                        <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-danger">Revenue</span></strong>
-                                                                (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {YearsAgoRevenue.toLocaleString()}</p>
-                                                            <p class="fw-bolder">M-Pesa. {M_Pesa?.yearsAgo.toLocaleString()}</p>
-                                                            <p class="fw-bolder">Cash. {Cash?.yearsAgo.toLocaleString()}</p>
+                                                        <div class="col d-grid">
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-danger">Revenue</span></strong>
+                                                                        (<span className="text-primary">{now.year}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {YearRevenue.toLocaleString()}</p>
+                                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.year.toLocaleString()}</p>
+                                                                    <p class="fw-bolder">Cash. {Cash?.year.toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="card-body d-grid flex-wrap">
+                                                    <div class="row">
+                                                        <div class="col d-grid">
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-success">Expense</span></strong>
+                                                                        (<span className="text-primary">{now.year}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {YearExpense.toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="card-body d-grid flex-wrap">
+                                                    <div class="row">
+                                                        <div class="col d-grid">
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-primary">Net Income</span></strong>
+                                                                        (<span className="text-success">{now.year}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {(YearRevenue-YearExpense).toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <hr />
-                                        <div class="card-body d-grid flex-wrap">
-                                            <div class="row">
-                                                <div class="col d-grid flex-wrap">
+
+                                            <div class="card d-flex card-dashboard text-dark"
+                                                >
+                                                <div class="card-body d-grid flex-wrap">
                                                     <div class="row">
                                                         <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-success">Expense</span></strong>
-                                                                (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {YearsAgoExpense.toLocaleString()}</p>
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-danger">Revenue</span></strong>
+                                                                        (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {YearsAgoRevenue.toLocaleString()}</p>
+                                                                    <p class="fw-bolder">M-Pesa. {M_Pesa?.yearsAgo.toLocaleString()}</p>
+                                                                    <p class="fw-bolder">Cash. {Cash?.yearsAgo.toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="card-body d-grid flex-wrap">
+                                                    <div class="row">
+                                                        <div class="col d-grid flex-wrap">
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-success">Expense</span></strong>
+                                                                        (<span className="text-primary">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {YearsAgoExpense.toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="card-body d-grid flex-wrap">
+                                                    <div class="row">
+                                                        <div class="col d-grid">
+                                                            <div class="row">
+                                                                <div class="col d-grid flex-wrap">
+                                                                    <p><strong><span
+                                                                                className="text-primary">Net Income</span></strong>
+                                                                        (<span className="text-success">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
+                                                                    <p class="fw-bolder">Total KSh. {(YearsAgoRevenue-YearsAgoExpense).toLocaleString()}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <hr />
-                                        <div class="card-body d-grid flex-wrap">
-                                            <div class="row">
-                                                <div class="col d-grid">
-                                                    <div class="row">
-                                                        <div class="col d-grid flex-wrap">
-                                                            <p><strong><span
-                                                                        className="text-primary">Net Income</span></strong>
-                                                                (<span className="text-success">{new Date(dateDetails.yearsAgo).getFullYear()} - {new Date().getFullYear()}</span>)</p>
-                                                            <p class="fw-bolder">Total KSh. {(YearsAgoRevenue-YearsAgoExpense).toLocaleString()}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </>
+                                        )
+                                    }
+
+                                    
                                     </>
                                 )
                             }

@@ -370,7 +370,11 @@ export default function EmployeesPaymentPage({session}) {
                                
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" onClick={e=>{showModal(2);setDropDownManu(!dropDownManu)}}>New Payment</a>
-                                    <a class="dropdown-item" onClick={e=>{resetPayments(1);setDropDownManu(!dropDownManu)}}>Reset All Payments</a>
+                                    {
+                                        session.user.package === 2 && (
+                                            <a class="dropdown-item" onClick={e=>{resetPayments(1);setDropDownManu(!dropDownManu)}}>Reset All Payments</a>
+                                        )
+                                    }
                                 </div>
                                     
                             </div>

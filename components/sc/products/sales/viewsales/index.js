@@ -239,18 +239,23 @@ export default function ViewSalesPage({session}) {
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
                     viewMore(SalesData[i]?.documents.branch,SalesData[i]?.documents.details.moreDateDetails.moreHourDetails)
                 }}/></td>
-                <td title="Roll Back"><FontAwesomeIcon icon={faArrowAltCircleUp} className="text-danger fw-bold faEdit" onClick={()=>{
-                    let data={
-                        user:session?.user.id,
-                        now:Today(),
-                        date:SalesData[i]?.documents.details.date,
-                        hour:SalesData[i]?.documents.details.moreDateDetails.hour,
-                        name:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name,
-                        branch:branch.current,
-                        sale:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails
-                    }
-                    rollBackSale(data)
-                }}/></td>
+                {
+                    session.user.package === 2 && (
+                        <td title="Roll Back"><FontAwesomeIcon icon={faArrowAltCircleUp} className="text-danger fw-bold faEdit" onClick={()=>{
+                            let data={
+                                user:session?.user.id,
+                                now:Today(),
+                                date:SalesData[i]?.documents.details.date,
+                                hour:SalesData[i]?.documents.details.moreDateDetails.hour,
+                                name:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name,
+                                branch:branch.current,
+                                sale:SalesData[i]?.documents.details.moreDateDetails.moreHourDetails
+                            }
+                            rollBackSale(data)
+                        }}/></td>
+                    )
+                }
+                
                 </tr>
     
                 </>
@@ -326,11 +331,18 @@ export default function ViewSalesPage({session}) {
                                 <div style={{display:dropDownManu ? 'block' : 'none'}} class="dropdown-menu" >
                                     <a class="dropdown-item" href="/sc/products/sales/makesales">New Sale</a>
                                     {
-                                        session.user.access !==1 && (
-                                            <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
+                                        session.user.package === 2 && (
+                                            session.user.access !==1 && (
+                                                <a class="dropdown-item" href="/sc/products/sales/rollback"  >Roll Back Report</a>
+                                            )
                                         )
                                     }
-                                    <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
+
+                                    {
+                                        session.user.package === 2 && (
+                                            <a class="dropdown-item" href="/sc/products/sales/reports"  >Sales Report Dashboard</a>
+                                        )
+                                    }
                                 </div>
                                     
                             </div>

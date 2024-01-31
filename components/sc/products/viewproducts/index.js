@@ -208,9 +208,14 @@ export default function ViewProductsPage({session}) {
                             showModal(1)
                         }} class="far fa-edit faEdit text-start text-warning "
                         ></i></td>
-                        <td title="Archive"><FontAwesomeIcon icon={faArchive} className="text-danger faEdit" onClick={()=>{
-                            deleteProduct(ProductData[i]?.documents.branches.id,ProductData[i]?.documents.id,ProductData[i]?.documents.code,2)
-                        }}/></td>
+                        {
+                            session.user.package === 2 && (
+                                <td title="Archive"><FontAwesomeIcon icon={faArchive} className="text-danger faEdit" onClick={()=>{
+                                    deleteProduct(ProductData[i]?.documents.branches.id,ProductData[i]?.documents.id,ProductData[i]?.documents.code,2)
+                                }}/></td>
+                            )
+                        }
+                        
                 
                         </>
                     )
@@ -392,35 +397,38 @@ export default function ViewProductsPage({session}) {
                                     }
                                     <a class="dropdown-item"  onClick={(e)=>{showModal(2)}}>Dead Stock/Issues</a>
                                     {
-                                        achivedProducts ? (
-                                            <>
-                                    <a class="dropdown-item" onClick={(e)=>{
-                                        achievedVal.current=1
-                                        getProductData()
-                                        setproductInfo('Available Products')
-                                        setAchivedProducts(false)
-                                        setDropDownManu(false)
-                                    }}>Available Products</a>
-                                            
-                                            </>
-                                        ):(
-                                            <>
-                                            {
-                                                session.user.access !==1 && (
-                                                    <>
-                                                    <a class="dropdown-item" onClick={(e)=>{
-                                                        achievedVal.current=2
-                                                        getProductData()
-                                                        setproductInfo('Archived Products')
-                                                        setAchivedProducts(true)
-                                                        setDropDownManu(false)
-                                                    }}>Archived Products</a>
-                                                    </>
-                                                )
-                                            }
-                                            
-                                            </>
+                                        session.user.package === 2 && (
+                                            achivedProducts ? (
+                                                <>
+                                                <a class="dropdown-item" onClick={(e)=>{
+                                                    achievedVal.current=1
+                                                    getProductData()
+                                                    setproductInfo('Available Products')
+                                                    setAchivedProducts(false)
+                                                    setDropDownManu(false)
+                                                }}>Available Products</a>
+                                                        
+                                                </>
+                                            ):(
+                                                <>
+                                                {
+                                                    session.user.access !==1 && (
+                                                        <>
+                                                        <a class="dropdown-item" onClick={(e)=>{
+                                                            achievedVal.current=2
+                                                            getProductData()
+                                                            setproductInfo('Archived Products')
+                                                            setAchivedProducts(true)
+                                                            setDropDownManu(false)
+                                                        }}>Archived Products</a>
+                                                        </>
+                                                    )
+                                                }
+                                                
+                                                </>
+                                            )
                                         )
+                                        
                                     }
                                     <a class="dropdown-item" href="/sc/invoice"  >Invoices</a>
 

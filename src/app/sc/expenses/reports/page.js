@@ -19,7 +19,11 @@ export default async function ExpenseReports() {
     <>
     {
       session ? (
-        <ExpensesReportPage session={session}/>
+        session.user.package ===2 ?(
+          <ExpensesReportPage session={session}/>
+        ):(
+          logOut()
+        )
       ):(
         logOut()
       )

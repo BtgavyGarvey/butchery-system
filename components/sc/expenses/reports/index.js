@@ -91,6 +91,9 @@ export default function ViewSalesPage({session}) {
         else if (refDay.current==='Expenses This Year') {
           dateDetails['dynamicDate']=dateDetails.thisYear
         }
+        else if (refDay.current==='Expenses In The Past 5 Years') {
+          dateDetails['dynamicDate']=dateDetails.yearsAgo
+        }
 
         
         if (radio.current===1) {
@@ -267,9 +270,10 @@ export default function ViewSalesPage({session}) {
           label=data?.map((item) => item.month)
           
         }
+        
 
         DataSales=data?.map((item) => item.totalAmount)
-          DataQuantity=data?.map((item) => item.totalQuantity)
+        DataQuantity=data?.map((item) => item.totalQuantity)
         
       
     

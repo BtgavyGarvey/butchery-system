@@ -253,13 +253,17 @@ export default function MakeSalesPage({session,data}) {
             paymentType.type=parseInt(value)
 
             if (value==='1' || value==='2') {
-                if (value==='1') {
-                    promptM_Pesa.current.style.display='none'
-                    
-                } else {
-                    promptM_Pesa.current.style.display='block'
-                    
+
+                if (session.user.package === 2 ) {
+                    if (value==='1') {
+                        promptM_Pesa.current.style.display='none'
+                        
+                    } else {
+                        promptM_Pesa.current.style.display='block'
+                        
+                    }
                 }
+                
                 bothRef.current.style.display='none'
                 paidAmountMpesa.current.value=''
                 setDisplay(false)
@@ -267,7 +271,8 @@ export default function MakeSalesPage({session,data}) {
             }
             else{
 
-                promptM_Pesa.current.style.display='block'
+                if (session.user.package === 2 ) {promptM_Pesa.current.style.display='block'}
+                
                 bothRef.current.style.display='block'
                 paymentType.m_pesa='0'
                 setDisplay(true)
@@ -305,7 +310,7 @@ export default function MakeSalesPage({session,data}) {
         totalChange(totalPrice.current)
     }
 
-    accessToken()
+    
 
     const handleInputChange=(val)=>{
 
@@ -354,7 +359,7 @@ export default function MakeSalesPage({session,data}) {
             toast.error('Input is too short')
             return
         }
-
+        await accessToken()
         // toast.success(answer)
         // accessToken()
         // await initiateSTKPush()
@@ -673,9 +678,14 @@ export default function MakeSalesPage({session,data}) {
                                                 </div>
                                                 
                                             </div>
-                                            <div className="col-md-12 d-flex justify-content-center p-3">
-                                            <a onClick={promptM_PesaAmount} ref={promptM_Pesa} className="bothRef text-light text-decoration-underlined" href="#">Prompt Customer</a>
-                                            </div>
+                                            {
+                                                session.user.package === 2 && (
+                                                    <div className="col-md-12 d-flex justify-content-center p-3">
+                                                        <a onClick={promptM_PesaAmount} ref={promptM_Pesa} className="bothRef text-light text-decoration-underlined" href="#">Prompt Customer</a>
+                                                    </div>
+                                                )
+                                            }
+                                            
                                         </div>
 
                                         <div class="row mb-3">

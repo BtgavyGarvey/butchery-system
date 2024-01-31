@@ -521,6 +521,7 @@ export default function ProfilePage({session}) {
                         <span className="text-dark"><span className="text-info fw-bold">NB: </span> Changes will be effective on next login.</span>
 
                         {
+                            session.user.package === 2 && (
                             session.user.access !==1 && (
                                 <span>
                                     {
@@ -534,6 +535,7 @@ export default function ProfilePage({session}) {
                                         
                                     }
                                 </span>
+                            )
                             )
                         }
                         

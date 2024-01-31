@@ -267,6 +267,11 @@ export default function ViewSalesPage({session}) {
           label=data?.map((item) => item.month)
           
         }
+        else if (value==='Sales In The Past 5 Years'){
+          text.current='Years'
+        label=data?.map((item) => item.year)
+        
+      }
 
         DataSales=data?.map((item) => item.totalAmount)
           DataQuantity=data?.map((item) => item.totalQuantity)
