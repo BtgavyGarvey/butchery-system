@@ -636,6 +636,10 @@ export async function loginUser(username, password, req) {
 
     const branch = await Branches.findOne({ id: cashierUser.branch }).lean().exec();
 
+  //  CHECK IF SUBSCRIPTION IS EXPIRED
+
+    
+
     const butchery = await Butchery.findOne({ id: branch.butchery }).lean().exec();
 
     if (validPassword) {

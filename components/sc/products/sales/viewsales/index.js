@@ -14,9 +14,7 @@ import { getCashierById } from "../../../../../src/app/api/v1/controller/user/ro
 
 let soldProducts=[]
 let cashierData=[]
-let totalSales=0
-let m_pesaSales=0
-let cashSales=0
+
 
 export default function ViewSalesPage({session}) {
 
@@ -24,6 +22,11 @@ export default function ViewSalesPage({session}) {
     const [OneSalesData, setOneSalesData]=React.useState()
 
     const page=React.useRef()
+    const total_Sales=React.useRef({
+        totalSales:0,
+        m_pesaSales:0,
+        cashSales:0,
+    })
     const DateRef=React.useRef()
     const cashier=React.useRef()
     const pageLimit=React.useRef()
@@ -202,9 +205,9 @@ export default function ViewSalesPage({session}) {
         const sale=[]
         soldProducts=[]
 
-        totalSales=0
-        cashSales=0
-        m_pesaSales=0
+        total_Sales.current.totalSales=0
+        total_Sales.current.cashSales=0
+        total_Sales.current.m_pesaSales=0
 
         for (let i = 0; i < SalesData.length; i++) {
 
@@ -221,11 +224,11 @@ export default function ViewSalesPage({session}) {
                 sale.push(
                     result
                 )
-                m_pesaSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
-                cashSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
+                total_Sales.current.m_pesaSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.m_pesa)
+                total_Sales.current.cashSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.payedBy.cash)
             }
 
-            totalSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold)
+            total_Sales.current.totalSales +=parseInt(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold)
             
 
             result1.push(
@@ -432,9 +435,9 @@ export default function ViewSalesPage({session}) {
                             </div>
                             <div class="row">
                                 <div class="Dflex col-md-12 bg-light justify-content-between">
-                                        <p className="text-primary fw-bold">Total Sales: <span className="text-dark">KSh. {totalSales.toLocaleString()}</span></p>
-                                        <p className="text-success fw-bold">M-Pesa Sales: <span className="text-dark">KSh. {m_pesaSales.toLocaleString()}</span></p>
-                                        <p className="text-danger fw-bold">Cash Sales: <span className="text-dark">KSh. {cashSales.toLocaleString()}</span></p>
+                                        <p className="text-primary fw-bold">Total Sales: <span className="text-dark">KSh. {total_Sales.current.totalSales.toLocaleString()}</span></p>
+                                        <p className="text-success fw-bold">M-Pesa Sales: <span className="text-dark">KSh. {total_Sales.current.m_pesaSales.toLocaleString()}</span></p>
+                                        <p className="text-danger fw-bold">Cash Sales: <span className="text-dark">KSh. {total_Sales.current.cashSales.toLocaleString()}</span></p>
                                 </div>
                             </div>
                             

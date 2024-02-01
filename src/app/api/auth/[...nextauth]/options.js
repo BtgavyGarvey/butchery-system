@@ -39,8 +39,9 @@ const authOptions={
                     email:userData.butchery.email,
                     butcheryName:userData.butchery.name,
                     branch:userData.user.branch,
-                    package:userData.branch.subscription.package,
-                    branchName:userData.branch.name
+                    package:userData.branch.subscription[0].package,
+                    branchName:userData.branch.name,
+                    phone:userData.butchery.country[0].phoneCode+userData.butchery.mobile
                 }
 
             }
@@ -63,6 +64,8 @@ const authOptions={
                 token.branch=user.branch
                 token.butcheryName=user.butcheryName
                 token.branchName=user.branchName
+                token.phone=user.phone
+                token.package=user.package
             }
             return token
         },
@@ -75,6 +78,8 @@ const authOptions={
                 session.user.branch=token.branch
                 session.user.butcheryName=token.butcheryName
                 session.user.branchName=token.branchName
+                session.user.phone=token.phone
+                session.user.package=token.package
             }
             return session
         }

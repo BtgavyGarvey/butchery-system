@@ -8,6 +8,7 @@ import NavBar from "../../../../layout/navbar"
 import toast, { Toaster } from "react-hot-toast"
 import { getProducts, isShopOpened, newSale } from "../../../../../src/app/api/v1/controller/butchery/route"
 import { DayTime, Today } from "../../../../layout/utils"
+import printReceipt1 from "../../../../layout/utils/print/index"
 import lodash from 'lodash'
 import printJS from 'print-js'
 import { accessToken } from '../../../../../src/app/api/v1/controller/m_pesa/middleware'
@@ -19,6 +20,7 @@ let paymentType={
 }
 
 let sellData=[]
+let printData=[]
 let branch
 
 export default function MakeSalesPage({session,data}) {
@@ -54,6 +56,7 @@ export default function MakeSalesPage({session,data}) {
         modalRef1.current.style.display='none'
         bothRef.current.style.display='none'
         
+        // printReceipt1()
         // const foundPrinters=Printer.getPrinters()
         // setPrinters(foundPrinters)
     },[])
@@ -123,13 +126,13 @@ export default function MakeSalesPage({session,data}) {
         try {
 
             const receiptHTML = `
-            <div class="receipt" style="max-width: 300px; margin: auto; border: 1px solid #ccc; padding: 20px;">
+            <div class="receipt" style="max-width: 250px; border: 1px solid #ccc; padding: 10px;">
                 <div class="header" style="text-align: center; margin-bottom: 10px;">
                 <div class="store-name" style="font-size: 1.5em; font-weight: bold;">${session.user.butcheryName} Butchery</div>
                 <div class="branch" style="font-weight: bold;">${session.user.branchName} Branch</div>
                 <div class="contact" style="font-size: 0.8em;">
-                    0759903908<br />
-                    btgavygarvey@gmail.com
+                    ${session.user.phone}<br />
+                    ${session.user.email}
                 </div>
                 </div>
                 
@@ -140,31 +143,29 @@ export default function MakeSalesPage({session,data}) {
                 <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
 
                 <div class="items" style="margin-bottom: 10px;">
-                
-
 
                 <table style="width: 100%; margin-bottom: 10px;">
                 <colgroup>
-                    <col style="width: 10%">
-                    <col style="width: 30%">
-                    <col style="width: 30%">
-                    <col style="width: 30%">
+                    
+                    <col style="width: 33.33%">
+                    <col style="width: 33.33%">
+                    <col style="width: 33.33%">
                 </colgroup>
                     <thead>
                         <tr style="font-weight: bold;">
-                        <td>No.</td>
+                        
                         <td>Product</td>
                         <td>Quantity</td>
-                        <td>Total</td>
+                        <td>Amount</td>
                         </tr>
                     </thead>
                     <tbody>
-                    ${sellData?.map((result,key) => `
-                        <tr key=${result.id}>
-                            <td>${key+1}</td>
+                    ${printData?.map((result,key) => `
+                        <tr key=${key+1}>
+                            
                             <td>${result.name}</td>
-                            <td>${result.quantitySold}</td>
-                            <td>${result.totalPrice}.00</td>
+                            <td>${result.quantitySold.toLocaleString()}</td>
+                            <td>${result.totalPrice.toLocaleString()}.00</td>
                         </tr>
                     `).join('')}
                     </tbody>
@@ -175,25 +176,25 @@ export default function MakeSalesPage({session,data}) {
 
                 <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
                 <span class="received-amount">Received Amount:</span>
-                <span class="change-amount">KSh ${parseInt(totalPrice.current)+parseInt(change)}.00</span>
+                <span class="change-amount">KSh ${(parseInt(totalPrice.current)+parseInt(change)).toLocaleString()}.00</span>
                 </div>
                 <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
-                <span class="total-amount">Total amount:</span>
-                <span class="total-amount">KSh ${totalPrice.current}.00</span>
+                <span class="total-amount">Total Amount:</span>
+                <span class="total-amount">KSh ${(totalPrice.current).toLocaleString()}.00</span>
                 </div>
                 <div style="margin-bottom: 5px; display: flex; justify-content: space-between;">
                 <span class="change-amount">Change Amount:</span>
-                <span class="change-amount">KSh ${change}.00</span>
+                <span class="change-amount">KSh ${change.toLocaleString()}.00</span>
                 </div>
 
                 <hr style="border: 0; border-top: 1px solid #000; margin: 10px 0;" />
 
                 <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
                 <span style="font-style: italic;">You were served by:</span>
-                <span style="font-style: italic; font-weight: bold;">${session.user.name}</span>
+                <span style="font-style: italic;">${session.user.name}</span>
                 </div>
                 <div class="footer" style="font-size: 0.8em; display: flex; justify-content: center;">
-                <span style="font-style: italic; font-weight: bold;">Wellcome Back.</span>
+                <h3 style="font-style: italic; font-weight: bold;">Wellcome Back.</h3>
                 </div>
                 <div class="footer" style="font-size: 0.8em; display: flex; justify-content: space-between;">
                 <span style="font-style: italic;">System Website:</span>
@@ -206,7 +207,7 @@ export default function MakeSalesPage({session,data}) {
                 printable: receiptHTML, // ID, class, or HTML element to print
                 type: 'raw-html', // 'html' or 'raw-html'
                 // header: 'Print Example', // Optional header
-                // style: '@media print { body {font-family: monospace; font-size: 12pt } }', // Optional styles
+                style: '@media print { body {font-family: monospace; font-size: 10px } }', // Optional styles
             });
 
            
@@ -434,6 +435,7 @@ export default function MakeSalesPage({session,data}) {
     }
 
     const submit=async(e)=>{
+        printData=[]
 
         e.preventDefault()
 
@@ -451,6 +453,10 @@ export default function MakeSalesPage({session,data}) {
         for (let i = 0; i < sellData.length; i++) {
             sellData[i]['sellingTime']=Today()
             sellData[i]['paymentType']=paymentType
+
+            if (sellData[i].quantitySold > 0) {
+                printData.push(sellData[i])
+            }
         }
 
         toastId=toast.loading('Loading, please wait...',{
@@ -506,13 +512,13 @@ export default function MakeSalesPage({session,data}) {
             }
         }
         else{
+
             setChange('')
             paidAmountCash.current.value=''
             paidAmountMpesa.current.value=''
             saveBtn.current.disabled=true
 
         }
-
 
     }
 
