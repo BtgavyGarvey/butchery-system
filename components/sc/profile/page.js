@@ -568,10 +568,18 @@ export default function ProfilePage({session}) {
                                                 type="text" required onChange={handleInputChangeProfile} data-bs-theme="light"name="lastName" /></div>
                                         <div class="col-sm-12 offset-sm-0"><button
                                                 class="btn btn-primary font-monospace text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder text-center text-dark border rounded-pill border-2 border-success shadow focus-ring focus-ring-danger rubberBand animated"
-                                                type="submit" style={{margin: "8px"}}><strong>SAVE</strong></button><a
-                                                class="btn btn-danger font-monospace text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder text-center border rounded-pill border-2 border-info shadow focus-ring focus-ring-danger rubberBand animated"
-                                                role="button" style={{margin: "8px"}} href={`/sc/profile/resetpassword?username=${Name?.username}`}
-                                                target="_top"><strong>Change password</strong></a></div>
+                                                type="submit" style={{margin: "8px"}}><strong>SAVE</strong>
+                                                </button>
+                                                {
+                                                    Name && (
+                                                        <a
+                                                        class="btn btn-danger font-monospace text-nowrap text-truncate text-break text-uppercase fs-6 fw-bolder text-center border rounded-pill border-2 border-info shadow focus-ring focus-ring-danger rubberBand animated"
+                                                        role="button" style={{margin: "8px"}} href={`/sc/profile/resetpassword?username=${Name?.username}`}
+                                                        target="_top"><strong>Change password</strong>
+                                                        </a>
+                                                    )
+                                                }
+                                                </div>
                                     </div>
                                 </form>
                             </div>

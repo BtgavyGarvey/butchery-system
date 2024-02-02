@@ -256,7 +256,10 @@ export default function RegisterPage() {
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0"><label class="form-label">Password</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring focus-ring-info form-control form-control-lg bounce animated"
-                                            type="password"  required placeholder="New Password" name="password" onChange={handleInputChange} min={8}/>
+                                            type="password"  required placeholder="New Password" name="password" onChange={handleInputChange} min={8} 
+                                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                            title='Must contain at least one number an one uppercase and lowercase letter, and at least 8 or more characters'
+                                            />
                                     </div>
                                     <div class="col-sm-6"><label class="form-label">Confirm Password</label><input
                                             class="border rounded-pill border-2 border-primary shadow-sm focus-ring form-control form-control-lg bounce animated"

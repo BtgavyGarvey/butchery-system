@@ -638,7 +638,19 @@ export async function loginUser(username, password, req) {
 
   //  CHECK IF SUBSCRIPTION IS EXPIRED
 
-    
+    let date1 = new Date().toLocaleDateString();
+    let date2 = new Date(branch.subscription[0].expiryDate).toLocaleDateString();
+
+    if (date1 > date2) {
+
+      if (user.role !=='Administrator') {
+        return {
+          message: 'Access Denied. Your Subscription has expired.',
+          success: false,
+        };
+      }
+      
+    } 
 
     const butchery = await Butchery.findOne({ id: branch.butchery }).lean().exec();
 

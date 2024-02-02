@@ -119,10 +119,13 @@ export default function MakeSalesPage({session,data}) {
         }
         
     }
-
+    let date=new Date().toUTCString()
+    console.log(date);
     const printReceipt=()=>{
 
-        const domainName = window.location.hostname;
+        const { hostname } = new URL(process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000');
+        const domainName = hostname;
+
         try {
 
             const receiptHTML = `

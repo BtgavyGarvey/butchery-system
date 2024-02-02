@@ -20,6 +20,7 @@ export default async function MakeSales() {
     value:1
   }
   
+  
   response=await getProducts(data)
 
   const logOut=()=>{
