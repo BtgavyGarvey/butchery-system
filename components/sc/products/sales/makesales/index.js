@@ -260,7 +260,7 @@ export default function MakeSalesPage({session,data}) {
                         promptM_Pesa.current.style.display='none'
                         
                     } else {
-                        promptM_Pesa.current.style.display='block'
+                        // promptM_Pesa.current.style.display='block'
                         
                     }
                 }
@@ -272,7 +272,9 @@ export default function MakeSalesPage({session,data}) {
             }
             else{
 
-                if (session.user.package === 2 ) {promptM_Pesa.current.style.display='block'}
+                if (session.user.package === 2 ) {
+                    // promptM_Pesa.current.style.display='block'
+                }
                 
                 bothRef.current.style.display='block'
                 paymentType.m_pesa='0'
@@ -310,8 +312,6 @@ export default function MakeSalesPage({session,data}) {
 
         totalChange(totalPrice.current)
     }
-
-    
 
     const handleInputChange=(val)=>{
 

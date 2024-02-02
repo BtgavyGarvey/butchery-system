@@ -1,5 +1,7 @@
 'use client'
 
+import { faMoneyBills, faUsers, faWallet } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { signOut } from "next-auth/react"
 import {useRouter } from "next/navigation"
 import React from "react"
@@ -59,7 +61,7 @@ export default function NavBar({session}) {
                     {
                         session.access !==1 && (
                                 <li class="nav-item" title="View Employees"><a class="nav-link"
-                                        href="/sc/employees/view"><i class="fas fa-table"></i><span className="p-1">View Employees</span></a>
+                                        href="/sc/employees/view"><FontAwesomeIcon icon={faUsers}></FontAwesomeIcon><span className="p-1">View Employees</span></a>
                                 </li>
                         )
                     }
@@ -67,7 +69,7 @@ export default function NavBar({session}) {
                     
                     
                     <li class="nav-item" title="Expenses"><a class="nav-link"
-                            href="/sc/expenses"><i class="fas fa-table"></i><span className="p-1">Expenses</span></a>
+                            href="/sc/expenses"><FontAwesomeIcon icon={faMoneyBills}></FontAwesomeIcon><span className="p-1">Expenses</span></a>
                     </li>
                     
                     <li class="nav-item " title="Log Out"><a href="/" class="nav-link text-dark fw-bold" onClick={signOut}

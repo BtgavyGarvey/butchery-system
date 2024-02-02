@@ -22,9 +22,9 @@ export default function ViewSalesPage({session}) {
     const [OneSalesData, setOneSalesData]=React.useState()
 
     const page=React.useRef()
-    const totalSales=React.useRef(0)
-    const m_pesaSales=React.useRef(0)
-    const cashSales=React.useRef(0)
+    const totalSales=React.useRef('0')
+    const m_pesaSales=React.useRef('0')
+    const cashSales=React.useRef('0')
     const DateRef=React.useRef()
     const cashier=React.useRef()
     const pageLimit=React.useRef()
@@ -234,8 +234,8 @@ export default function ViewSalesPage({session}) {
                 <tr>
                 <td>{i+1}</td>
                 <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.name}</td>
-                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.quantity}</td>
-                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold}</td>
+                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.quantity.toLocaleString()}</td>
+                <td>{SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.amountSold.toLocaleString()}</td>
                 <td>{DateTime(SalesData[i]?.documents.details.moreDateDetails.moreHourDetails.date)}</td>
                 <td title="View More"><FontAwesomeIcon icon={faEye} className="text-success fw-bold faEdit" onClick={()=>{
                     viewMore(SalesData[i]?.documents.branch,SalesData[i]?.documents.details.moreDateDetails.moreHourDetails)
