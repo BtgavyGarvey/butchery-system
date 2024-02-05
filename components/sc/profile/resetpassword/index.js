@@ -81,7 +81,7 @@ export default function ForgotPasswordPage({param, session}){
             }
             
         } else {
-            toastId=toast.error('Please enter email',{
+            toastId=toast.error('Please enter username',{
                 id:toastId
             })
         }
@@ -94,7 +94,7 @@ export default function ForgotPasswordPage({param, session}){
 
             const data={
                 code:formData.code,
-                email:formData.email
+                username:formData.username
             }
 
             try {
